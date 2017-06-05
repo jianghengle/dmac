@@ -1,0 +1,30 @@
+name: NiobraraServer
+version: 0.1.0
+
+authors:
+  - LI-COR Biosciences
+
+targets:
+  NiobraraServer:
+    main: src/server.cr
+
+crystal: 0.21.1
+
+license: MIT
+
+dependencies:
+  crecto:
+    github: fridgerator/crecto
+    version: 0.4.2
+
+  pg:
+    github: will/crystal-pg
+    version: 0.13.2
+
+  kemal:
+    github: kemalcr/kemal
+    version: 0.18.3
+
+  micrate:
+    github: juanedi/micrate
+    version: 0.3.0
