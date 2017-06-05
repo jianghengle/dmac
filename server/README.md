@@ -2,7 +2,7 @@
 `crystal src/server.cr`
 
 Envrionmental variables:  
-PG_URL: the database url like: postgres://localhost:5432/niobrara_development  
+PG_URL: the database url like: postgres://localhost:5432/dmac_development  
 ACCOUNT_SERVER: the account server to authorize a user  
 
 The account server should have two the end points:  
