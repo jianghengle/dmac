@@ -17,6 +17,8 @@ Query = Crecto::Repo::Query
 module DMACServer
     class Server
         def initialize
+            # Middlewares
+            add_handler DMACServer::HttpAPI::ApiHandler.new
             
             get "/" do |env|
                env.redirect "/index.html"
