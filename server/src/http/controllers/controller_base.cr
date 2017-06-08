@@ -28,6 +28,50 @@ module DMACServer
         end
       end
 
+      private def get_header(ctx, header_string) : String?
+        return ctx.request.headers[header_string].to_s if ctx.request.headers.has_key?(header_string)
+      end
+
+      private def get_header!(ctx, header_string) : String
+        header = get_header(ctx, header_string)
+        return header unless header.nil?
+        raise InsufficientParameters.new("header #{header_string} does not exist")
+      end
+
+      private def verify_token(ctx) 
+        token = get_header!(ctx, "Authorization")
+        account_server = ""
+        if ENV.has_key?("ACCOUNT_SERVER")
+          account_server = ENV["ACCOUNT_SERVER"].to_s
+        end
+
+        return token.gsub("--", "@") if account_server == ""
+        return User.get_user(token).email.to_s if account_server == "localhost"
+
+        response = HTTP::Client.post(account_server+"/get_user", headers: HTTP::Headers{"Content-Type" => "application/json"}, body: {token: token}.to_json)
+        resp = JSON.parse(response.body)
+        email = resp["email"].to_s
+        return email
+      end
+
+      private def json_array(arr)
+        result = String.build do |str|
+          first = true
+          arr.each do |e|
+            if first
+              str << "["
+              str << e
+              first = false
+            else
+              str << ","
+              str << e
+            end
+          end
+          str << "]"
+        end
+        result
+      end
+
     end
   end
 end

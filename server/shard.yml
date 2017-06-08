@@ -1,11 +1,11 @@
-name: NiobraraServer
+name: DMACServer
 version: 0.1.0
 
 authors:
-  - LI-COR Biosciences
+  - Hengle
 
 targets:
-  NiobraraServer:
+  DMACServer:
     main: src/server.cr
 
 crystal: 0.21.1
@@ -25,6 +25,3 @@ dependencies:
     github: kemalcr/kemal
     version: 0.18.3
 
-  micrate:
-    github: juanedi/micrate
-    version: 0.3.0

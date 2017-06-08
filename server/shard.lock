@@ -16,10 +16,6 @@ shards:
     github: jeromegn/kilt
     version: 0.3.3
 
-  micrate:
-    github: juanedi/micrate
-    version: 0.3.0
-
   pg:
     github: will/crystal-pg
     version: 0.13.2

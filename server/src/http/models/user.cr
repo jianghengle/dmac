@@ -15,7 +15,7 @@ module DMACServer
         user = Repo.get_by(User, email: email)
         raise "Cannot find user" if user.nil?
         raise "Cannot verify password" unless Crypto::Bcrypt::Password.new(user.encrypted_password.not_nil!) == password
-        return user.auth_token
+        return user.auth_token.to_s
       end
 
       def self.get_user(token : String)

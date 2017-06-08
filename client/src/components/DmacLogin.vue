@@ -35,13 +35,15 @@
 
     <div class="field is-grouped">
       <p class="control">
-        <button class="button is-primary" @click="login">Login</button>
+        <button class="button is-primary" :class="{'is-loading': sent}" @click="login">Login</button>
       </p>
     </div>
   </div>
 </template>
 
 <script>
+import Vue from 'vue'
+
 const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
 export default {
@@ -51,7 +53,8 @@ export default {
       email: '',
       password: '',
       rememberMe: false,
-      error: ''
+      error: '',
+      sent: false 
     }
   },
   watch: {
@@ -71,21 +74,25 @@ export default {
       this.email = this.email.trim().toLowerCase()
       if(!emailRegex.test(this.email)){
         this.error = 'Invalid email address!'
-          return
-        }
+        return
+      }
+      this.sent = true
       var vm = this
       var message = {email: this.email, password: this.password}
       vm.$http.post(xHTTPx + '/get_auth_token', message).then(response => {
         var token = response.body.token
+        Vue.http.headers.common['Authorization'] = token
         this.$store.commit('user/setToken', token)
         this.$store.commit('user/setEmail', this.email)
         if (vm.rememberMe) {
           localStorage.setItem('token', token)
           localStorage.setItem('email', this.email)
         }
+        this.sent = false
       }, response => {
         vm.error = 'Failed to authorize user!'
         this.$store.commit('user/reset')
+        this.sent = false
       })
     }
   }

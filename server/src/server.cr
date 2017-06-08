@@ -36,6 +36,14 @@ module DMACServer
                 HttpAPI::UserController.get_user(env)
             end
 
+            get "/get_projects" do |env|
+                HttpAPI::ProjectController.get_projects(env)
+            end
+
+            get "/get_project/:project_id" do |env|
+                HttpAPI::ProjectController.get_project(env)
+            end
+
             Kemal.run
         end
     end

@@ -60,25 +60,6 @@ module DMACServer
         end
       end
 
-      def get_email(token : String)
-        return verify_token(token)
-      end
-
-      def verify_token(token : String)
-        account_server = ""
-        if ENV.has_key?("ACCOUNT_SERVER")
-          account_server = ENV["ACCOUNT_SERVER"].to_s
-        end
-
-        return token.gsub("--", "@") if account_server == ""
-        return User.get_user(token).email.to_s if account_server == "localhost"
-
-        response = HTTP::Client.post(account_server+"/get_user", headers: HTTP::Headers{"Content-Type" => "application/json"}, body: {token: token}.to_json)
-        resp = JSON.parse(response.body)
-        email = resp["email"].to_s
-        return email
-      end
-
     end
   end
 end

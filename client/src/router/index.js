@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Projects from '@/components/Projects'
+import ProjectsPage from '@/components/ProjectsPage'
+import ProjectPage from '@/components/ProjectPage'
 
 Vue.use(Router)
 
@@ -8,8 +9,13 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Projects',
-      component: Projects
-    }
+      name: 'ProjectsPage',
+      component: ProjectsPage
+    },
+    {
+      path: '/:id/:path',
+      name: 'ProjectPage',
+      component: ProjectPage
+    },
   ]
 })

@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import Vue from 'vue'
+
 export default {
   name: 'dmac-header',
   data () {
@@ -23,11 +25,16 @@ export default {
   },
   computed: {
     token () {
-      return this.$store.state.user.token
+      var token = this.$store.state.user.token
+      if(token){
+        Vue.http.headers.common['Authorization'] = token
+      }
+      return token
     }
   },
   methods: {
     logout () {
+      delete Vue.http.headers.common['Authorization']
       return this.$store.commit('user/reset')
     }
   },

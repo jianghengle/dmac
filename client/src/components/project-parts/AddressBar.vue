@@ -1,12 +1,12 @@
 <template>
-  <div class="header">
-    dmac projects
+  <div>
+    address bar
   </div>
 </template>
 
 <script>
 export default {
-  name: 'projects',
+  name: 'address-bar',
   data () {
     return {
       msg: 'Welcome to Your Vue.js App'
@@ -15,6 +15,6 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 
 </style>
