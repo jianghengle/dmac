@@ -89,6 +89,7 @@ export default {
           localStorage.setItem('email', this.email)
         }
         this.sent = false
+        this.$router.push("/")
       }, response => {
         vm.error = 'Failed to authorize user!'
         this.$store.commit('user/reset')

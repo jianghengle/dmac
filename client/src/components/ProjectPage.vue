@@ -26,20 +26,18 @@ export default {
     Users,
     Folder
   },
-  data () {
-    return {
-      pageType: '',
-    }
-  },
-  mounted () {
-    var path = this.$route.params.path
-
-    if(path == '-root-'){
-      this.pageType = 'project'
-    }else if(path == '-users-'){
-      this.pageType = 'users'
-    }else if(path != ''){
-      this.pageType = 'folder'
+  computed: {
+    pageType () {
+      var pageType = ''
+      var path = this.$route.params.path
+      if(path == '-root-'){
+        pageType = 'project'
+      }else if(path == '-users-'){
+        pageType = 'users'
+      }else if(path != ''){
+        pageType = 'folder'
+      }
+      return pageType
     }
   },
 }

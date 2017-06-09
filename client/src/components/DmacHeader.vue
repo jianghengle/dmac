@@ -1,13 +1,15 @@
 <template>
   <div>
-    <nav class="nav">
+    <nav class="nav header">
         <div class="nav-left">
           <a class="nav-item app-name">
             Data Management and Analysis Core
           </a>
         </div>
         <div class="nav-right">
-          <a class="nav-item" v-if="token" @click="logout">Log out</a>
+          <a class="nav-item app-item" v-if="token" @click="logout">
+            <icon name="sign-out"></icon>&nbsp;Logout
+          </a>
         </div>
     </nav>
   </div>
@@ -42,8 +44,22 @@ export default {
 </script>
 
 <style scoped>
+.header {
+  background-color: #333333;
+  border-radius: 3px;
+}
+
 .app-name {
-    font-weight: bold;
-    font-size: 18px;
+  color: #FFFFFF;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.app-item {
+  color: #FFFFFF;
+}
+
+a:hover {
+  color: #EEEEEE;
 }
 </style>

@@ -19,6 +19,8 @@ export const mutations = {
   reset (state) {
     state.email = null
     state.token = null
+    localStorage.removeItem('email')
+    localStorage.removeItem('token')
   }
 }
 

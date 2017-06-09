@@ -8,7 +8,7 @@ module DMACServer
         field :key, String
       end
 
-      def to_json(fields : Hash(String, String))
+      def to_json(fields = {} of String => String)
         result = String.build do |str|
           str << "{"
           str << "\"id\":\"" << @id << "\","

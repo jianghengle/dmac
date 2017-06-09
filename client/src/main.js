@@ -8,8 +8,12 @@ import store from './store'
 import VueResource from 'vue-resource'
 Vue.use(VueResource)
 
+import 'vue-awesome/icons/sign-out'
 import 'vue-awesome/icons/envelope'
 import 'vue-awesome/icons/key'
+import 'vue-awesome/icons/folder'
+import 'vue-awesome/icons/file'
+import 'vue-awesome/icons/trash'
 import Icon from 'vue-awesome/components/Icon'
 Vue.component('icon', Icon)
 

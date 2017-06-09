@@ -7,8 +7,8 @@
       {{error}}
     </div>
  
-    <div>project name</div>
-    <folder-content></folder-content>
+    <div></div>
+    <folder-content :content="folderContent"></folder-content>
   </div>
 </template>
 
@@ -27,7 +27,29 @@ export default {
       error: ''
     }
   },
-  
+  computed: {
+    projectId () {
+      return this.$route.params.projectId
+    },
+    project () {
+      return this.$store.state.projects.nodeMap['/' + this.projectId + '/-root-']
+    },
+    folderContent () {
+      if(this.project) return this.project.children.slice(1)
+      return []
+    }
+  },
+  mounted () {
+    var vm = this
+    vm.$nextTick(function(){
+      vm.$http.get(xHTTPx + '/get_project/' + vm.projectId).then(response => {
+        var resp = response.body
+        this.$store.commit('projects/setProject', resp)
+      }, response => {
+        vm.error = 'Failed to get project!'
+      })
+    })
+  }
 }
 </script>
 

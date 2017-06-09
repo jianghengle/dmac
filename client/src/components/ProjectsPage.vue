@@ -43,7 +43,6 @@ export default {
     }
   },
   mounted () {
-
     var vm = this
     vm.$nextTick(function(){
       vm.$http.get(xHTTPx + '/get_projects').then(response => {

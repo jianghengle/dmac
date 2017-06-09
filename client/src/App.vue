@@ -38,4 +38,10 @@ export default {
 <style>
 @import "../node_modules/bulma/css/bulma.css";
 
+body {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 </style>

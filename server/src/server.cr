@@ -44,6 +44,10 @@ module DMACServer
                 HttpAPI::ProjectController.get_project(env)
             end
 
+            get "/get_folder/:project_id/:path" do |env|
+                HttpAPI::ProjectController.get_folder(env)
+            end
+
             Kemal.run
         end
     end

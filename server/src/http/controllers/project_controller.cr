@@ -34,6 +34,7 @@ module DMACServer
         end
       end
 
+
       def get_project(ctx)
         begin
           email = verify_token(ctx)
@@ -41,10 +42,14 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          root = project_root(project)
-          files = collect_files(root)
-          puts files.to_s
+          files = MyFile.collect_files(project)
           
+          arr = [] of String
+          arr << project.to_json
+          files.each do |f|
+            arr << f.to_json
+          end
+          json_array(arr)
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception
@@ -53,26 +58,27 @@ module DMACServer
       end
 
 
+      def get_folder(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "project_id")
+          path = get_param!(ctx, "path")
 
-      private def project_root(project)
-        raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
-        root = ENV["DMAC_ROOT"]
-        root = root + "/" + project.key.to_s
-        raise "No such path" unless File.exists? root
-        return root
-      end
 
-      private def collect_files(path)
-        files = [] of String
-        files.push(path)
-        if File.directory? path
-          Dir.foreach path do |filename|
-            if filename.to_s != "." && filename.to_s != ".."
-              files.push(path + "/" + filename)
-            end
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          files = MyFile.collect_files(project, path)
+          
+          arr = [] of String
+          files.each do |f|
+            arr << f.to_json
           end
+          json_array(arr)
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
         end
-        return files
       end
 
 
