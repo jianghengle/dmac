@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20170605184330) do
     t.string   "key"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.index ["key"], name: "index_projects_on_key", unique: true, using: :btree
   end
 
   create_table "users", force: :cascade do |t|
