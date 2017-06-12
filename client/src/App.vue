@@ -5,10 +5,10 @@
       <dmac-login></dmac-login>
     </div>
     <div v-if="token" class="columns">
-      <div class="column is-one-quarter">
+      <div class="column is-one-quarter" v-show="showNav">
         <dmac-nav></dmac-nav>
       </div>
-      <div class="column is-three-quarter">
+      <div class="column" :class="{'is-three-quarter': showNav}">
         <router-view></router-view>
       </div>
     </div>
@@ -30,6 +30,9 @@ export default {
   computed: {
     token () {
       return this.$store.state.user.token
+    },
+    showNav () {
+      return this.$store.state.projects.showNav
     }
   }
 }
@@ -42,6 +45,15 @@ body {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.view-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.spinner-container {
+  text-align: center;
 }
 
 </style>

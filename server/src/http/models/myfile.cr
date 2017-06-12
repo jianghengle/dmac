@@ -3,7 +3,7 @@ module DMACServer
     class MyFile
       property type : String
       property name : String
-      property path : String
+      property data_path : String
       property full_path : String
       property project : Project
       property size : UInt64
@@ -12,16 +12,12 @@ module DMACServer
       raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
       @@root = ENV["DMAC_ROOT"]
 
-      def initialize(@project, path)
-        if path == ""
+      def initialize(@project, @data_path)
+        if @data_path == ""
           @full_path = @@root + "/" + @project.key.to_s
-          @path = "/" + project.id.to_s + "/-root-"
         else
-          tail = ""
-          path.split("/") { |s| tail = s }
-          rel_path = tail.gsub("--", "/")
+          rel_path = @data_path.gsub("--", "/")
           @full_path = @@root + "/" + @project.key.to_s + "/" + rel_path
-          @path = "/" + project.id.to_s + "/" + tail
         end
         raise "No such path" unless File.exists?(@full_path)
 
@@ -37,12 +33,12 @@ module DMACServer
       def to_json
         result = String.build do |str|
           str << "{"
-          str << "\"project_id\":\"" << @project.id << "\","
+          str << "\"projectId\":\"" << @project.id << "\","
           str << "\"type\":\"" << @type << "\","
           str << "\"name\":\"" << @name << "\","
-          str << "\"path\":\"" << @path << "\","
+          str << "\"dataPath\":\"" << @data_path << "\","
           str << "\"size\":\"" << @size << "\","
-          str << "\"modified_at\":" << @modified_at.as(Time).epoch
+          str << "\"modifiedTime\":" << @modified_at.as(Time).epoch
           str << "}"
         end
         result
@@ -51,26 +47,25 @@ module DMACServer
 
       def self.collect_files(project)
         files = [] of MyFile
-        root_dir = MyFile.new(project, "")
-        files << root_dir
-        Dir.foreach root_dir.full_path do |filename|
+        dir = MyFile.new(project, "")
+        files << dir
+        Dir.foreach dir.full_path do |filename|
           if filename.to_s != "." && filename.to_s != ".."
-            path = "/" + project.id.to_s + "/" + filename
-            files << MyFile.new(project, path)
+            files << MyFile.new(project, filename.to_s)
           end
         end
         return files
       end
 
 
-      def self.collect_files(project, path)
+      def self.collect_files(project, data_path)
         files = [] of MyFile
-        root_dir = MyFile.new(project, path)
-        files << root_dir
-        Dir.foreach root_dir.full_path do |filename|
+        dir = MyFile.new(project, data_path)
+        files << dir
+        Dir.foreach dir.full_path do |filename|
           if filename.to_s != "." && filename.to_s != ".."
-            path = root_dir.path + "--" + filename
-            files << MyFile.new(project, path)
+            dp = data_path + "--" + filename
+            files << MyFile.new(project, dp)
           end
         end
         return files

@@ -100,7 +100,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
   .login-page {
     padding: 20px;
   }

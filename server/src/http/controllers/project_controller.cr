@@ -58,18 +58,19 @@ module DMACServer
       end
 
 
-      def get_folder(ctx)
+      def get_file(ctx)
         begin
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
-          path = get_param!(ctx, "path")
+          data_path = get_param!(ctx, "data_path")
 
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          files = MyFile.collect_files(project, path)
+          files = MyFile.collect_files(project, data_path)
           
           arr = [] of String
+          arr << project.to_json
           files.each do |f|
             arr << f.to_json
           end

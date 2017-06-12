@@ -10,8 +10,14 @@ require "./http/controllers/*"
 require "./http/middleware/*"
 
 
-# Shortcut variables
-Repo  = Crecto::Repo
+module Repo
+  extend Crecto::Repo
+
+  config do |conf|
+    conf.adapter = Crecto::Adapters::Postgres
+    conf.uri = ENV["PG_URL"]
+  end
+end
 Query = Crecto::Repo::Query
 
 module DMACServer
@@ -44,8 +50,8 @@ module DMACServer
                 HttpAPI::ProjectController.get_project(env)
             end
 
-            get "/get_folder/:project_id/:path" do |env|
-                HttpAPI::ProjectController.get_folder(env)
+            get "/get_file/:project_id/:data_path" do |env|
+                HttpAPI::ProjectController.get_file(env)
             end
 
             Kemal.run

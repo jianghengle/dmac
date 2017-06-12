@@ -8,18 +8,18 @@ targets:
   DMACServer:
     main: src/server.cr
 
-crystal: 0.21.1
+crystal: 0.22.0
 
 license: MIT
 
 dependencies:
   crecto:
     github: fridgerator/crecto
-    version: 0.4.2
+    version: 0.6.0
 
   pg:
     github: will/crystal-pg
-    version: 0.13.2
+    version: 0.13.3
 
   kemal:
     github: kemalcr/kemal

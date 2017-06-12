@@ -13,7 +13,7 @@ export default new Router({
       component: ProjectsPage
     },
     {
-      path: '/:projectId/:path',
+      path: '/:projectId/:dataPath',
       name: 'ProjectPage',
       component: ProjectPage
     },

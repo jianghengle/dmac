@@ -1,8 +1,9 @@
 class Project < ApplicationRecord
-  before_create :set_key
+  after_create :set_key
 
   def set_key
-    self[:key] = SecureRandom.hex(16)
+    self[:key] = self.id.to_s
+    self.save!
   end
 
   rails_admin do

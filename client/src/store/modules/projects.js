@@ -3,199 +3,284 @@ import DateForm from 'dateformat'
 
 // initial state
 export const state = {
-  root: null,
+  showNav: false,
   nodeMap: {}
 }
 
 // mutations
 export const mutations = {
 
-  setProjects (state, projects) {
-    if(state.root){
-      var oldArr = state.root.children
-      var newArr = projects.map(function(p){
-        p.type = 'project'
-        p.path = '/' + p.id + '/-root-'
-        p.createdDate = DateForm(p.created_at*1000, 'mediumDate')
-        p.udpatedDate = DateForm(p.updated_at*1000, 'mediumDate')
-        return p
-      })
-      updateArray(oldArr, newArr, state.nodeMap)
-    }else{
-      var root = {
-        type: 'projects',
-        path: '/'
-      }
-      Vue.set(state.nodeMap, '/', root)
-      var children = projects.map(function(p){
-        p.type = 'project'
-        p.path = '/' + p.id + '/-root-'
-        Vue.set(state.nodeMap, p.path, p)
-        p.createdDate = DateForm(p.created_at*1000, 'mediumDate')
-        p.udpatedDate = DateForm(p.updated_at*1000, 'mediumDate')
-        return p
-      })
-      node.children = children
-      state.root = node
-    }
+  toggleNav (state) {
+    state.showNav = !state.showNav
   },
 
-
-  setProject (state, project) {
-    var projectNode = state.nodeMap['/' + project[0].id + '/-root-']
-    if(projectNode){
-      updateNode(projectNode, project[0])
-      if(!projectNode.children){
-        projectNode.children = []
-      }
-      var oldArr = projectNode.children
-      var newArr = project.slice(2).map(function(f){
-        f.modifiedAt = DateForm(f.modified_at*1000, 'mmm dd yyyy HH:MM')
-        return f
-      })
-      var usersNode = {type: 'users', path: '/'+ project[0].id + '/-users-'}
-      newArr.unshift(usersNode)
-      updateArray(oldArr, newArr, state.nodeMap)
-    }else{
-      var root = {
-        type: 'projects',
-        path: '/'
-      }
-      Vue.set(state.nodeMap, '/', root)
-      var p = project[0]
-      p.type = 'project'
-      p.path = '/' + p.id + '/-root-'
-      Vue.set(state.nodeMap, p.path, p)
-      p.createdDate = DateForm(p.created_at*1000, 'mediumDate')
-      p.udpateDate = DateForm(p.update_at*1000, 'mediumDate')
-      root.children = [p]
-
-      var children = []
-      var usersNode = {type: 'users', path: '/'+ p.id + '/-users-'}
-      var files = project.slice(2).map(function(f){
-        Vue.set(state.nodeMap, f.path, f)
-        f.modifiedAt = DateForm(f.modified_at*1000, 'mmm dd yyyy HH:MM')
-        return f
-      })
-      p.children = files
-      p.children.unshift(usersNode)
-      state.root = root
-    }
-  },
-
-  setFolder (state, folder) {
-    console.log(folder)
-    var folderNode = state.nodeMap[folder[0].path]
-    if(folderNode){
-      updateNode(folderNode, folder[0])
-    }else{
-      buildChain(state, folder[0])
-      folderNode = state.nodeMap[folder[0].path]
-    }
-
-    if(!folderNode.children){
-      folderNode.children = []
-    }
-    var oldArr = folderNode.children
-    var newArr = folder.slice(1).map(function(f){
-      f.modifiedAt = DateForm(f.modified_at*1000, 'mmm dd yyyy HH:MM')
-      return f
+  setProjects (state, resp) {
+    var ps = resp.map(initProject)
+    var children = []
+    ps.forEach(function(p){
+      var np = updateNode(state, p)
+      children.push(p.path)
     })
-    updateArray(oldArr, newArr, state.nodeMap)
-
-    console.log(folderNode)
+    var root = initRoot()
+    updateNode(state, root, children)
   },
 
-  reset (state) {
-    state.projects = []
-  }
-}
 
-
-function buildChain(state, folder){
-  var root = {type: 'projects', path: '/'}
-  Vue.set(state.nodeMap, '/', root)
-  state.root = root
-
-  var projectNode = {
-    type: 'project',
-    path: '/' + folder.project_id, 
-    id: folder.project_id
-  }
-  Vue.set(state.nodeMap, projectNode.path, projectNode)
-  state.root.children = [projectNode]
-  
-  var ss = folder.path.split('/')[2].split('--')
-  var node = projectNode
-  for(var i=0;i<ss.length;i++){
-    var child
-    if(i == 0){
-      child = {path: node.path + '/' + ss[i], name: ss[i]}
-    }else{
-      child = {path: node.path + '--' + ss[i], name: ss[i]}
+  setProject (state, resp) {
+    var project = initProject(resp[0])
+    patchChain(state.nodeMap, project, project.path)
+    var files = resp.slice(2).map(initFile)
+    var children = []
+    files.forEach(function(file){
+      var nf = updateNode(state, file)
+      children.push(nf.path)
+    })
+    var users = initUsers(project)
+    if(!state.nodeMap[users.path]){
+      Vue.set(state.nodeMap, users.path, users)
     }
-    node.children = [child]
-    Vue.set(state.nodeMap, child.path, child)
-    node = child
-  }
+    children.unshift(users.path)
+    updateNode(state, project, children)
+  },
 
-  updateNode(node, folder)
-}
-
-
-function updateNode(oldNode, newNode){
-  Object.keys(newNode).forEach(function(k){
-    if(oldNode[k] == undefined){
-      Vue.set(oldNode, k, newNode[k])
-    }else{
-      oldNode[k] = newNode[k]
-    }
-  })
-}
-
-
-function updateArray(oldArr, newArr, nodeMap){
-  var newMap = {}
-  newArr.forEach(function(e){
-    newMap[e.path] = e
-  })
-  var removed = []
-  for(var i=0;i<oldArr.length;i++){
-    var o = oldArr[i]
-    var n = newMap[o.path]
-    if(n){
-      Object.keys(n).forEach(function(k){
-        if(o[k] == undefined){
-          Vue.set(o, k, n[k])
-        }else{
-          o[k] = n[k]
-        }
+  setFile (state, resp) {
+    var project = initProject(resp[0])
+    var file = initFile(resp[1])
+    patchChain(state.nodeMap, project, file.path)
+    if(file.type == 'folder'){
+      var files = resp.slice(2).map(initFile)
+      var children = []
+      files.forEach(function(f){
+        var nf = updateNode(state, f)
+        children.push(nf.path)
       })
+      updateNode(state, file, children)
     }else{
-      removed.push(i)
+      updateNode(state, file)
+    }
+  },
+
+  openNode (state, path) {
+    var node = state.nodeMap[path]
+    if(node){
+        node.options.open = true
+    }
+  },
+
+  closeNode (state, path) {
+    var node = state.nodeMap[path]
+    if(node){
+      node.options.open = false
     }
   }
-  for(var i=removed.length-1;i>=0;i--){
-    var e = oldArr[i]
-    delete nodeMap[e.path]
-    oldArr.splice(removed[i], 1)
-  }
-  var oldMap = {}
-  oldArr.forEach(function(e){
-    oldMap[e.path] = e
-  })
-  newArr.forEach(function(e){
-    if(!oldMap[e.path]){
-      oldArr.push(e)
-      Vue.set(nodeMap, e.path, e)
-    }
-  })
-  return sortArray(oldArr)
+
 }
 
 
-function sortArray(arr){
-  return arr
+function initRoot(){
+  var options = {
+    open: true,
+    sortOption: {
+      field: 'createdTime',
+      order: 'number',
+      asc: false
+    }
+  }
+  return {
+    type: 'projects',
+    path: '/',
+    name: 'Projects',
+    options: options,
+    children: []
+  }
+}
+
+
+function initProject(project, options){
+  var p = Object.assign({}, project)
+  p.type = 'project'
+  p.path = '/' + p.id + '/-root-'
+  p.createdDate = DateForm(p.createdTime*1000, 'mediumDate')
+  p.udpatedDate = DateForm(p.updatedTime*1000, 'mediumDate')
+  var opts = {}
+  opts.open = false
+  opts.sortOption = {
+    field: 'type',
+    order: ['folder', 'file'],
+    asc: true
+  }
+  if(options){
+    Object.assign(opts, options)
+  }
+  p.options = opts
+  p.children = ['/'+ p.id + '/-users-']
+  return p
+}
+
+
+function initUsers(project) {
+  return {
+    type: 'users',
+    path: '/'+ project.id + '/-users-',
+    name: '-users-',
+    users: [],
+    sortOption: {
+      field: 'role',
+      order: ['owner', 'admin', 'editor', 'viewer'],
+      asc: true
+    },
+  }
+}
+
+
+function initFile(file, options){
+  var f = Object.assign({}, file)
+  f.path = '/' + f.projectId + '/' + f.dataPath
+  f.modifiedAt = DateForm(f.modifiedTime*1000, 'mmm dd yyyy HH:MM')
+  var opts = {}
+  if(f.type == 'folder'){
+    opts.open = false
+  }
+  opts.sortOption = {
+    field: 'type',
+    order: ['folder', 'file'],
+    asc: true
+  }
+  if(options){
+    Object.assign(opts, options)
+  }
+  f.options = opts
+  if(f.type == 'folder'){
+    f.children = []
+  }
+  return f
+}
+
+
+function updateNode(state, node, children){
+  var old = state.nodeMap[node.path]
+  if(old){
+    node.options = old.options
+    if(old.children){
+      node.children = old.children
+    }
+  }
+  if(children){
+    node.children = children
+    sortChildren(node, state.nodeMap)
+  }
+  if(old){
+    state.nodeMap[node.path] = node
+  }else{
+    Vue.set(state.nodeMap, node.path, node)
+  }
+  return node
+}
+
+
+function sortChildren(node, nodeMap){
+  var children = node.children.slice()
+  if(node.type == 'project'){
+    children.splice(0, 1)
+  }
+  var nodes = children.map(function(c){
+    return nodeMap[c]
+  })
+  nodes.sort(function(a, b){
+    return compareNodes(a, b, node.options.sortOption)
+  })
+  children = nodes.map(function(o){
+    return o.path
+  })
+  if(node.type == 'project'){
+    children.unshift('/' + node.id + '/-users-')
+  }
+  node.children = children
+}
+
+
+function compareNodes(o1, o2, opt){
+  var v1 = o1[opt.field]
+  var v2 = o2[opt.field]
+  if(v1 == v2){
+    return o1.name.localeCompare(o2.name)
+  }
+  if(opt.order == 'number'){
+    if(opt.asc){
+      return v1 - v2
+    }
+    return v2 - v1
+  }else if(opt.order == 'string'){
+    if(opt.asc){
+      return v1.localeCompare(v2)
+    }
+    return -v1.localeCompare(v2)
+  }else if(Array.isArray(opt.order)){
+    var i1 = opt.order.indexOf(v1)
+    var i2 = opt.order.indexOf(v2)
+    if(opt.asc){
+      return i1 - i2
+    }
+    return i2 - i1
+  }
+  return 0
+}
+
+
+function patchChain(nodeMap, project, path){
+  var parent = findParent(path)
+  while(parent && !nodeMap[parent.path]){
+    if(parent.type == 'projects'){
+      var root = initRoot()
+      root.children = [parent.childPath]
+      Vue.set(nodeMap, root.path, root)
+    }else if(parent.type == 'project'){
+      var project = initProject(project, {open: true})
+      project.children = [parent.childPath]
+      Vue.set(nodeMap, project.path, project)
+    }else if(parent.type == 'folder'){
+      var folder = {
+        projectId: project.id,
+        type: 'folder',
+        name: parent.name,
+        dataPath: parent.dataPath,
+        size: 0,
+        modifiedTime: 0
+      }
+      var folder = initFile(folder, {open: true})
+      folder.children = [parent.childPath]
+      Vue.set(nodeMap, folder.path, folder)
+    }
+    parent = findParent(parent.path)
+  }
+}
+
+
+function findParent(path){
+  var ss = path.split('/')
+  if(ss.length <= 2) return null
+  var parent = {childPath: path}
+  if(ss.length == 3){
+    if(ss[2] == '-users-'){
+      parent.type = 'project'
+      parent.path = '/' + ss[1] + '/-root-'
+    }else if(ss[2] == '-root-'){
+      parent.type = 'projects'
+      parent.path = '/'
+    }else{
+      var sss = ss[2].split('--')
+      if(sss.length == 1){
+        parent.type = 'project'
+        parent.path = '/' + ss[1] + '/-root-'
+      }else{
+        parent.type = 'folder'
+        parent.dataPath = sss.slice(0, -1).join('--')
+        parent.path = '/' + ss[1] + '/' + parent.dataPath
+        parent.name = sss[sss.length-1]
+      }
+    }
+  }
+  return parent
 }
 
 

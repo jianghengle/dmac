@@ -15,8 +15,8 @@
         <tr v-for="(f, i) in content" :class="{'folder': f.type=='folder'}" @click="viewFile(f)">
           <td class="number-cell">{{i+1}}</td>
           <td class="text-cell">
-            <icon v-if="f.type=='folder'" name="folder"></icon>
-            <icon v-if="f.type=='file'" name="file"></icon>
+            <icon v-if="f.type=='folder'" name="folder-o"></icon>
+            <icon v-if="f.type=='file'" name="file-o"></icon>
           </td>
           <td class="text-cell">{{f.name}}</td>
           <td class="number-cell"><span v-if="f.type=='file'">{{f.size}}</span></td>
@@ -25,13 +25,12 @@
         </tr>
       </tbody>
     </table>
-    <div v-if="!content || !content.length">Folder is empty.</div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'folder-content',
+  name: 'file-content',
   props: ['content'],
   data () {
     return {

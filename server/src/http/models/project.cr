@@ -12,15 +12,15 @@ module DMACServer
         result = String.build do |str|
           str << "{"
           str << "\"id\":\"" << @id << "\","
-          str << "\"name\":\"" << @name << "\","
-          str << "\"description\":\"" << @description << "\","
+          str << "\"name\":" << @name.to_json << ","
+          str << "\"description\":" << @description.to_json << ","
           str << "\"status\":\"" << @status << "\","
           str << "\"key\":\"" << @key << "\","
           fields.each do |k, v|
             str << "\"" << k << "\":\"" << v << "\","
           end
-          str << "\"created_at\":" << @created_at.as(Time).epoch << ","
-          str << "\"updated_at\":" << @updated_at.as(Time).epoch
+          str << "\"createdTime\":" << @created_at.as(Time).epoch << ","
+          str << "\"updatedTime\":" << @updated_at.as(Time).epoch
           str << "}"
         end
         result

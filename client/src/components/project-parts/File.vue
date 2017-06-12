@@ -1,19 +1,16 @@
 <template>
   <div>
     <address-bar></address-bar>
-    <div class="view-title">{{project && project.name}}</div>
-    <div>project toolbar</div>
+    <div class="view-title">{{file && file.name}}</div>
+    <div>file toolbar</div>
     <div v-if="error" class="notification is-danger login-text">
       <button class="delete" @click="error=''"></button>
       {{error}}
     </div>
- 
     <file-content :content="fileContent"></file-content>
-
     <div class="spinner-container" v-if="waiting">
       <icon name="spinner" class="icon is-medium fa-spin"></icon>
     </div>
-
     <div class="empty-label" v-if="!waiting && (!fileContent || !fileContent.length)">(Empty)</div>
   </div>
 </template>
@@ -23,9 +20,9 @@ import AddressBar from './AddressBar'
 import FileContent from './FileContent'
 
 export default {
-  name: 'project',
+  name: 'file',
   components: {
-    AddressBar,
+  	AddressBar,
     FileContent
   },
   data () {
@@ -41,13 +38,16 @@ export default {
     nodeMap () {
       return this.$store.state.projects.nodeMap
     },
-    project () {
-      return this.nodeMap['/' + this.projectId + '/-root-']
+    path () {
+      return "/" + this.projectId + "/" + this.$route.params.dataPath
+    },
+    file () {
+      return this.nodeMap[this.path]
     },
     fileContent () {
-      if(this.project && this.project.children){
+      if(this.file){
         var vm = this
-        return this.project.children.slice(1).map(function(c){
+        return this.file.children.map(function(c){
           return vm.nodeMap[c]
         })
       }
@@ -55,20 +55,21 @@ export default {
     }
   },
   watch: {
-    projectId: function (val) {
-      this.requestProject()  
+    path: function (val) {
+      this.requestFile()
     },
   },
   methods: {
-    requestProject () {
+    requestFile () {
       var vm = this
+      var dataPath = this.$route.params.dataPath
       vm.waiting = true
-      vm.$http.get(xHTTPx + '/get_project/' + vm.projectId).then(response => {
+      vm.$http.get(xHTTPx + '/get_file/' + vm.projectId + "/" + dataPath).then(response => {
         var resp = response.body
-        this.$store.commit('projects/setProject', resp)
+        this.$store.commit('projects/setFile', resp)
         vm.waiting = false
       }, response => {
-        vm.error = 'Failed to get project!'
+        vm.error = 'Failed to get file!'
         vm.waiting = false
       })
     }
@@ -76,7 +77,7 @@ export default {
   mounted () {
     var vm = this
     vm.$nextTick(function(){
-      this.requestProject()
+      vm.requestFile()
     })
   }
 }

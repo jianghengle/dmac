@@ -7,7 +7,7 @@
       <users></users>
     </div>
     <div v-if="pageType == 'folder'">
-      <folder></folder>
+      <file></file>
     </div>
   </div>
 </template>
@@ -16,7 +16,7 @@
 import AddressBar from './project-parts/AddressBar'
 import Project from './project-parts/Project'
 import Users from './project-parts/Users'
-import Folder from './project-parts/Folder'
+import File from './project-parts/File'
 
 export default {
   name: 'project-page',
@@ -24,17 +24,17 @@ export default {
     AddressBar,
     Project,
     Users,
-    Folder
+    File
   },
   computed: {
     pageType () {
       var pageType = ''
-      var path = this.$route.params.path
-      if(path == '-root-'){
+      var dataPath = this.$route.params.dataPath
+      if(dataPath == '-root-'){
         pageType = 'project'
-      }else if(path == '-users-'){
+      }else if(dataPath == '-users-'){
         pageType = 'users'
-      }else if(path != ''){
+      }else if(dataPath != ''){
         pageType = 'folder'
       }
       return pageType
