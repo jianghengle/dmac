@@ -10,19 +10,18 @@ module DMACServer
         begin
           email = verify_token(ctx)
           controls = Control.get_controls_by_user(email)
-          
+          return "[]" if controls.size == 0
           project_ids = [] of Int32 | Int64 | Nil
-          controls.each do |c|
+          controls.each do |k, c|
             project_ids.push(c.project_id)
           end
-
           projects = Project.get_projects_by_ids(project_ids)
           owners = Control.get_owners_by_project_ids(project_ids)
-
           arr = [] of String
           projects.each do |k, v|
             fields = {} of String => String
             fields["owner"] = owners[k] if owners.has_key? k
+            fields["projectRole"] = controls[k].role.to_s if controls.has_key? k
             obj = v.to_json(fields)
             arr.push(obj)
           end
@@ -82,6 +81,62 @@ module DMACServer
         end
       end
 
+      def create_project(ctx)
+        begin
+          email = verify_token(ctx)
+          name = get_param!(ctx, "name")
+          description = get_param!(ctx, "description")
+          project = Project.create_project(name, description)
+          Control.create_control(email, project, "Owner")
+          MyFile.create_folder(project, "/")
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def update_project(ctx)
+        begin
+          email = verify_token(ctx)
+          id = get_param!(ctx, "id")
+          name = get_param!(ctx, "name")
+          description = get_param!(ctx, "description")
+          status = get_param!(ctx, "status")
+
+          project = Project.get_project!(id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" if control.role.to_s == "Editor" || control.role.to_s == "Viewer"
+
+          Project.update_project(project, name, description, status)
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def delete_project(ctx)
+        begin
+          email = verify_token(ctx)
+          id = get_param!(ctx, "id")
+
+          project = Project.get_project!(id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" if control.role.to_s == "Editor" || control.role.to_s == "Viewer"
+
+          Control.delete_all_by_project(project)
+          Project.delete_project(project)
+          MyFile.delete_folder(project, "/")
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
 
     end
   end

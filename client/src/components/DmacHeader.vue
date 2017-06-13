@@ -2,9 +2,9 @@
   <div>
     <nav class="nav header">
         <div class="nav-left">
-          <a class="nav-item app-name">
+          <router-link class="nav-item app-name" :to="'/'">
             Data Management and Analysis Core
-          </a>
+          </router-link>
         </div>
         <div class="nav-right">
           <a class="nav-item app-item" v-if="token" @click="logout">
@@ -32,6 +32,9 @@ export default {
         Vue.http.headers.common['Authorization'] = token
       }
       return token
+    },
+    email () {
+      return this.$store.state.user.email
     }
   },
   methods: {

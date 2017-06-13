@@ -193,7 +193,7 @@ export default {
 
 .is-current {
   color: white;
-  background-color: #00d1b2;
+  background-color: #3273dc;
   font-weight: bold;
 }
 

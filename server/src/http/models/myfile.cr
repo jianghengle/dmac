@@ -71,6 +71,16 @@ module DMACServer
         return files
       end
 
+      def self.create_folder(project, data_path)
+        full_path = @@root + "/" + project.key.to_s + data_path
+        Dir.mkdir(full_path)
+      end
+
+      def self.delete_folder(project, data_path)
+        full_path = @@root + "/" + project.key.to_s + data_path
+        Dir.rmdir(full_path)
+      end
+
     end
 
   end

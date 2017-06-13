@@ -12,7 +12,7 @@ class Project < ApplicationRecord
       field :description
       field :status, :enum do
         enum do
-          ['active', 'archived']
+          ['Active', 'Archived']
         end
       end
       field :key

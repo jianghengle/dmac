@@ -46,6 +46,40 @@ module DMACServer
         raise "Cannot find project in database"
       end
 
+
+      def self.create_project(name, description)
+        project = Project.new
+        project.name = name
+        project.description = description
+        project.status = "Active"
+        changeset = Repo.insert(project)
+        raise changeset.errors.to_s unless changeset.valid?
+        changeset.changes.each do |change|
+          if(change.has_key?(:id))
+            project.id = change[:id].as(Int32)
+            project.key = change[:id].to_s
+          end
+        end
+        changeset = Repo.update(project)
+        raise changeset.errors.to_s unless changeset.valid?
+        return project
+      end
+
+
+      def self.update_project(project, name, description, status)
+        project.name = name
+        project.description = description
+        project.status = status
+        changeset = Repo.update(project)
+        raise changeset.errors.to_s unless changeset.valid?
+        return project
+      end
+
+      def self.delete_project(project)
+        changeset = Repo.delete(project)
+        raise changeset.errors.to_s unless changeset.valid?
+      end
+
     end
 
   end

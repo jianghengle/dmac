@@ -21,6 +21,8 @@ import 'vue-awesome/icons/user-o'
 import 'vue-awesome/icons/database'
 import 'vue-awesome/icons/folder-o'
 import 'vue-awesome/icons/folder-open-o'
+import 'vue-awesome/icons/plus'
+import 'vue-awesome/icons/edit'
 import Icon from 'vue-awesome/components/Icon'
 Vue.component('icon', Icon)
 

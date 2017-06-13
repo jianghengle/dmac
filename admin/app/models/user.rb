@@ -19,7 +19,7 @@ class User < ApplicationRecord
       field :last_name
       field :role, :enum do
         enum do
-          ['admin', 'normal']
+          ['Admin', 'Normal']
         end
       end
     end

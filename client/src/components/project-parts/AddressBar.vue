@@ -4,9 +4,9 @@
       <icon name="navicon"></icon>
     </span>
     &nbsp
-    <span v-for="(node, i) in nodes" class="address-text">
+    <span v-for="(node, i) in nodes">
       <span v-if="i != 0">&nbsp;/</span>
-      <a @click="viewNode(node)">{{node.name}}</a>
+      <a @click="viewNode(node)" class="address-text">{{node.name}}</a>
     </span>
   </div>
 </template>
@@ -75,7 +75,7 @@ export default {
 <style lang="scss" scoped>
 
 .address-text {
-  
+  color: #3273dc;
 }
 
 .nav-icon {

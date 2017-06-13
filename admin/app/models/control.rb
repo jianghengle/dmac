@@ -7,7 +7,7 @@ class Control < ApplicationRecord
       field :email
       field :role, :enum do
         enum do
-          ['owner', 'admin', 'editor', 'viewer']
+          ['Owner', 'Admin', 'Editor', 'Viewer']
         end
       end
     end
