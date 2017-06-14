@@ -18,11 +18,13 @@ import 'vue-awesome/icons/trash'
 import 'vue-awesome/icons/navicon'
 import 'vue-awesome/icons/spinner'
 import 'vue-awesome/icons/user-o'
+import 'vue-awesome/icons/user'
 import 'vue-awesome/icons/database'
 import 'vue-awesome/icons/folder-o'
 import 'vue-awesome/icons/folder-open-o'
 import 'vue-awesome/icons/plus'
 import 'vue-awesome/icons/edit'
+import 'vue-awesome/icons/cloud-upload'
 import Icon from 'vue-awesome/components/Icon'
 Vue.component('icon', Icon)
 

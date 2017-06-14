@@ -41,10 +41,12 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          files = MyFile.collect_files(project)
+          files = MyFile.collect_files(control.role.to_s, project)
           
           arr = [] of String
-          arr << project.to_json
+          fields = {} of String => String
+          fields["projectRole"] = control.role.to_s
+          arr << project.to_json(fields)
           files.each do |f|
             arr << f.to_json
           end
@@ -66,10 +68,12 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          files = MyFile.collect_files(project, data_path)
+          files = MyFile.collect_files(control.role.to_s, project, data_path)
           
           arr = [] of String
-          arr << project.to_json
+          fields = {} of String => String
+          fields["projectRole"] = control.role.to_s
+          arr << project.to_json(fields)
           files.each do |f|
             arr << f.to_json
           end
@@ -88,7 +92,7 @@ module DMACServer
           description = get_param!(ctx, "description")
           project = Project.create_project(name, description)
           Control.create_control(email, project, "Owner")
-          MyFile.create_folder(project, "/")
+          MyFile.create_folder(project, "")
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -129,7 +133,86 @@ module DMACServer
 
           Control.delete_all_by_project(project)
           Project.delete_project(project)
-          MyFile.delete_folder(project, "/")
+          MyFile.delete_folder(project, "")
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def create_folder(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" if control.role.to_s == "Viewer"
+
+
+          MyFile.create_folder(project, data_path)
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def update_folder_file_name(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+          name = get_param!(ctx, "newName")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" if control.role.to_s == "Viewer"
+
+          MyFile.update_folder_file_name(project, data_path, name)
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def delete_folder_file(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" if control.role.to_s == "Viewer"
+
+          MyFile.delete_folder_file(project, data_path)
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def upload_file(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "project_id")
+          data_path = get_param!(ctx, "data_path")
+          file = ctx.params.files["file"]
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" if control.role.to_s == "Viewer"
+
+          MyFile.upload_file(project, data_path, file)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

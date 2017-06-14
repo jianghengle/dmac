@@ -20,16 +20,16 @@
 
 <script>
 export default {
-    name: 'confirm-modal',
-    props: ['opened', 'message'],
-    methods: {
-        close(){
-            this.$emit('close-confirm-modal', false)
-        },
-        confirm(){
-            this.$emit('close-confirm-modal', true)
-        }
+  name: 'confirm-modal',
+  props: ['opened', 'message'],
+  methods: {
+    close(){
+      this.$emit('close-confirm-modal', false)
     },
+    confirm(){
+      this.$emit('close-confirm-modal', true)
+    }
+  },
 }
 </script>
 

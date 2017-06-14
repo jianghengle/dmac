@@ -123,12 +123,7 @@ function initUsers(project) {
     type: 'users',
     path: '/'+ project.id + '/-users-',
     name: '-users-',
-    users: [],
-    sortOption: {
-      field: 'role',
-      order: ['owner', 'admin', 'editor', 'viewer'],
-      asc: true
-    },
+    options: {open: false}
   }
 }
 

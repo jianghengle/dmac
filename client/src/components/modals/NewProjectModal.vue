@@ -57,9 +57,9 @@ export default {
       var message = {name: vm.newName, description: vm.newDescription}
       vm.$http.post(xHTTPx + '/create_project', message).then(response => {
         vm.waiting= false
-        this.newName = ''
-        this.newDescription = ''
-        this.$emit('close-new-project-modal', true)
+        vm.newName = ''
+        vm.newDescription = ''
+        vm.$emit('close-new-project-modal', true)
       }, response => {
         vm.error = 'Failed to create project!'
         vm.waiting= false

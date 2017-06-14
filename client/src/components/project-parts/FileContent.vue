@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="file-content">
     <table class="table is-narrow">
       <thead>
         <tr>
@@ -21,20 +21,47 @@
           <td class="text-cell">{{f.name}}</td>
           <td class="number-cell"><span v-if="f.type=='file'">{{f.size}}</span></td>
           <td class="text-cell">{{f.modifiedAt}}</td>
-          <td class="text-cell"><a><icon v-if="f.type=='file'" name="trash"></icon></a></td>
+          <td class="text-cell">
+            <a v-if="role!='Viewer' && ( role=='Editor' ? f.type=='file' : true )"
+              @click.stop="openEditNameModal(f)"
+              class="edit-icon">
+              <icon name="edit"></icon>
+            </a>
+          </td>
         </tr>
       </tbody>
     </table>
+
+    <edit-name-modal
+      :opened="editNameModal.opened"
+      :role="role"
+      :files="content"
+      :file="editNameModal.file"
+      @close-edit-name-modal="closeEditNameModal">
+    </edit-name-modal>
   </div>
 </template>
 
 <script>
+import EditNameModal from '../modals/EditNameModal'
+
 export default {
   name: 'file-content',
-  props: ['content'],
+  components: {
+    EditNameModal
+  },
+  props: ['content', 'project'],
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      editNameModal: {
+        opened: false,
+        file: null
+      },
+    }
+  },
+  computed: {
+    role () {
+      return this.project && this.project.projectRole
     }
   },
   methods: {
@@ -42,12 +69,26 @@ export default {
       if(f.type == 'folder'){
         this.$router.push(f.path)
       }
+    },
+    openEditNameModal(f){
+      this.editNameModal.file = f
+      this.editNameModal.opened = true
+    },
+    closeEditNameModal(result){
+      this.editNameModal.opened = false
+      if(result){
+        this.$emit('file-changed', true)
+      }
     }
   },
 }
 </script>
 
 <style lang="scss" scoped>
+
+.file-content {
+  margin-top: 5px;
+}
 
 .folder{
   cursor: pointer;
@@ -64,6 +105,12 @@ export default {
 
 .number-cell {
   text-align: right;
+}
+
+.edit-icon {
+  color: #3273dc;
+  position: relative;
+  top: 3px;
 }
 
 
