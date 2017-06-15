@@ -1,45 +1,143 @@
 <template>
   <div class="project-page">
-    <div v-if="pageType == 'project'">
-      <project></project>
+    <address-bar></address-bar>
+    
+    <div class="columns">
+      <div class="view-title column">
+        <icon name="folder-open"></icon>&nbsp;
+        {{project && project.name}}
+      </div>
     </div>
-    <div v-if="pageType == 'users'">
-      <users></users>
+
+    <div>
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Status</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <p class="input field-text">{{project && project.status}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Description</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <p class="input field-text">{{project && project.description}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Created Date</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <p class="input field-text">{{project && project.createdDate}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Role</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <p class="input field-text">{{project && project.projectRole}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
-    <div v-if="pageType == 'folder'">
-      <file></file>
+
+    
+    <div class="columns actions">
+      <div class="column action">
+        <a class="button is-info" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewData">
+          <icon name="folder-open"></icon>&nbsp;
+          Data Explorer
+        </a>
+      </div>
+      <div class="column action">
+        <a class="button is-info" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
+          <icon name="user"></icon>&nbsp;
+          Users Management
+        </a>
+      </div>
     </div>
+    
   </div>
 </template>
 
 <script>
-import AddressBar from './project-parts/AddressBar'
-import Project from './project-parts/Project'
-import Users from './project-parts/Users'
-import File from './project-parts/File'
+import AddressBar from './AddressBar'
+
 
 export default {
   name: 'project-page',
   components: {
     AddressBar,
-    Project,
-    Users,
-    File
   },
-  computed: {
-    pageType () {
-      var pageType = ''
-      var dataPath = this.$route.params.dataPath
-      if(dataPath == '-root-'){
-        pageType = 'project'
-      }else if(dataPath == '-users-'){
-        pageType = 'users'
-      }else if(dataPath != ''){
-        pageType = 'folder'
-      }
-      return pageType
+  data () {
+    return {
+      error: '',
+      waiting: false,
     }
   },
+  computed: {
+    projectId () {
+      return this.$route.params.projectId
+    },
+    nodeMap () {
+      return this.$store.state.projects.nodeMap
+    },
+    project () {
+      return this.nodeMap['/' + this.projectId]
+    },
+    projectRole () {
+      return this.project && this.project.projectRole
+    }
+  },
+  methods: {
+    requestProject () {
+      var vm = this
+      vm.waiting = true
+      vm.$http.get(xHTTPx + '/get_project/' + vm.projectId).then(response => {
+        var resp = response.body
+        this.$store.commit('projects/setProject', resp)
+        vm.waiting = false
+      }, response => {
+        vm.error = 'Failed to get project!'
+        vm.waiting = false
+      })
+    },
+    viewUsers () {
+      this.$router.push('/' + this.projectId + '/users')
+    },
+    viewData () {
+      this.$router.push('/' + this.projectId + '/data/-root-')
+    },
+  },
+  mounted () {
+    var vm = this
+    vm.$nextTick(function(){
+      vm.requestProject()
+    })
+  }
 }
 </script>
 
@@ -48,6 +146,20 @@ export default {
 .project-page {
   padding: 10px;
 }
+
+.field-text {
+  border-style: none;
+  box-shadow: none;
+}
+
+.actions {
+  margin-top: 30px;
+}
+
+.action {
+  text-align: center;
+}
+
 
 
 </style>

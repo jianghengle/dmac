@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="users-page">
     <address-bar></address-bar>
 
     <div class="columns">
@@ -80,11 +80,11 @@
 <script>
 import AddressBar from './AddressBar'
 import DateForm from 'dateformat'
-import NewUserModal from '../modals/NewUserModal'
-import EditUserModal from '../modals/EditUserModal'
+import NewUserModal from './modals/NewUserModal'
+import EditUserModal from './modals/EditUserModal'
 
 export default {
-  name: 'users',
+  name: 'UsersPage',
   components: {
     AddressBar,
     NewUserModal,
@@ -138,7 +138,7 @@ export default {
       vm.$http.get(xHTTPx + '/get_project/' + vm.projectId).then(response => {
         var resp = response.body
         vm.$store.commit('projects/setProject', resp)
-        vm.$store.commit('projects/openNode', '/' + this.projectId + '/-root-')
+        vm.$store.commit('projects/openNode', '/' + this.projectId)
         vm.waiting = false
       }, response => {
         vm.error = 'Failed to get project!'
@@ -242,9 +242,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.users-page {
+  padding: 10px;
+}
 
 .buttons {
   text-align: right;
+  padding-right: 20px;
 }
 
 .self-email {

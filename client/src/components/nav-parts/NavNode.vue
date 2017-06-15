@@ -55,17 +55,7 @@ export default {
       return this.$route.params.dataPath
     },
     routePath () {
-      var path
-      if(this.routeProjectId){
-        if(this.routeDataPath){
-          path = '/' + this.routeProjectId + '/' + this.routeDataPath
-        }else{
-          path = '/' + this.routeProjectId
-        }
-      }else{
-        path = '/'
-      }
-      return path
+      return this.$route.path
     },
     isCurrent () {
       return this.node && this.routePath == this.node.path
@@ -104,7 +94,7 @@ export default {
     },
     closeNode () {
       var nodePath = this.node.path
-      if(this.node.type == 'project'){
+      if(this.node.dataPath == '-root-'){
         nodePath = nodePath.slice(0, -7)
       }
       var routePath = this.routePath

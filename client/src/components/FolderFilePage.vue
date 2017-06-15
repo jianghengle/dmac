@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div class="folder-file-page">
     <address-bar></address-bar>
     
     <div class="columns">
       <div class="view-title column">
-        <icon name="folder-open"></icon>&nbsp;
+        <icon name="folder-open-o"></icon>&nbsp;
         {{file && file.name}}
       </div>
       <div class="column buttons">
@@ -12,7 +12,7 @@
           <icon name="plus"></icon>&nbsp;
           Folder
         </a>
-        <a class="button" v-if="projectRole && projectRole!='Viewer'">
+        <a class="button" v-if="projectRole && projectRole!='Viewer'" @click="openFileUploadModal">
           <icon name="cloud-upload"></icon>&nbsp;
           File
         </a>
@@ -37,20 +37,29 @@
       :data-path="file && file.dataPath"
       @close-new-folder-modal="closeNewFolderModal">
     </new-folder-modal>
+
+    <file-upload-modal
+      :opened="fileUploadModal.opened"
+      :project-id="projectId"
+      :data-path="file && file.dataPath"
+      @close-file-upload-modal="closeFileUploadModal">
+    </file-upload-modal>
   </div>
 </template>
 
 <script>
 import AddressBar from './AddressBar'
-import FileContent from './FileContent'
-import NewFolderModal from '../modals/NewFolderModal'
+import FileContent from './folder-parts/FileContent'
+import NewFolderModal from './modals/NewFolderModal'
+import FileUploadModal from './modals/FileUploadModal'
 
 export default {
-  name: 'file',
+  name: 'folder-file-page',
   components: {
   	AddressBar,
     FileContent,
-    NewFolderModal
+    NewFolderModal,
+    FileUploadModal
   },
   data () {
     return {
@@ -58,7 +67,10 @@ export default {
       waiting: false,
       newFolderModal: {
         opened: false
-      }
+      },
+      fileUploadModal: {
+        opened: false
+      },
     }
   },
   computed: {
@@ -69,13 +81,13 @@ export default {
       return this.$store.state.projects.nodeMap
     },
     project () {
-      return this.nodeMap['/' + this.projectId + '/-root-']
+      return this.nodeMap['/' + this.projectId]
     },
     projectRole () {
       return this.project && this.project.projectRole
     },
     path () {
-      return "/" + this.projectId + "/" + this.$route.params.dataPath
+      return "/" + this.projectId + "/data/" + this.$route.params.dataPath
     },
     file () {
       return this.nodeMap[this.path]
@@ -120,6 +132,15 @@ export default {
     },
     onFileChanged(){
       this.requestFile()
+    },
+    openFileUploadModal(){
+      this.fileUploadModal.opened = true
+    },
+    closeFileUploadModal(result){
+      this.fileUploadModal.opened = false
+      if(result){
+        this.requestFile()
+      }
     }
   },
   mounted () {
@@ -132,6 +153,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.folder-file-page {
+  padding: 10px;
+}
 
 .empty-label {
   text-align: center;

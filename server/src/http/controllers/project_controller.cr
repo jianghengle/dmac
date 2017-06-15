@@ -41,16 +41,10 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          files = MyFile.collect_files(control.role.to_s, project)
           
-          arr = [] of String
           fields = {} of String => String
           fields["projectRole"] = control.role.to_s
-          arr << project.to_json(fields)
-          files.each do |f|
-            arr << f.to_json
-          end
-          json_array(arr)
+          return project.to_json(fields)
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception
@@ -64,7 +58,6 @@ module DMACServer
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
           data_path = get_param!(ctx, "data_path")
-
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
@@ -92,7 +85,7 @@ module DMACServer
           description = get_param!(ctx, "description")
           project = Project.create_project(name, description)
           Control.create_control(email, project, "Owner")
-          MyFile.create_folder(project, "")
+          MyFile.create_folder(project, "-root-")
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -133,7 +126,7 @@ module DMACServer
 
           Control.delete_all_by_project(project)
           Project.delete_project(project)
-          MyFile.delete_folder(project, "")
+          MyFile.delete_folder(project, "-root-")
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

@@ -26,6 +26,9 @@ export default {
     dataPath () {
       return this.$route.params.dataPath
     },
+    routeName () {
+      return this.$route.name
+    },
     nodeMap () {
       return this.$store.state.projects.nodeMap
     },
@@ -34,11 +37,15 @@ export default {
       nodes.push(this.getNode('/'))
 
       if(!this.projectId) return nodes
-      nodes.push(this.getNode('/' + this.projectId + '/-root-'))
-
-      if(this.dataPath){
+      nodes.push(this.getNode('/' + this.projectId))
+      if(this.routeName == 'Project') return nodes
+        
+      if(this.routeName == 'ProjectUsers'){
+        nodes.push(this.getNode('/' + this.projectId + '/users'))
+      }else{
+        nodes.push(this.getNode('/' + this.projectId + '/data/-root-'))
         var files = this.dataPath.split('--')
-        var path = '/' + this.projectId
+        var path = '/' + this.projectId + '/data'
         for(var i=0;i<files.length;i++){
           if(i == 0){
             path = path + '/' + files[i]

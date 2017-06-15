@@ -27,25 +27,37 @@ export const mutations = {
 
 
   setProject (state, resp) {
-    var project = initProject(resp[0])
+    var project = initProject(resp)
     patchChain(state.nodeMap, project, project.path)
-    var files = resp.slice(2).map(initFile)
-    var children = []
-    files.forEach(function(file){
-      var nf = updateNode(state, file)
-      children.push(nf.path)
-    })
+
     var users = initUsers(project)
     if(!state.nodeMap[users.path]){
       Vue.set(state.nodeMap, users.path, users)
     }
-    children.unshift(users.path)
+
+    var root = initFile({
+      projectId: project.id,
+      type: 'folder',
+      name: '-root-',
+      path: '/' + project.id + '/-root-',
+      dataPath: '-root-',
+      size: 0,
+      modifiedTime: 0
+    })
+    if(!state.nodeMap[root.path]){
+      Vue.set(state.nodeMap, root.path, root)
+    }
+
+    var children = [users.path, root.path]
     updateNode(state, project, children)
   },
 
   setFile (state, resp) {
     var project = initProject(resp[0])
     var file = initFile(resp[1])
+    if(file.dataPath == '-root-'){
+      file.name = '-root-'
+    }
     patchChain(state.nodeMap, project, file.path)
     if(file.type == 'folder'){
       var files = resp.slice(2).map(initFile)
@@ -99,21 +111,17 @@ function initRoot(){
 function initProject(project, options){
   var p = Object.assign({}, project)
   p.type = 'project'
-  p.path = '/' + p.id + '/-root-'
+  p.path = '/' + p.id
   p.createdDate = DateForm(p.createdTime*1000, 'mediumDate')
   p.udpatedDate = DateForm(p.updatedTime*1000, 'mediumDate')
   var opts = {}
   opts.open = false
-  opts.sortOption = {
-    field: 'type',
-    order: ['folder', 'file'],
-    asc: true
-  }
   if(options){
     Object.assign(opts, options)
   }
   p.options = opts
-  p.children = ['/'+ p.id + '/-users-']
+  p.children = ['/'+ p.id + '/users']
+  p.children = ['/'+ p.id + '/-root-']
   return p
 }
 
@@ -121,8 +129,8 @@ function initProject(project, options){
 function initUsers(project) {
   return {
     type: 'users',
-    path: '/'+ project.id + '/-users-',
-    name: '-users-',
+    path: '/'+ project.id + '/users',
+    name: 'Users',
     options: {open: false}
   }
 }
@@ -130,7 +138,7 @@ function initUsers(project) {
 
 function initFile(file, options){
   var f = Object.assign({}, file)
-  f.path = '/' + f.projectId + '/' + f.dataPath
+  f.path = '/' + f.projectId + '/data/' + f.dataPath
   f.modifiedAt = DateForm(f.modifiedTime*1000, 'mmm dd yyyy HH:MM')
   var opts = {}
   if(f.type == 'folder'){
@@ -162,7 +170,9 @@ function updateNode(state, node, children){
   }
   if(children){
     node.children = children
-    sortChildren(node, state.nodeMap)
+    if(node.options.sortOption){
+      sortChildren(node, state.nodeMap)
+    }
   }
   if(old){
     state.nodeMap[node.path] = node
@@ -175,9 +185,6 @@ function updateNode(state, node, children){
 
 function sortChildren(node, nodeMap){
   var children = node.children.slice()
-  if(node.type == 'project'){
-    children.splice(0, 1)
-  }
   var nodes = children.map(function(c){
     return nodeMap[c]
   })
@@ -187,9 +194,6 @@ function sortChildren(node, nodeMap){
   children = nodes.map(function(o){
     return o.path
   })
-  if(node.type == 'project'){
-    children.unshift('/' + node.id + '/-users-')
-  }
   node.children = children
 }
 
@@ -253,24 +257,31 @@ function patchChain(nodeMap, project, path){
 
 function findParent(path){
   var ss = path.split('/')
-  if(ss.length <= 2) return null
+  if(ss.length < 2) return null
   var parent = {childPath: path}
-  if(ss.length == 3){
-    if(ss[2] == '-users-'){
+  if(ss.length == 2){
+    parent.type = 'projects'
+    parent.path = '/'
+  }else if(ss.length == 3){
+    if(ss[2] == 'users'){
       parent.type = 'project'
-      parent.path = '/' + ss[1] + '/-root-'
-    }else if(ss[2] == '-root-'){
-      parent.type = 'projects'
-      parent.path = '/'
+      parent.path = '/' + ss[1]
+    }
+  }else if(ss.length == 4){
+    if(ss[3] == '-root-'){
+      parent.type = 'project'
+      parent.path = '/' + ss[1]
     }else{
-      var sss = ss[2].split('--')
+      var sss = ss[3].split('--')
       if(sss.length == 1){
-        parent.type = 'project'
-        parent.path = '/' + ss[1] + '/-root-'
+        parent.type = 'folder'
+        parent.dataPath = '-root-'
+        parent.path = '/' + ss[1] + '/data/-root-'
+        parent.name = '-root-'
       }else{
         parent.type = 'folder'
         parent.dataPath = sss.slice(0, -1).join('--')
-        parent.path = '/' + ss[1] + '/' + parent.dataPath
+        parent.path = '/' + ss[1] + '/data/' + parent.dataPath
         parent.name = sss[sss.length-1]
       }
     }

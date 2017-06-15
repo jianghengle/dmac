@@ -13,7 +13,7 @@ module DMACServer
       @@root = ENV["DMAC_ROOT"]
 
       def initialize(@project, @data_path)
-        if @data_path == ""
+        if @data_path == "-root-"
           @full_path = @@root + "/" + @project.key.to_s
         else
           rel_path = @data_path.gsub("--", "/")
@@ -45,30 +45,14 @@ module DMACServer
       end
 
 
-      def self.collect_files(role, project)
-        files = [] of MyFile
-        dir = MyFile.new(project, "")
-        files << dir
-        Dir.foreach dir.full_path do |filename|
-          if filename.to_s != "." && filename.to_s != ".."
-            if filename.to_s[0] != '.'
-              files << MyFile.new(project, filename.to_s)
-            elsif role == "Owner" || role == "Admin"
-              files << MyFile.new(project, filename.to_s)
-            end
-          end
-        end
-        return files
-      end
-
-
       def self.collect_files(role, project, data_path)
         files = [] of MyFile
         dir = MyFile.new(project, data_path)
         files << dir
         Dir.foreach dir.full_path do |filename|
           if filename.to_s != "." && filename.to_s != ".."
-            dp = data_path + "--" + filename
+            dp = filename
+            dp = data_path + "--" + dp unless data_path == "-root-"
             if filename.to_s[0] != '.'
               files << MyFile.new(project, dp)
             elsif role == "Owner" || role == "Admin"
@@ -81,7 +65,7 @@ module DMACServer
 
       def self.create_folder(project, data_path)
         full_path = @@root + "/" + project.key.to_s
-        if data_path != ""
+        if data_path != "-root-"
           full_path = full_path + "/" + data_path.gsub("--", "/")
         end
         Dir.mkdir(full_path)
@@ -89,7 +73,7 @@ module DMACServer
 
       def self.delete_folder(project, data_path)
         full_path = @@root + "/" + project.key.to_s
-        if data_path != ""
+        if data_path != "-root-"
           full_path = full_path + "/" + data_path.gsub("--", "/")
         end
         MyFile.delete_files(full_path)

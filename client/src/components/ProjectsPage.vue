@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import AddressBar from './project-parts/AddressBar'
+import AddressBar from './AddressBar'
 import NewProjectModal from './modals/NewProjectModal'
 import EditProjectModal from './modals/EditProjectModal'
 

@@ -11,7 +11,7 @@
             <input type="file" @change="onFileChange">
         </section>
         <footer class="modal-card-foot">
-          <a class="button is-info" @click="uploadFile">Submit</a>
+          <a class="button is-info" :class="{'is-loading': waiting}" @click="uploadFile">Upload</a>
           <a class="button" @click="close">Cancel</a>
         </footer>
       </div>
@@ -24,7 +24,8 @@ export default {
   props: ['opened', 'projectId', 'dataPath'],
   data () {
     return {
-      file: null
+      file: null,
+      waiting: false
     }
   },
   methods: {
@@ -38,14 +39,17 @@ export default {
       this.file = files[0]
     },
     uploadFile() {
+      this.waiting = true
       var formData = new FormData();
       formData.append('file', this.file)
       var url = xHTTPx + '/upload_file/' + this.projectId + '/' + this.dataPath
       this.$http.post(url, formData).then((response) => {
         console.log('File sent...')
         console.log(response)
+        this.waiting = false
         this.$emit('close-file-upload-modal', true)
       }, (response) => {
+        this.waiting = false
         console.log('Error occurred...')
       })
     }

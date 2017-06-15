@@ -1,7 +1,9 @@
 <template>
+
   <div class="nav-bar">
     <nav-node :path="'/'"></nav-node>
   </div>
+
 </template>
 
 <script>
@@ -18,8 +20,9 @@ export default {
 <style lang="scss" scoped>
 
 .nav-bar {
-	padding: 10px;
-	font-size: 14px;
+  padding: 10px;
+  font-size: 14px;
+  overflow: scroll;
 }
 
 </style>

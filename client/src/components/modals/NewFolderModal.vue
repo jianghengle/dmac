@@ -67,22 +67,28 @@ export default {
       return true
     }
   },
+  watch: {
+    opened: function (val) {
+      if(val){
+        this.newName = ''
+        this.error = ''
+      }
+    },
+  },
   methods: {
     close(){
-      this.newName = ''
       this.$emit('close-new-folder-modal', false)
     },
     create(){
       var vm = this
       vm.waiting = true
       var dataPath = vm.newName
-      if(vm.dataPath){
+      if(vm.dataPath != '-root-'){
         dataPath = vm.dataPath + '/' + dataPath
       }
       var message = {projectId: vm.projectId, dataPath:  dataPath}
       vm.$http.post(xHTTPx + '/create_folder', message).then(response => {
         vm.waiting= false
-        vm.newName = ''
         vm.$emit('close-new-folder-modal', true)
       }, response => {
         vm.error = 'Failed to create folder!'
