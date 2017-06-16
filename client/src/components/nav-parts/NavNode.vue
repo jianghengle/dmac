@@ -7,11 +7,13 @@
         <icon class="is-clickable" v-if="!open && node.type=='project'" name="folder"></icon>
         <icon class="is-clickable" v-if="open && node.type=='folder'" name="folder-open-o"></icon>
         <icon class="is-clickable" v-if="!open && node.type=='folder'" name="folder-o"></icon>
-        <icon v-if="node.type=='file'" name="file-o"></icon>
+        <span v-if="node.type=='file'">
+          <icon :name="node.icon"></icon>
+        </span>
         <icon v-if="node.type=='users'" name="user-o"></icon>
       </span>
-      <span class="node-name"
-        :class="{'is-current': isCurrent, 'is-clickable': node.type!='file'}"
+      <span class="node-name is-clickable"
+        :class="{'is-current': isCurrent}"
         @click="viewNode">
         {{node.name}}
       </span>
@@ -75,8 +77,7 @@ export default {
   },
   methods: {
     viewNode () {
-      if(this.node.type != 'file')
-        this.$router.push(this.node.path)
+      this.$router.push(this.node.path)
     },
     toggleOpen () {
       var type = this.node && this.node.type

@@ -140,6 +140,15 @@ function initFile(file, options){
   var f = Object.assign({}, file)
   f.path = '/' + f.projectId + '/data/' + f.dataPath
   f.modifiedAt = DateForm(f.modifiedTime*1000, 'mmm dd yyyy HH:MM')
+  if(f.type == 'file'){
+    var iconMap = {
+      unknown: 'file-o',
+      image: 'file-image-o',
+      pdf: 'file-pdf-o'
+    }
+    f.icon = iconMap[f.fileType]
+  }
+
   var opts = {}
   if(f.type == 'folder'){
     opts.open = false
@@ -282,7 +291,7 @@ function findParent(path){
         parent.type = 'folder'
         parent.dataPath = sss.slice(0, -1).join('--')
         parent.path = '/' + ss[1] + '/data/' + parent.dataPath
-        parent.name = sss[sss.length-1]
+        parent.name = sss[sss.length-2]
       }
     }
   }

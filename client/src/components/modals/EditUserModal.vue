@@ -110,6 +110,7 @@ export default {
       this.$emit('close-edit-user-modal', null)
     },
     updateUser(){
+      if(!this.changeValid) return
       var vm = this
       vm.newEmail = vm.newEmail.toLowerCase()
       vm.waiting = true
@@ -124,6 +125,7 @@ export default {
       })
     },
     deleteUser(){
+      if(this.changed) return
       var message = 'Are you sure to delete this user: ' + this.user.email + ' ?'
       var context = {callback: this.deleteUserConfirmed, args: []}
       this.openConfirmModal(message, context)

@@ -1,76 +1,60 @@
 <template>
   <div class="folder-file-page">
     <address-bar></address-bar>
-    
-    <div class="columns">
-      <div class="view-title column">
-        <icon name="folder-open-o"></icon>&nbsp;
-        {{file && file.name}}
-      </div>
-      <div class="column buttons">
-        <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFolderModal">
-          <icon name="plus"></icon>&nbsp;
-          Folder
-        </a>
-        <a class="button" v-if="projectRole && projectRole!='Viewer'" @click="openFileUploadModal">
-          <icon name="cloud-upload"></icon>&nbsp;
-          File
-        </a>
-      </div>
-    </div>
 
     <div v-if="error" class="notification is-danger login-text">
       <button class="delete" @click="error=''"></button>
       {{error}}
     </div>
-    <file-content :content="fileContent" :project="project" @file-changed="onFileChanged"></file-content>
+    
+    <folder v-if="folderFile && folderFile.type == 'folder'"
+      :folder="folderFile"
+      :waiting="waiting"
+      @content-changed="contentChanged">
+    </folder>
+
+    <div v-if="folderFile && folderFile.type == 'file'">
+      <normal-file
+        v-if="folderFile.fileType == 'unknown'"
+        :file="folderFile">
+      </normal-file>
+      <image-file
+        v-if="folderFile.fileType == 'image'"
+        :file="folderFile">
+      </image-file>
+      <pdf-file
+        v-if="folderFile.fileType == 'pdf'"
+        :file="folderFile">
+      </pdf-file>
+    </div>
+
     <div class="spinner-container" v-if="waiting">
       <icon name="spinner" class="icon is-medium fa-spin"></icon>
     </div>
-    <div class="empty-label" v-if="!waiting && (!fileContent || !fileContent.length)">(Empty)</div>
 
-    <new-folder-modal
-      :opened="newFolderModal.opened"
-      :role="projectRole"
-      :files="fileContent"
-      :project-id="projectId"
-      :data-path="file && file.dataPath"
-      @close-new-folder-modal="closeNewFolderModal">
-    </new-folder-modal>
-
-    <file-upload-modal
-      :opened="fileUploadModal.opened"
-      :project-id="projectId"
-      :data-path="file && file.dataPath"
-      @close-file-upload-modal="closeFileUploadModal">
-    </file-upload-modal>
   </div>
 </template>
 
 <script>
 import AddressBar from './AddressBar'
-import FileContent from './folder-parts/FileContent'
-import NewFolderModal from './modals/NewFolderModal'
-import FileUploadModal from './modals/FileUploadModal'
+import Folder from './folder-parts/Folder'
+import NormalFile from './file-parts/NormalFile'
+import ImageFile from './file-parts/ImageFile'
+import PdfFile from './file-parts/PdfFile'
 
 export default {
   name: 'folder-file-page',
   components: {
   	AddressBar,
-    FileContent,
-    NewFolderModal,
-    FileUploadModal
+    Folder,
+    NormalFile,
+    ImageFile,
+    PdfFile
   },
   data () {
     return {
       error: '',
-      waiting: false,
-      newFolderModal: {
-        opened: false
-      },
-      fileUploadModal: {
-        opened: false
-      },
+      waiting: false
     }
   },
   computed: {
@@ -80,26 +64,11 @@ export default {
     nodeMap () {
       return this.$store.state.projects.nodeMap
     },
-    project () {
-      return this.nodeMap['/' + this.projectId]
-    },
-    projectRole () {
-      return this.project && this.project.projectRole
-    },
     path () {
       return "/" + this.projectId + "/data/" + this.$route.params.dataPath
     },
-    file () {
+    folderFile () {
       return this.nodeMap[this.path]
-    },
-    fileContent () {
-      if(this.file){
-        var vm = this
-        return this.file.children.map(function(c){
-          return vm.nodeMap[c]
-        })
-      }
-      return []
     }
   },
   watch: {
@@ -121,27 +90,9 @@ export default {
         vm.waiting = false
       })
     },
-    openNewFolderModal(){
-      this.newFolderModal.opened = true
-    },
-    closeNewFolderModal(result){
-      this.newFolderModal.opened = false
-      if(result){
-        this.requestFile()
-      }
-    },
-    onFileChanged(){
+    contentChanged(){
       this.requestFile()
     },
-    openFileUploadModal(){
-      this.fileUploadModal.opened = true
-    },
-    closeFileUploadModal(result){
-      this.fileUploadModal.opened = false
-      if(result){
-        this.requestFile()
-      }
-    }
   },
   mounted () {
     var vm = this

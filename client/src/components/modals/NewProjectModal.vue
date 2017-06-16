@@ -45,6 +45,15 @@ export default {
       newDescription: ''
     }
   },
+  watch: {
+    opened: function (val) {
+      if(val){
+        this.newName = ''
+        this.newDescription = ''
+        this.error = ''
+      }
+    },
+  },
   methods: {
     close(){
       this.newName = ''
@@ -52,6 +61,7 @@ export default {
       this.$emit('close-new-project-modal', false)
     },
     create(){
+      if(!this.newName.length) return
       var vm = this
       vm.waiting = true
       var message = {name: vm.newName, description: vm.newDescription}

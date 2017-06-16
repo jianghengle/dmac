@@ -41,16 +41,8 @@ module DMACServer
         return controls.as(Array)
       end
 
-      def self.get_owners_by_project_ids(ids)
-        query = Query.where(:project_id, ids).where(:role, "owner")
-        controls = Repo.all(Control, query)
-        result = {} of String => String
-        return result if controls.nil?
-        controls = controls.as(Array)
-        controls.each do |c|
-          result[c.project_id.to_s] = c.email.to_s
-        end
-        return result
+      def self.get_project_owner(project)
+        return Repo.get_by(Control, project_id: project.id, role: "Owner")
       end
 
       def self.get_control!(email, project)

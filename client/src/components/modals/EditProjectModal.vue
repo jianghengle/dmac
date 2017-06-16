@@ -106,6 +106,7 @@ export default {
       this.$emit('close-edit-project-modal', false)
     },
     update(){
+      if(!this.newName.length || !this.projectChanged) return
       var vm = this
       vm.waiting = true
       var message = {id: vm.project.id, name: vm.newName, description: vm.newDescription, status: vm.newStatus}
@@ -118,6 +119,7 @@ export default {
       })
     },
     deleteProject(){
+      if(this.projectChanged) return
       var message = 'Are you sure to delete this project and all its data inside'
       var context = {callback: this.deleteProjectConfirmed, args: []}
       this.openConfirmModal(message, context)
@@ -128,7 +130,7 @@ export default {
       var message = {id: this.project.id}
       vm.$http.post(xHTTPx + '/delete_project', message).then(response => {
         vm.waiting = false
-        this.$emit('close-edit-project-modal', true)
+        this.$emit('close-edit-project-modal', 'deleted')
       }, response => {
         vm.error = 'Failed to delete project!'
         vm.waiting = false

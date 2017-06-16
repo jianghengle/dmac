@@ -3,6 +3,7 @@ require "crecto"
 require "kemal"
 require "json"
 require "crypto/bcrypt/password"
+require "secure_random"
 
 require "./http/models/*"
 require "./http/errors/*"
@@ -98,6 +99,14 @@ module DMACServer
         HttpAPI::ProjectController.upload_file(env)
       end
 
+      get "/get_download_url/:project_id/:data_path" do |env|
+        HttpAPI::DownloadController.get_download_url(env)
+      end
+
+      get "/download_file/:key" do |env|
+        HttpAPI::DownloadController.download_file(env)
+      end
+ 
       Kemal.run
       end
   end

@@ -8,9 +8,17 @@ module DMACServer
       property project : Project
       property size : UInt64
       property modified_at : Time
+      property fileType : String
 
       raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
       @@root = ENV["DMAC_ROOT"]
+      @@typeMap = {} of String => String
+      @@typeMap[".png"] = "image"
+      @@typeMap[".jpg"] = "image"
+      @@typeMap[".jpeg"] = "image"
+      @@typeMap[".gif"] = "image"
+      @@typeMap[".bmp"] = "image"
+      @@typeMap[".pdf"] = "pdf"
 
       def initialize(@project, @data_path)
         if @data_path == "-root-"
@@ -21,8 +29,13 @@ module DMACServer
         end
         raise "No such path" unless File.exists?(@full_path)
 
-        @type = "file"
-        @type = "folder" if File.directory?(@full_path)
+        @type = "folder"
+        @fileType = "unknown"
+        if File.file?(@full_path)
+          @type = "file"
+          ext = File.extname(full_path)
+          @fileType = @@typeMap[ext.downcase] if @@typeMap.has_key?(ext)
+        end
 
         @name = File.basename(@full_path)
         @size = File.size(@full_path)
@@ -35,6 +48,7 @@ module DMACServer
           str << "{"
           str << "\"projectId\":\"" << @project.id << "\","
           str << "\"type\":\"" << @type << "\","
+          str << "\"fileType\":\"" << @fileType << "\","
           str << "\"name\":\"" << @name << "\","
           str << "\"dataPath\":\"" << @data_path << "\","
           str << "\"size\":\"" << @size << "\","
@@ -49,6 +63,7 @@ module DMACServer
         files = [] of MyFile
         dir = MyFile.new(project, data_path)
         files << dir
+        return files if dir.type.to_s == "file"
         Dir.foreach dir.full_path do |filename|
           if filename.to_s != "." && filename.to_s != ".."
             dp = filename
@@ -159,6 +174,12 @@ module DMACServer
         end
 
         return path + "/" + new_name
+      end
+
+      def self.get_full_path(project_key, data_path)
+        full_path = @@root + "/" + project_key.to_s + "/" + data_path.gsub("--", "/")
+        raise "No such path" unless File.exists?(full_path)
+        return full_path
       end
 
     end

@@ -1,0 +1,85 @@
+<template>
+  <div>
+    <div class="columns">
+      <div class="view-title column">
+        <icon :name="file.icon"></icon>&nbsp;
+        {{file && file.name}}
+      </div>
+      <div class="column buttons">
+        
+      </div>
+    </div>
+
+    <div class="file-content">
+      <figure class="image image-container">
+        <img :src="url">
+      </figure>
+    </div>
+
+  </div>
+</template>
+
+<script>
+
+export default {
+  name: 'image-file',
+  props: ['file'],
+  
+  data () {
+    return {
+      url: null
+    }
+  },
+  computed: {
+    projectId () {
+      return this.$route.params.projectId
+    },
+    nodeMap () {
+      return this.$store.state.projects.nodeMap
+    },
+    project () {
+      return this.nodeMap['/' + this.projectId]
+    },
+    projectRole () {
+      return this.project && this.project.projectRole
+    },
+    path () {
+      return this.$route.path
+    },
+  },
+  watch: {
+    path: function (val) {
+      this.getDownloadUrl()
+    },
+  },
+  methods: {
+    getDownloadUrl() {
+      this.$http.get(xHTTPx + '/get_download_url/' + this.projectId + "/" + this.file.dataPath).then(response => {
+        this.url = xHTTPx + response.body
+      }, response => {
+        console.log('failed to get url')
+      })
+    }
+  },
+  mounted () {
+    this.getDownloadUrl()
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+
+.buttons {
+  text-align: right;
+}
+
+.file-content {
+  margin-top: 5px;
+}
+
+.image-container {
+  max-width: 1000px;
+}
+
+
+</style>

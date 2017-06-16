@@ -28,6 +28,13 @@ export default {
       waiting: false
     }
   },
+  watch: {
+    opened: function (val) {
+      if(val){
+        this.file = null
+      }
+    },
+  },
   methods: {
     close(){
       this.$emit('close-file-upload-modal', false)
@@ -39,6 +46,7 @@ export default {
       this.file = files[0]
     },
     uploadFile() {
+      if(!this.file) return
       this.waiting = true
       var formData = new FormData();
       formData.append('file', this.file)

@@ -16,11 +16,10 @@ module DMACServer
             project_ids.push(c.project_id)
           end
           projects = Project.get_projects_by_ids(project_ids)
-          owners = Control.get_owners_by_project_ids(project_ids)
+
           arr = [] of String
           projects.each do |k, v|
             fields = {} of String => String
-            fields["owner"] = owners[k] if owners.has_key? k
             fields["projectRole"] = controls[k].role.to_s if controls.has_key? k
             obj = v.to_json(fields)
             arr.push(obj)
@@ -41,9 +40,11 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
+          owner = Control.get_project_owner(project)
           
           fields = {} of String => String
           fields["projectRole"] = control.role.to_s
+          fields["owner"] = owner.email.to_s unless owner.nil?
           return project.to_json(fields)
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

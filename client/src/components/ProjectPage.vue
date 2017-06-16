@@ -5,19 +5,25 @@
     <div class="columns">
       <div class="view-title column">
         <icon name="folder-open"></icon>&nbsp;
-        {{project && project.name}}
+        {{project && project.name}}&nbsp;
+        <span class="edit-icon"
+          v-if="projectRole=='Owner' || projectRole=='Admin'"
+          @click="openEditProjectModal(project)">
+          <icon name="edit"></icon>
+        </span>
+
       </div>
     </div>
 
     <div>
       <div class="field is-horizontal">
         <div class="field-label is-normal">
-          <label class="label">Status</label>
+          <label class="label">Created By:</label>
         </div>
         <div class="field-body">
           <div class="field">
             <div class="control">
-              <p class="input field-text">{{project && project.status}}</p>
+              <input class="input field-text" type="text" readonly :value="project && project.owner">
             </div>
           </div>
         </div>
@@ -25,12 +31,12 @@
 
       <div class="field is-horizontal">
         <div class="field-label is-normal">
-          <label class="label">Description</label>
+          <label class="label">Created Date:</label>
         </div>
         <div class="field-body">
           <div class="field">
             <div class="control">
-              <p class="input field-text">{{project && project.description}}</p>
+              <input class="input field-text" type="text" readonly :value="project && project.createdDate">
             </div>
           </div>
         </div>
@@ -38,12 +44,12 @@
 
       <div class="field is-horizontal">
         <div class="field-label is-normal">
-          <label class="label">Created Date</label>
+          <label class="label">Status:</label>
         </div>
         <div class="field-body">
           <div class="field">
             <div class="control">
-              <p class="input field-text">{{project && project.createdDate}}</p>
+              <input class="input field-text" type="text" readonly :value="project && project.status">
             </div>
           </div>
         </div>
@@ -51,12 +57,25 @@
 
       <div class="field is-horizontal">
         <div class="field-label is-normal">
-          <label class="label">Role</label>
+          <label class="label">Description:</label>
         </div>
         <div class="field-body">
           <div class="field">
             <div class="control">
-              <p class="input field-text">{{project && project.projectRole}}</p>
+              <textarea class="textarea field-text" :style="{height: textAreaHeight}" readonly>{{project && project.description}}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Your Role:</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <input class="input field-text" type="text" readonly :value="project && project.projectRole">
             </div>
           </div>
         </div>
@@ -79,23 +98,34 @@
         </a>
       </div>
     </div>
+
+    <edit-project-modal
+      :opened="editProjectModal.opened"
+      :project="editProjectModal.project"
+      @close-edit-project-modal="closeEditProjectModal">
+    </edit-project-modal>
     
   </div>
 </template>
 
 <script>
 import AddressBar from './AddressBar'
-
+import EditProjectModal from './modals/EditProjectModal'
 
 export default {
   name: 'project-page',
   components: {
     AddressBar,
+    EditProjectModal
   },
   data () {
     return {
       error: '',
       waiting: false,
+      editProjectModal: {
+        opened: false,
+        project: null
+      },
     }
   },
   computed: {
@@ -110,6 +140,11 @@ export default {
     },
     projectRole () {
       return this.project && this.project.projectRole
+    },
+    textAreaHeight () {
+      if(!this.project) return 1
+      var lines = this.project.description.split('\n').length
+      return 20*lines + 'px'
     }
   },
   methods: {
@@ -131,6 +166,20 @@ export default {
     viewData () {
       this.$router.push('/' + this.projectId + '/data/-root-')
     },
+    openEditProjectModal(){
+      this.editProjectModal.project = this.project
+      this.editProjectModal.opened = true
+    },
+    closeEditProjectModal(result){
+      this.editProjectModal.opened = false
+      if(result){
+        if(result == 'deleted'){
+          this.$router.push('/')
+        }else{
+          this.requestProject()
+        }
+      }
+    },
   },
   mounted () {
     var vm = this
@@ -150,6 +199,8 @@ export default {
 .field-text {
   border-style: none;
   box-shadow: none;
+  resize: none;
+  min-height: 40px;
 }
 
 .actions {
@@ -160,6 +211,11 @@ export default {
   text-align: center;
 }
 
-
+.edit-icon {
+  font-size: 14px;
+  position: relative;
+  top: 3px;
+  cursor: pointer;
+}
 
 </style>

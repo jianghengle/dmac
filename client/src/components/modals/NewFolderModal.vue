@@ -80,6 +80,7 @@ export default {
       this.$emit('close-new-folder-modal', false)
     },
     create(){
+      if(!this.newNameValid) return
       var vm = this
       vm.waiting = true
       var dataPath = vm.newName

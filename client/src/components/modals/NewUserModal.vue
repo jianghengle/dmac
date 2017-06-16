@@ -71,12 +71,21 @@ export default {
       return !this.userMap[this.newEmail]
     }
   },
+  watch: {
+    opened: function (val) {
+      if(val){
+        this.newEmail = ''
+        this.error = ''
+      }
+    },
+  },
   methods: {
     close(){
       this.newEmai = ''
       this.$emit('close-new-user-modal', null)
     },
     addUser(){
+      if(!this.newEmailValid) return
       var vm = this
       vm.newEmail = vm.newEmail.toLowerCase()
       vm.waiting = true

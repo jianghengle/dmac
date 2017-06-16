@@ -99,6 +99,7 @@ export default {
       this.$emit('close-edit-name-modal', false)
     },
     updateName(){
+      if(!this.newNameValid) return
       var vm = this
       vm.waiting = true
       var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath, newName: vm.newName}
@@ -112,6 +113,7 @@ export default {
       })
     },
     deleteFile(){
+      if(this.changed) return
       var message = 'Are you sure to delete this ' + this.file.type + ": " + this.file.name + ' ?'
       var context = {callback: this.deleteFileConfirmed, args: []}
       this.openConfirmModal(message, context)
@@ -122,7 +124,7 @@ export default {
       var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath}
       vm.$http.post(xHTTPx + '/delete_folder_file', message).then(response => {
         vm.waiting= false
-        this.$emit('close-edit-name-modal', true)
+        this.$emit('close-edit-name-modal', 'deleted')
       }, response => {
         vm.error = 'Failed to udpate user!'
         vm.waiting= false
