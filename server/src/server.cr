@@ -87,6 +87,10 @@ module DMACServer
         HttpAPI::ProjectController.create_folder(env)
       end
 
+      post "/create_file" do |env|
+        HttpAPI::ProjectController.create_file(env)
+      end
+
       post "/update_folder_file_name" do |env|
         HttpAPI::ProjectController.update_folder_file_name(env)
       end
@@ -106,7 +110,15 @@ module DMACServer
       get "/download_file/:key" do |env|
         HttpAPI::DownloadController.download_file(env)
       end
+
+      post "/save_text_file" do |env|
+        HttpAPI::ProjectController.save_text_file(env)
+      end
  
+      post "/copy_folder_file" do |env|
+        HttpAPI::ProjectController.copy_folder_file(env)
+      end
+
       Kemal.run
       end
   end

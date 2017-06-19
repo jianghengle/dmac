@@ -68,8 +68,11 @@ module DMACServer
           fields = {} of String => String
           fields["projectRole"] = control.role.to_s
           arr << project.to_json(fields)
-          files.each do |f|
-            arr << f.to_json
+
+          files.each_index do |i|
+            f = files[i]
+            read_text = i == 0 && f.fileType == "text"
+            arr << f.to_json(read_text)
           end
           json_array(arr)
         rescue ex : InsufficientParameters
@@ -156,6 +159,26 @@ module DMACServer
         end
       end
 
+      def create_file(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" if control.role.to_s == "Viewer"
+
+
+          MyFile.create_file(project, data_path)
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
       def update_folder_file_name(ctx)
         begin
           email = verify_token(ctx)
@@ -207,6 +230,59 @@ module DMACServer
           raise "Permission denied" if control.role.to_s == "Viewer"
 
           MyFile.upload_file(project, data_path, file)
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def save_text_file(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+          text = get_param!(ctx, "text")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" if control.role.to_s == "Viewer"
+
+          MyFile.save_text_file(project, data_path, text)
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def copy_folder_file(ctx)
+        begin
+          email = verify_token(ctx)
+          source_project_id = get_param!(ctx, "sourceProjectId")
+          source_data_paths = get_param!(ctx, "sourceDataPaths")
+          target_project_id = get_param!(ctx, "targetProjectId")
+          target_data_path = get_param!(ctx, "targetDataPath")
+
+          source_project = Project.get_project!(source_project_id)
+          source_control = Control.get_control!(email, source_project)
+          target_project = Project.get_project!(target_project_id)
+          target_control = Control.get_control!(email, target_project)
+          raise "Permission denied" if target_control.role.to_s == "Viewer"
+
+          source_files = [] of MyFile
+          source_data_paths.split(",").each do |dp|
+            f = MyFile.new(source_project, dp)
+            if f.type == "file"
+              source_files << f
+            elsif target_control.role.to_s != "Editor"
+              source_files << f
+            end
+          end
+          target_file = MyFile.new(target_project, target_data_path)
+          MyFile.copy_files(source_files, target_file)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

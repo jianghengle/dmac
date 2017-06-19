@@ -10,9 +10,21 @@
           <icon name="plus"></icon>&nbsp;
           Folder
         </a>
+        <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFileModal">
+          <icon name="plus"></icon>&nbsp;
+          File
+        </a>
         <a class="button" v-if="projectRole && projectRole!='Viewer'" @click="openFileUploadModal">
           <icon name="upload"></icon>&nbsp;
           File
+        </a>
+        <a class="button" @click="copySelection">
+          <icon name="copy"></icon>&nbsp;
+          Copy
+        </a>
+        <a class="button" v-if="projectRole && projectRole!='Viewer'" :disabled="!canPaste" @click="pasteSelection">
+          <icon name="paste"></icon>&nbsp;
+          Paste
         </a>
       </div>
     </div>
@@ -21,25 +33,54 @@
       <table class="table is-narrow">
         <thead>
           <tr>
-            <th class="number-cell">#</th>
-            <th class="text-cell">Type</th>
-            <th class="text-cell">Name</th>
-            <th class="number-cell">Size</th>
-            <th class="text-cell">Modified At</th>
+            <th class="number-cell is-clickable" @click="toggleAll">{{files.length}}</th>
+            <th class="text-cell is-clickable" @click="sortNodeChildren('fileType', typeOrder)">Type
+              <span v-if="sortOption.field=='fileType'">
+                <icon class="asc-icon" name="sort-asc" v-if="sortOption.asc"></icon>
+                <icon name="sort-desc" v-if="!sortOption.asc"></icon>
+              </span>
+            </th>
+            <th class="number-cell is-clickable" @click="sortNodeChildren('name', 'string')">Name
+              <span v-if="sortOption.field=='name'">
+                <icon class="asc-icon" name="sort-asc" v-if="sortOption.asc"></icon>
+                <icon name="sort-desc" v-if="!sortOption.asc"></icon>
+              </span>
+            </th>
+            <th class="number-cell is-clickable" @click="sortNodeChildren('size', 'number')">Size
+              <span v-if="sortOption.field=='size'">
+                <icon class="asc-icon" name="sort-asc" v-if="sortOption.asc"></icon>
+                <icon name="sort-desc" v-if="!sortOption.asc"></icon>
+              </span>
+            </th>
+            <th class="text-cell is-clickable" @click="sortNodeChildren('modifiedTime', 'number')">Modified At
+              <span v-if="sortOption.field=='modifiedTime'">
+                <icon class="asc-icon" name="sort-asc" v-if="sortOption.asc"></icon>
+                <icon name="sort-desc" v-if="!sortOption.asc"></icon>
+              </span>
+            </th>
             <th class="text-cell">Action</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(f, i) in files" class="entry" :class="{'folder': f.type=='folder'}" @click="viewFile(f)">
-            <td class="number-cell">{{i+1}}</td>
+            <td class="number-cell" @click.stop="toggleSelected(f)">
+              <input type="checkbox" v-model="selection[f.path]" @click.stop="toggleSelected(f)">
+            </td>
             <td class="text-cell">
-              <icon v-if="f.type=='folder'" name="folder-o"></icon>
+              <icon class="type-icon" v-if="f.type=='folder'" name="folder-o"></icon>
               <span v-if="f.type=='file'">
-                <icon :name="f.icon"></icon>
+                <icon class="type-icon" :name="f.icon"></icon>
               </span>
             </td>
-            <td class="text-cell">{{f.name}}</td>
-            <td class="number-cell"><span v-if="f.type=='file'">{{f.size}}</span></td>
+            <td class="number-cell">
+              {{f.name}}
+            </td>
+            <td class="number-cell">
+              <span class="tooltip">
+                {{f.sizeLabel}}
+                <span class="tooltiptext">{{f.size}}</span>
+              </span>
+            </td>
             <td class="text-cell">{{f.modifiedAt}}</td>
             <td class="text-cell">
               <a v-if="projectRole!='Viewer' && ( projectRole=='Editor' ? f.type=='file' : true )"
@@ -52,7 +93,7 @@
                 class="action-icon">
                 <icon name="download"></icon>
               </a>
-              <a v-if="urls[f.path]" :href="urls[f.path]">link</a>
+              <a v-if="urls[f.path]" :href="urls[f.path]" @click.stop="">link</a>
             </td>
           </tr>
         </tbody>
@@ -69,6 +110,15 @@
       :data-path="folder && folder.dataPath"
       @close-new-folder-modal="closeNewFolderModal">
     </new-folder-modal>
+
+    <new-file-modal
+      :opened="newFileModal.opened"
+      :role="projectRole"
+      :files="files"
+      :project-id="projectId"
+      :data-path="folder && folder.dataPath"
+      @close-new-file-modal="closeNewFileModal">
+    </new-file-modal>
 
     <file-upload-modal
       :opened="fileUploadModal.opened"
@@ -89,6 +139,7 @@
 
 <script>
 import NewFolderModal from '../modals/NewFolderModal'
+import NewFileModal from '../modals/NewFileModal'
 import FileUploadModal from '../modals/FileUploadModal'
 import EditNameModal from '../modals/EditNameModal'
 
@@ -97,12 +148,16 @@ export default {
   props: ['waiting', 'folder'],
   components: {
     NewFolderModal,
+    NewFileModal,
     FileUploadModal,
     EditNameModal
   },
   data () {
     return {
       newFolderModal: {
+        opened: false
+      },
+      newFileModal: {
         opened: false
       },
       fileUploadModal: {
@@ -112,7 +167,10 @@ export default {
         opened: false,
         file: null
       },
-      urls: {}
+      urls: {},
+      typeOrder: ['folder', 'image', 'pdf', 'text', 'unknown'],
+      pasting: false,
+      selection: {}
     }
   },
   computed: {
@@ -123,7 +181,7 @@ export default {
       return this.$store.state.projects.nodeMap
     },
     project () {
-      return this.nodeMap['/' + this.projectId]
+      return this.nodeMap['/projects/' + this.projectId]
     },
     projectRole () {
       return this.project && this.project.projectRole
@@ -136,7 +194,22 @@ export default {
         })
       }
       return []
+    },
+    sortOption () {
+      if(this.folder) return this.folder.options.sortOption
+      return {}
+    },
+    clipboard () {
+      return this.$store.state.projects.clipboard
+    },
+    canPaste () {
+      return this.clipboard.projectId && this.clipboard.dataPaths.length
     }
+  },
+  watch: {
+    files: function (val) {
+      this.reloadSelection()
+    },
   },
   methods: {
     openNewFolderModal(){
@@ -144,6 +217,15 @@ export default {
     },
     closeNewFolderModal(result){
       this.newFolderModal.opened = false
+      if(result){
+        this.$emit('content-changed', true)
+      }
+    },
+    openNewFileModal(){
+      this.newFileModal.opened = true
+    },
+    closeNewFileModal(result){
+      this.newFileModal.opened = false
       if(result){
         this.$emit('content-changed', true)
       }
@@ -177,7 +259,58 @@ export default {
       }, response => {
         console.log('failed to get url')
       })
-    }
+    },
+    sortNodeChildren(field, order){
+      this.$store.commit('projects/sortNodeChildren', {path: this.folder.path, field: field, order: order})
+    },
+    reloadSelection(){
+      var selection = {}
+      for(var i=0;i<this.files.length;i++){
+        var f = this.files[i]
+        selection[f.path] = f.options.selected
+      }
+      this.selection = selection
+    },
+    toggleSelected(f){
+      this.$store.commit('projects/toggleSelected', f.path)
+      this.selection[f.path] = f.options.selected
+    },
+    toggleAll(){
+      for(var i=0;i<this.files.length;i++){
+        var f = this.files[i]
+        this.toggleSelected(f)
+      }
+    },
+    copySelection(f){
+      var dataPaths =[]
+      for(var i=0;i<this.files.length;i++){
+        var f = this.files[i]
+        if(f.options.selected){
+          dataPaths.push(f.dataPath)
+        }
+      }
+      this.$store.commit('projects/copySelection', {projectId: this.projectId, dataPaths: dataPaths})
+    },
+    pasteSelection(){
+      if(!this.canPaste) return
+      this.pasting = true
+      var message = {
+        'sourceProjectId': this.clipboard.projectId,
+        'sourceDataPaths': this.clipboard.dataPaths.join(','),
+        'targetProjectId': this.projectId,
+        'targetDataPath': this.folder.dataPath
+      }
+      this.$http.post(xHTTPx + '/copy_folder_file', message).then(response => {
+        this.pasting = false
+        this.$emit('content-changed', true)
+      }, response => {
+        this.pasting = false
+        console.log('failed to paste')
+      })
+    },
+  },
+  mounted () {
+    this.reloadSelection()
   }
 }
 </script>
@@ -220,5 +353,41 @@ export default {
   color: #3273dc;
   position: relative;
   top: 3px;
+}
+
+.type-icon {
+  position: relative;
+  top: 3px;
+}
+
+.asc-icon {
+  position: relative;
+  top: 5px;
+}
+
+.is-clickable {
+  cursor: pointer;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+.tooltip .tooltiptext {
+  visibility: hidden;
+  background-color: #363636;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px 5px;
+  /* Position the tooltip */
+  position: absolute;
+  left: 0px;
+  z-index: 10;
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 0.9;
 }
 </style>

@@ -4,7 +4,7 @@
       <div class="modal-background"></div>
       <div class="modal-card">
         <header class="modal-card-head">
-          <p class="modal-card-title">New Folder</p>
+          <p class="modal-card-title">New File</p>
           <button class="delete" @click="close"></button>
         </header>
         <section class="modal-card-body modal-body">
@@ -30,7 +30,7 @@
 
 <script>
 export default {
-  name: 'new-folder-modal',
+  name: 'new-file-modal',
   props: ['opened', 'role', 'files', 'projectId', 'dataPath'],
   data () {
     return {
@@ -77,7 +77,7 @@ export default {
   },
   methods: {
     close(){
-      this.$emit('close-new-folder-modal', false)
+      this.$emit('close-new-file-modal', false)
     },
     create(){
       if(!this.newNameValid) return
@@ -88,11 +88,11 @@ export default {
         dataPath = vm.dataPath + '--' + dataPath
       }
       var message = {projectId: vm.projectId, dataPath:  dataPath}
-      vm.$http.post(xHTTPx + '/create_folder', message).then(response => {
+      vm.$http.post(xHTTPx + '/create_file', message).then(response => {
         vm.waiting= false
-        vm.$emit('close-new-folder-modal', true)
+        vm.$emit('close-new-file-modal', true)
       }, response => {
-        vm.error = 'Failed to create folder!'
+        vm.error = 'Failed to create file!'
         vm.waiting= false
       })
     }

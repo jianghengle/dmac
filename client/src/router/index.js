@@ -11,21 +11,25 @@ export default new Router({
   routes: [
     {
       path: '/',
+      redirect: '/projects'
+    },
+    {
+      path: '/projects',
       name: 'Projects',
       component: ProjectsPage
     },
     {
-      path: '/:projectId',
+      path: '/projects/:projectId',
       name: 'Project',
       component: ProjectPage
     },
     {
-      path: '/:projectId/users',
+      path: '/projects/:projectId/users',
       name: 'ProjectUsers',
       component: UsersPage
     },
     {
-      path: '/:projectId/data/:dataPath',
+      path: '/projects/:projectId/data/:dataPath',
       name: 'FolderFile',
       component: FolderFilePage
     },

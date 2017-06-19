@@ -34,18 +34,18 @@ export default {
     },
     nodes () {
       var nodes = []
-      nodes.push(this.getNode('/'))
+      nodes.push(this.getNode('/projects'))
 
       if(!this.projectId) return nodes
-      nodes.push(this.getNode('/' + this.projectId))
+      nodes.push(this.getNode('/projects/' + this.projectId))
       if(this.routeName == 'Project') return nodes
         
       if(this.routeName == 'ProjectUsers'){
-        nodes.push(this.getNode('/' + this.projectId + '/users'))
+        nodes.push(this.getNode('/projects/' + this.projectId + '/users'))
       }else{
-        nodes.push(this.getNode('/' + this.projectId + '/data/-root-'))
+        nodes.push(this.getNode('/projects/' + this.projectId + '/data/-root-'))
         var files = this.dataPath.split('--')
-        var path = '/' + this.projectId + '/data'
+        var path = '/projects/' + this.projectId + '/data'
         for(var i=0;i<files.length;i++){
           if(i == 0){
             path = path + '/' + files[i]

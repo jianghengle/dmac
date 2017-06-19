@@ -13,10 +13,12 @@
 
     <div class="file-content">
       <div class="pdf-container">
-        <embed :src="dataUrl" width="1000px" height="1000px" class="pdf-body" type="application/pdf" />
+        <div class="spinner-container" v-if="waiting">
+          <icon name="spinner" class="icon is-medium fa-spin"></icon>
+        </div>
+        <embed :src="dataUrl" :width="pdfWidth + 'px'" height="1000px" class="pdf-body" type="application/pdf" />
       </div>
     </div>
-
   </div>
 </template>
 
@@ -26,12 +28,13 @@ import PDFObject from 'pdfobject'
 export default {
   name: 'pdf-file',
   props: ['file'],
-  
   data () {
     return {
       url: null,
       data: null,
-      dataUrl: null
+      dataUrl: null,
+      waiting: false,
+      pdfWidth: 800
     }
   },
   computed: {
@@ -60,10 +63,12 @@ export default {
     getDownloadUrl() {
       this.$http.get(xHTTPx + '/get_download_url/' + this.projectId + "/" + this.file.dataPath).then(response => {
         this.url = xHTTPx + response.body
+        this.waiting = true
         this.$http.get(this.url, {responseType: 'blob'}).then(response => {
           return response.blob()
         }).then(blob => {
           this.dataUrl = URL.createObjectURL(blob)
+          this.waiting = false
         })
       }, response => {
         console.log('failed to get url')
@@ -71,6 +76,7 @@ export default {
     }
   },
   mounted () {
+    this.pdfWidth = this.$el.clientWidth
     this.getDownloadUrl()
   }
 }
@@ -87,7 +93,7 @@ export default {
 }
 
 .pdf-container {
-  width: 1000px;
+  width: 100%;
   height: 1000px;
 }
 

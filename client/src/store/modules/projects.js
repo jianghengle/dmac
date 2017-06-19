@@ -4,7 +4,9 @@ import DateForm from 'dateformat'
 // initial state
 export const state = {
   showNav: false,
-  nodeMap: {}
+  nodeMap: {},
+  showArchive: false,
+  clipboard: {projectId: null, dataPaths: []}
 }
 
 // mutations
@@ -39,7 +41,7 @@ export const mutations = {
       projectId: project.id,
       type: 'folder',
       name: '-root-',
-      path: '/' + project.id + '/-root-',
+      path: '/projects/' + project.id + '/data/-root-',
       dataPath: '-root-',
       size: 0,
       modifiedTime: 0
@@ -84,8 +86,38 @@ export const mutations = {
     if(node){
       node.options.open = false
     }
-  }
+  },
 
+  sortNodeChildren(state, nodeSort) {
+    var path = nodeSort.path
+    var node = state.nodeMap[path]
+    var sortOption = node.options.sortOption
+    var field = nodeSort.field
+    var order = nodeSort.order
+    if(field == sortOption.field){
+      sortOption.asc = !sortOption.asc
+    }else{
+      sortOption.field = field
+      sortOption.order = order
+    }
+    sortChildren(node, state.nodeMap)
+  },
+
+  setShowArchive(state, val) {
+    state.showArchive = val
+  },
+
+  toggleSelected(state, path) {
+    var node = state.nodeMap[path]
+    if(node){
+      node.options.selected = !node.options.selected
+    }
+  },
+
+  copySelection(state, selection) {
+    state.clipboard.projectId = selection.projectId
+    state.clipboard.dataPaths = selection.dataPaths
+  }
 }
 
 
@@ -100,7 +132,7 @@ function initRoot(){
   }
   return {
     type: 'projects',
-    path: '/',
+    path: '/projects',
     name: 'Projects',
     options: options,
     children: []
@@ -111,7 +143,7 @@ function initRoot(){
 function initProject(project, options){
   var p = Object.assign({}, project)
   p.type = 'project'
-  p.path = '/' + p.id
+  p.path = '/projects/' + p.id
   p.createdDate = DateForm(p.createdTime*1000, 'mediumDate')
   p.udpatedDate = DateForm(p.updatedTime*1000, 'mediumDate')
   var opts = {}
@@ -120,8 +152,8 @@ function initProject(project, options){
     Object.assign(opts, options)
   }
   p.options = opts
-  p.children = ['/'+ p.id + '/users']
-  p.children = ['/'+ p.id + '/-root-']
+  p.children = ['/projects/'+ p.id + '/users']
+  p.children = ['/projects/'+ p.id + '/-root-']
   return p
 }
 
@@ -129,7 +161,7 @@ function initProject(project, options){
 function initUsers(project) {
   return {
     type: 'users',
-    path: '/'+ project.id + '/users',
+    path: '/projects/'+ project.id + '/users',
     name: 'Users',
     options: {open: false}
   }
@@ -138,24 +170,34 @@ function initUsers(project) {
 
 function initFile(file, options){
   var f = Object.assign({}, file)
-  f.path = '/' + f.projectId + '/data/' + f.dataPath
+  f.path = '/projects/' + f.projectId + '/data/' + f.dataPath
   f.modifiedAt = DateForm(f.modifiedTime*1000, 'mmm dd yyyy HH:MM')
   if(f.type == 'file'){
     var iconMap = {
       unknown: 'file-o',
       image: 'file-image-o',
-      pdf: 'file-pdf-o'
+      pdf: 'file-pdf-o',
+      text: 'file-code-o'
     }
     f.icon = iconMap[f.fileType]
+    f.sizeLabel = f.size
+    if(f.size > 1000000000){
+      f.sizeLabel = Math.floor(f.size / 1000000000) + 'G'
+    }else if(f.size > 1000000){
+      f.sizeLabel = Math.floor(f.size / 1000000) + 'M'
+    }else if(f.size > 1000){
+      f.sizeLabel = Math.floor(f.size / 1000) + 'K'
+    }
   }
 
   var opts = {}
+  opts.selected = false
   if(f.type == 'folder'){
     opts.open = false
   }
   opts.sortOption = {
-    field: 'type',
-    order: ['folder', 'file'],
+    field: 'fileType',
+    order: ['folder', 'image', 'pdf', 'text', 'unknown'],
     asc: true
   }
   if(options){
@@ -219,6 +261,8 @@ function compareNodes(o1, o2, opt){
     }
     return v2 - v1
   }else if(opt.order == 'string'){
+    v1 = v1.toLowerCase()
+    v2 = v2.toLowerCase()
     if(opt.asc){
       return v1.localeCompare(v2)
     }
@@ -266,31 +310,31 @@ function patchChain(nodeMap, project, path){
 
 function findParent(path){
   var ss = path.split('/')
-  if(ss.length < 2) return null
+  if(ss.length < 3) return null
   var parent = {childPath: path}
-  if(ss.length == 2){
+  if(ss.length == 3){
     parent.type = 'projects'
-    parent.path = '/'
-  }else if(ss.length == 3){
-    if(ss[2] == 'users'){
-      parent.type = 'project'
-      parent.path = '/' + ss[1]
-    }
+    parent.path = '/projects'
   }else if(ss.length == 4){
-    if(ss[3] == '-root-'){
+    if(ss[3] == 'users'){
       parent.type = 'project'
-      parent.path = '/' + ss[1]
+      parent.path = '/projects/' + ss[2]
+    }
+  }else if(ss.length == 5){
+    if(ss[4] == '-root-'){
+      parent.type = 'project'
+      parent.path = '/projects/' + ss[2]
     }else{
-      var sss = ss[3].split('--')
+      var sss = ss[4].split('--')
       if(sss.length == 1){
         parent.type = 'folder'
         parent.dataPath = '-root-'
-        parent.path = '/' + ss[1] + '/data/-root-'
+        parent.path = '/projects/' + ss[2] + '/data/-root-'
         parent.name = '-root-'
       }else{
         parent.type = 'folder'
         parent.dataPath = sss.slice(0, -1).join('--')
-        parent.path = '/' + ss[1] + '/data/' + parent.dataPath
+        parent.path = '/projects/' + ss[2] + '/data/' + parent.dataPath
         parent.name = sss[sss.length-2]
       }
     }

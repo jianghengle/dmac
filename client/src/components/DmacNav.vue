@@ -1,7 +1,7 @@
 <template>
 
   <div class="nav-bar">
-    <nav-node :path="'/'"></nav-node>
+    <nav-node :path="'/projects'"></nav-node>
   </div>
 
 </template>

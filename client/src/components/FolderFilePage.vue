@@ -26,6 +26,11 @@
         v-if="folderFile.fileType == 'pdf'"
         :file="folderFile">
       </pdf-file>
+      <text-file
+        v-if="folderFile.fileType == 'text'"
+        :file="folderFile"
+        @content-changed="contentChanged">
+      </text-file>
     </div>
 
     <div class="spinner-container" v-if="waiting">
@@ -41,6 +46,7 @@ import Folder from './folder-parts/Folder'
 import NormalFile from './file-parts/NormalFile'
 import ImageFile from './file-parts/ImageFile'
 import PdfFile from './file-parts/PdfFile'
+import TextFile from './file-parts/TextFile'
 
 export default {
   name: 'folder-file-page',
@@ -49,7 +55,8 @@ export default {
     Folder,
     NormalFile,
     ImageFile,
-    PdfFile
+    PdfFile,
+    TextFile
   },
   data () {
     return {
@@ -65,7 +72,7 @@ export default {
       return this.$store.state.projects.nodeMap
     },
     path () {
-      return "/" + this.projectId + "/data/" + this.$route.params.dataPath
+      return "/projects/" + this.projectId + "/data/" + this.$route.params.dataPath
     },
     folderFile () {
       return this.nodeMap[this.path]

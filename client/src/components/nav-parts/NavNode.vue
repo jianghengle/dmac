@@ -1,6 +1,6 @@
 <template>
   <div class="node-container">
-    <div class="node" v-if="node">
+    <div class="node" v-if="node && (node.type!='project' || node.status!='Archived' || showArchive)">
       <span class="node-icon" @click="toggleOpen">
         <icon v-if="node.type=='projects'" name="database"></icon>
         <icon class="is-clickable" v-if="open && node.type=='project'" name="folder-open"></icon>
@@ -67,6 +67,9 @@ export default {
     },
     children () {
       return this.node && this.node.children
+    },
+    showArchive () {
+      return this.$store.state.projects.showArchive
     }
   },
   watch: {

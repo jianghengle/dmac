@@ -15,76 +15,7 @@
       </div>
     </div>
 
-    <div>
-      <div class="field is-horizontal">
-        <div class="field-label is-normal">
-          <label class="label">Created By:</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <input class="input field-text" type="text" readonly :value="project && project.owner">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field is-horizontal">
-        <div class="field-label is-normal">
-          <label class="label">Created Date:</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <input class="input field-text" type="text" readonly :value="project && project.createdDate">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field is-horizontal">
-        <div class="field-label is-normal">
-          <label class="label">Status:</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <input class="input field-text" type="text" readonly :value="project && project.status">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field is-horizontal">
-        <div class="field-label is-normal">
-          <label class="label">Description:</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <textarea class="textarea field-text" :style="{height: textAreaHeight}" readonly>{{project && project.description}}</textarea>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field is-horizontal">
-        <div class="field-label is-normal">
-          <label class="label">Your Role:</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <input class="input field-text" type="text" readonly :value="project && project.projectRole">
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    
-    <div class="columns actions">
+    <div class="columns">
       <div class="column action">
         <a class="button is-info" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewData">
           <icon name="folder-open"></icon>&nbsp;
@@ -97,6 +28,74 @@
           Users Management
         </a>
       </div>
+    </div>
+
+    <div class="details">
+      <div class="field is-horizontal project-field">
+        <div class="field-label is-normal">
+          <label class="label">Owner:</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <input class="input field-text" type="text" readonly :value="project && project.owner">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-horizontal project-field">
+        <div class="field-label is-normal">
+          <label class="label">Created Date:</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <input class="input field-text" type="text" readonly :value="project && project.createdDate">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-horizontal project-field">
+        <div class="field-label is-normal">
+          <label class="label">Status:</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <input class="input field-text" type="text" readonly :value="project && project.status">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-horizontal project-field">
+        <div class="field-label is-normal">
+          <label class="label">Description:</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <textarea class="textarea field-text" :style="{height: textAreaHeight}" readonly>{{project && project.description}}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-horizontal project-field">
+        <div class="field-label is-normal">
+          <label class="label">Your Project Role:</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <div class="control">
+              <input class="input field-text" type="text" readonly :value="project && project.projectRole">
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <edit-project-modal
@@ -136,7 +135,7 @@ export default {
       return this.$store.state.projects.nodeMap
     },
     project () {
-      return this.nodeMap['/' + this.projectId]
+      return this.nodeMap['/projects/' + this.projectId]
     },
     projectRole () {
       return this.project && this.project.projectRole
@@ -144,7 +143,7 @@ export default {
     textAreaHeight () {
       if(!this.project) return 1
       var lines = this.project.description.split('\n').length
-      return 20*lines + 'px'
+      return 25*lines + 'px'
     }
   },
   methods: {
@@ -161,10 +160,10 @@ export default {
       })
     },
     viewUsers () {
-      this.$router.push('/' + this.projectId + '/users')
+      this.$router.push('/projects/' + this.projectId + '/users')
     },
     viewData () {
-      this.$router.push('/' + this.projectId + '/data/-root-')
+      this.$router.push('/projects/' + this.projectId + '/data/-root-')
     },
     openEditProjectModal(){
       this.editProjectModal.project = this.project
@@ -174,7 +173,7 @@ export default {
       this.editProjectModal.opened = false
       if(result){
         if(result == 'deleted'){
-          this.$router.push('/')
+          this.$router.push('/projects')
         }else{
           this.requestProject()
         }
@@ -196,17 +195,6 @@ export default {
   padding: 10px;
 }
 
-.field-text {
-  border-style: none;
-  box-shadow: none;
-  resize: none;
-  min-height: 40px;
-}
-
-.actions {
-  margin-top: 30px;
-}
-
 .action {
   text-align: center;
 }
@@ -216,6 +204,28 @@ export default {
   position: relative;
   top: 3px;
   cursor: pointer;
+}
+
+.detail-header {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.details {
+  margin-top: 20px;
+}
+
+.project-field {
+  margin-bottom: 0px;
+}
+
+.field-text {
+  border-style: none;
+  box-shadow: none;
+  resize: none;
+  min-height: 40px;
+  position: relative;
+  top: -2px;
 }
 
 </style>

@@ -4,16 +4,24 @@
     <div class="view-title">
       <icon name="database"></icon>
       Projects
-      <a class="button is-info new-project-button" @click="openNewProjectModal">
-        <icon name="plus"></icon>&nbsp;New Project
-      </a>
+      <span class="options">
+        <label class="checkbox" @click="toggleShowArchive">
+          <input type="checkbox" v-model="showArchiveInput">
+          Show Archive
+        </label>
+        &nbsp;
+        <a class="button is-info" @click="openNewProjectModal">
+          <icon name="plus"></icon>&nbsp;New Project
+        </a>
+      </span>
     </div>
 
     <div v-if="error" class="notification is-danger login-text">
       <button class="delete" @click="error=''"></button>
       {{error}}
     </div>
-    <div class="box project-box" v-for="project in projects" :key="project.id"  @click="viewProject(project)">
+    <div class="box project-box" :class="{'archived': project.status=='Archived'}" v-for="project in projects":key="project.id"
+      v-if="project.status!='Archived' || showArchive" @click="viewProject(project)">
       <div class="header">
         <span class="name">{{project.name}}</span>&nbsp;
         <span class="edit-icon"
@@ -68,6 +76,7 @@ export default {
         opened: false,
         project: null
       },
+      showArchiveInput: false
     }
   },
   computed: {
@@ -75,13 +84,21 @@ export default {
       return this.$store.state.projects.nodeMap
     },
     projects () {
-      var node = this.nodeMap['/']
+      var node = this.nodeMap['/projects']
       if(!node) return []
       var vm = this
       return node.children.map(function(c){
         return vm.nodeMap[c]
       })
+    },
+    showArchive () {
+      return this.$store.state.projects.showArchive
     }
+  },
+  watch: {
+    showArchive: function (val) {
+      this.showArchiveInput = val
+    },
   },
   methods: {
     requestProjects(){
@@ -118,12 +135,16 @@ export default {
         this.requestProjects()
       }
     },
+    toggleShowArchive(){
+      this.$store.commit('projects/setShowArchive', this.showArchiveInput)
+    }
   },
   mounted () {
     var vm = this
     vm.$nextTick(function(){
       vm.requestProjects()
     })
+    this.showArchiveInput = this.showArchive
   },
 }
 </script>
@@ -134,8 +155,11 @@ export default {
   padding: 10px;
 }
 
-.new-project-button {
+.options {
   float: right;
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 2.5;
 }
 
 .project-box {
@@ -145,13 +169,17 @@ export default {
   padding-bottom: 10px;
   margin-bottom: 15px;
   
-  
+  &.archived {
+    color: #7a7a7a;
+  }
 
   .header {
     
     .name {
       font-size: 18px;
       font-weight: bold;
+
+      
     }
 
     .edit-icon {
