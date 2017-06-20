@@ -119,6 +119,22 @@ module DMACServer
         HttpAPI::ProjectController.copy_folder_file(env)
       end
 
+      post "/make_folder_public" do |env|
+        HttpAPI::PublicController.make_folder_public(env)
+      end
+
+      get "/get_publics/:project_id" do |env|
+        HttpAPI::PublicController.get_publics(env)
+      end
+
+      post "/remove_folder_public" do |env|
+        HttpAPI::PublicController.remove_folder_public(env)
+      end
+
+      get "/get_public_file/:public_key/:data_path" do |env|
+        HttpAPI::PublicController.get_public_file(env)
+      end
+
       Kemal.run
       end
   end

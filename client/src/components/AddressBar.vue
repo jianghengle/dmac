@@ -6,7 +6,10 @@
     &nbsp
     <span v-for="(node, i) in nodes">
       <span v-if="i != 0">&nbsp;/</span>
-      <a @click="viewNode(node)" class="address-text">{{node.name}}</a>
+      <a @click="viewNode(node)" class="address-text">
+        {{node.name}}
+        <span v-if="node.publicUrl">*</span>
+      </a>
     </span>
   </div>
 </template>
@@ -23,6 +26,12 @@ export default {
     projectId () {
       return this.$route.params.projectId
     },
+    publicKey () {
+      return this.$route.params.publicKey
+    },
+    publicDataPath () {
+      return this.$store.state.projects.publicDataPath
+    },
     dataPath () {
       return this.$route.params.dataPath
     },
@@ -34,27 +43,41 @@ export default {
     },
     nodes () {
       var nodes = []
-      nodes.push(this.getNode('/projects'))
+      if(!this.publicKey){
+        nodes.push(this.getNode('/projects'))
 
-      if(!this.projectId) return nodes
-      nodes.push(this.getNode('/projects/' + this.projectId))
-      if(this.routeName == 'Project') return nodes
-        
-      if(this.routeName == 'ProjectUsers'){
-        nodes.push(this.getNode('/projects/' + this.projectId + '/users'))
+        if(!this.projectId) return nodes
+        nodes.push(this.getNode('/projects/' + this.projectId))
+        if(this.routeName == 'Project') return nodes
+
+        if(this.routeName == 'ProjectUsers'){
+          nodes.push(this.getNode('/projects/' + this.projectId + '/users'))
+        }else if(this.routeName == 'PublicUrlsPage'){
+          nodes.push(this.getNode('/projects/' + this.projectId + '/urls'))
+        }else{
+          nodes.push(this.getNode('/projects/' + this.projectId + '/data/-root-'))
+          var files = this.dataPath.split('--')
+          var path = '/projects/' + this.projectId + '/data'
+          for(var i=0;i<files.length;i++){
+            if(i == 0){
+              path = path + '/' + files[i]
+            }else{
+              path = path + '--' + files[i]
+            }
+            if(files[i] != '-root-'){
+              nodes.push(this.getNode(path))
+            }
+          }
+        }
       }else{
-        nodes.push(this.getNode('/projects/' + this.projectId + '/data/-root-'))
-        var files = this.dataPath.split('--')
-        var path = '/projects/' + this.projectId + '/data'
-        for(var i=0;i<files.length;i++){
-          if(i == 0){
-            path = path + '/' + files[i]
-          }else{
-            path = path + '--' + files[i]
-          }
-          if(files[i] != '-root-'){
-            nodes.push(this.getNode(path))
-          }
+        var path = '/public/' + this.publicKey + '/' + this.publicDataPath
+        nodes.push(this.getNode(path))
+        if(this.dataPath != this.publicDataPath && this.dataPath.indexOf(this.publicDataPath) == 0){
+          var vm = this
+          this.dataPath.slice(this.publicDataPath.length + 2).split('--').forEach(function(s){
+            path = path + '--' + s
+            nodes.push(vm.getNode(path))
+          })
         }
       }
       return nodes

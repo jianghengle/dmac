@@ -23,7 +23,10 @@
     <div class="box project-box" :class="{'archived': project.status=='Archived'}" v-for="project in projects":key="project.id"
       v-if="project.status!='Archived' || showArchive" @click="viewProject(project)">
       <div class="header">
-        <span class="name">{{project.name}}</span>&nbsp;
+        <span class="name">
+          {{project.name}}
+          <span v-if="project.status == 'Archived'">(Archived)</span>
+        </span>&nbsp;
         <span class="edit-icon"
           v-if="project.projectRole=='Owner' || project.projectRole=='Admin'"
           @click.stop="openEditProjectModal(project)">

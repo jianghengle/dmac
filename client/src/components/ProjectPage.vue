@@ -17,9 +17,15 @@
 
     <div class="columns">
       <div class="column action">
-        <a class="button is-info" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewData">
+        <a class="button is-info" @click="viewData">
           <icon name="folder-open"></icon>&nbsp;
           Data Explorer
+        </a>
+      </div>
+      <div class="column action">
+        <a class="button is-info" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
+          <icon name="share-alt"></icon>&nbsp;
+          Public Urls
         </a>
       </div>
       <div class="column action">
@@ -161,6 +167,9 @@ export default {
     },
     viewUsers () {
       this.$router.push('/projects/' + this.projectId + '/users')
+    },
+    viewPublicUrls () {
+      this.$router.push('/projects/' + this.projectId + '/urls')
     },
     viewData () {
       this.$router.push('/projects/' + this.projectId + '/data/-root-')

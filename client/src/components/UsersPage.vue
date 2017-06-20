@@ -120,7 +120,7 @@ export default {
       return this.$store.state.projects.nodeMap
     },
     project () {
-      return this.nodeMap['/' + this.projectId + '/-root-']
+      return this.nodeMap['/projects/' + this.projectId]
     },
   },
   watch: {
@@ -138,7 +138,7 @@ export default {
       vm.$http.get(xHTTPx + '/get_project/' + vm.projectId).then(response => {
         var resp = response.body
         vm.$store.commit('projects/setProject', resp)
-        vm.$store.commit('projects/openNode', '/' + this.projectId)
+        vm.$store.commit('projects/openNode', '/projects/' + this.projectId)
         vm.waiting = false
       }, response => {
         vm.error = 'Failed to get project!'

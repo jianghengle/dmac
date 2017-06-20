@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import ProjectsPage from '@/components/ProjectsPage'
 import ProjectPage from '@/components/ProjectPage'
 import UsersPage from '@/components/UsersPage'
+import PublicUrlsPage from '@/components/PublicUrlsPage'
 import FolderFilePage from '@/components/FolderFilePage'
 
 Vue.use(Router)
@@ -29,9 +30,19 @@ export default new Router({
       component: UsersPage
     },
     {
+      path: '/projects/:projectId/urls',
+      name: 'PublicUrlsPage',
+      component: PublicUrlsPage
+    },
+    {
       path: '/projects/:projectId/data/:dataPath',
       name: 'FolderFile',
       component: FolderFilePage
     },
+    {
+      path: '/public/:publicKey/:dataPath',
+      name: 'FolderFile',
+      component: FolderFilePage
+    }
   ]
 })

@@ -11,11 +11,13 @@
           <icon :name="node.icon"></icon>
         </span>
         <icon v-if="node.type=='users'" name="user-o"></icon>
+        <icon v-if="node.type=='urls'" name="share-alt"></icon>
       </span>
       <span class="node-name is-clickable"
         :class="{'is-current': isCurrent}"
         @click="viewNode">
         {{node.name}}
+        <span v-if="node.publicUrl">*</span>
       </span>
     </div>
     <div v-if="open && children" class="node-children">
@@ -70,7 +72,13 @@ export default {
     },
     showArchive () {
       return this.$store.state.projects.showArchive
-    }
+    },
+    publicKey () {
+      return this.$route.params.publicKey
+    },
+    publicDataPath () {
+      return this.$store.state.projects.publicDataPath
+    },
   },
   watch: {
     isCurrent: function (val) {
@@ -144,13 +152,23 @@ export default {
     requestFile () {
       var vm = this
       vm.waiting = true
-      vm.$http.get(xHTTPx + '/get_file/' + vm.node.projectId + "/" + vm.node.dataPath).then(response => {
-        var resp = response.body
-        this.$store.commit('projects/setFile', resp)
-        vm.waiting = false
-      }, response => {
-        vm.waiting = false
-      })
+      if(!this.publicKey){
+        vm.$http.get(xHTTPx + '/get_file/' + vm.node.projectId + "/" + vm.node.dataPath).then(response => {
+          var resp = response.body
+          this.$store.commit('projects/setFile', resp)
+          vm.waiting = false
+        }, response => {
+          vm.waiting = false
+        })
+      }else{
+        vm.$http.get(xHTTPx + '/get_public_file/' + vm.publicKey + "/" + vm.node.dataPath).then(response => {
+          var resp = response.body
+          vm.$store.commit('projects/setPublicFile', resp)
+          vm.waiting = false
+        }, response => {
+          vm.waiting = false
+        })
+      }
     }
   },
   mounted () {
@@ -182,7 +200,7 @@ export default {
 
 .node-name {
   padding: 3px;
-  bordor-radius: 3px;
+  border-radius: 3px;
 }
 
 .is-current {

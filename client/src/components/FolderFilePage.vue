@@ -2,7 +2,7 @@
   <div class="folder-file-page">
     <address-bar></address-bar>
 
-    <div v-if="error" class="notification is-danger login-text">
+    <div v-if="error" class="notification is-danger">
       <button class="delete" @click="error=''"></button>
       {{error}}
     </div>
@@ -68,11 +68,14 @@ export default {
     projectId () {
       return this.$route.params.projectId
     },
+    publicKey () {
+      return this.$route.params.publicKey
+    },
     nodeMap () {
       return this.$store.state.projects.nodeMap
     },
     path () {
-      return "/projects/" + this.projectId + "/data/" + this.$route.params.dataPath
+      return this.$route.path
     },
     folderFile () {
       return this.nodeMap[this.path]
@@ -85,17 +88,27 @@ export default {
   },
   methods: {
     requestFile () {
-      var vm = this
       var dataPath = this.$route.params.dataPath
-      vm.waiting = true
-      vm.$http.get(xHTTPx + '/get_file/' + vm.projectId + "/" + dataPath).then(response => {
-        var resp = response.body
-        this.$store.commit('projects/setFile', resp)
-        vm.waiting = false
-      }, response => {
-        vm.error = 'Failed to get file!'
-        vm.waiting = false
-      })
+      this.waiting = true
+      if(this.projectId){
+        this.$http.get(xHTTPx + '/get_file/' + this.projectId + "/" + dataPath).then(response => {
+          var resp = response.body
+          this.$store.commit('projects/setFile', resp)
+          this.waiting = false
+        }, response => {
+          this.error = 'Failed to get file!'
+          this.waiting = false
+        })
+      }else if(this.publicKey){
+        this.$http.get(xHTTPx + '/get_public_file/' + this.publicKey + "/" + dataPath).then(response => {
+          var resp = response.body
+          this.$store.commit('projects/setPublicFile', resp)
+          this.waiting = false
+        }, response => {
+          this.error = 'Failed to get file!'
+          this.waiting = false
+        })
+      }
     },
     contentChanged(){
       this.requestFile()

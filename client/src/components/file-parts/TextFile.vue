@@ -6,7 +6,7 @@
         {{file && file.name}}
       </div>
       <div class="column buttons">
-        <a class="button" :disabled="!textChanged" :class="{'is-danger': textChanged}" v-if="projectRole!='Viewer'" @click="saveTextFile">
+        <a class="button" :disabled="!textChanged" :class="{'is-danger': textChanged}" v-if="projectRole && projectRole!='Viewer'" @click="saveTextFile">
           <icon name="save"></icon>&nbsp;
           Save
         </a>
@@ -21,7 +21,7 @@
     <div class="field">
       <p class="control">
         <textarea class="textarea"
-          :readonly="projectRole=='Viewer'"
+          :readonly="!projectRole || projectRole=='Viewer'"
           :class="{'is-danger': textChanged}"
           :style="{height: textAreaHeight}"
           v-model="textInput">

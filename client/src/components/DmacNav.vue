@@ -1,7 +1,7 @@
 <template>
 
   <div class="nav-bar">
-    <nav-node :path="'/projects'"></nav-node>
+    <nav-node :path="root"></nav-node>
   </div>
 
 </template>
@@ -14,6 +14,20 @@ export default {
   components: {
     NavNode
   },
+  computed: {
+    publicKey () {
+      return this.$route.params.publicKey
+    },
+    publicDataPath () {
+      return this.$store.state.projects.publicDataPath
+    },
+    root () {
+      if(this.publicKey){
+        return '/public/' + this.publicKey + '/' + this.publicDataPath
+      }
+      return '/projects'
+    }
+  }
 }
 </script>
 

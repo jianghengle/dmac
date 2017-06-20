@@ -61,7 +61,7 @@ export default {
   },
   methods: {
     getDownloadUrl() {
-      this.$http.get(xHTTPx + '/get_download_url/' + this.projectId + "/" + this.file.dataPath).then(response => {
+      this.$http.get(xHTTPx + '/get_download_url/' + this.file.projectId + "/" + this.file.dataPath).then(response => {
         this.url = xHTTPx + response.body
         this.waiting = true
         this.$http.get(this.url, {responseType: 'blob'}).then(response => {

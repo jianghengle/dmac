@@ -57,9 +57,9 @@ module DMACServer
       private def json_array(arr)
         result = String.build do |str|
           first = true
+          str << "["
           arr.each do |e|
             if first
-              str << "["
               str << e
               first = false
             else

@@ -63,7 +63,13 @@ module DMACServer
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           files = MyFile.collect_files(control.role.to_s, project, data_path)
-          
+
+          paths = [] of String
+          files.each do |f|
+            paths << f.rel_path if f.type.to_s == "folder"
+          end
+          publics = Public.get_publics_by_paths(paths)
+
           arr = [] of String
           fields = {} of String => String
           fields["projectRole"] = control.role.to_s
@@ -72,7 +78,9 @@ module DMACServer
           files.each_index do |i|
             f = files[i]
             read_text = i == 0 && f.fileType == "text"
-            arr << f.to_json(read_text)
+            public_url = ""
+            public_url = publics[f.rel_path] if publics.has_key? f.rel_path
+            arr << f.to_json(read_text, public_url)
           end
           json_array(arr)
         rescue ex : InsufficientParameters
@@ -131,6 +139,7 @@ module DMACServer
           Control.delete_all_by_project(project)
           Project.delete_project(project)
           MyFile.delete_folder(project, "-root-")
+          Public.delete_all_by_project(project)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

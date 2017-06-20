@@ -5,6 +5,7 @@ module DMACServer
       property name : String
       property data_path : String
       property full_path : String
+      property rel_path : String
       property project : Project
       property size : UInt64
       property modified_at : Time
@@ -43,9 +44,11 @@ module DMACServer
       def initialize(@project, @data_path)
         if @data_path == "-root-"
           @full_path = @@root + "/" + @project.key.to_s
+          @rel_path = @project.key.to_s
         else
           rel_path = @data_path.gsub("--", "/")
           @full_path = @@root + "/" + @project.key.to_s + "/" + rel_path
+          @rel_path = @project.key.to_s + "/" + rel_path
         end
         raise "No such path" unless File.exists?(@full_path)
 
@@ -71,7 +74,7 @@ module DMACServer
       end
 
 
-      def to_json(read_text = false)
+      def to_json(read_text=false, public_url="")
         result = String.build do |str|
           str << "{"
           str << "\"projectId\":\"" << @project.id << "\","
@@ -79,6 +82,7 @@ module DMACServer
           str << "\"fileType\":\"" << @fileType << "\","
           str << "\"name\":\"" << @name << "\","
           str << "\"dataPath\":\"" << @data_path << "\","
+          str << "\"publicUrl\":\"" << public_url << "\","
           str << "\"size\":\"" << @size << "\","
           if read_text
             str << "\"text\":" << get_text.to_json << ","

@@ -4,6 +4,9 @@
       <div class="view-title column">
         <icon name="folder-open-o"></icon>&nbsp;
         {{folder && folder.name}}
+        <a v-if="folder.publicUrl" :href="folder.publicUrl">
+          <icon class="action-icon" name="share-alt"></icon>
+        </a>
       </div>
       <div class="column buttons">
         <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFolderModal">
@@ -18,13 +21,17 @@
           <icon name="upload"></icon>&nbsp;
           File
         </a>
-        <a class="button" @click="copySelection">
+        <a class="button" v-if="projectRole" @click="copySelection">
           <icon name="copy"></icon>&nbsp;
           Copy
         </a>
         <a class="button" v-if="projectRole && projectRole!='Viewer'" :disabled="!canPaste" @click="pasteSelection">
           <icon name="paste"></icon>&nbsp;
           Paste
+        </a>
+        <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="publicFolder">
+          <icon name="share-alt"></icon>&nbsp;
+          Public
         </a>
       </div>
     </div>
@@ -64,7 +71,7 @@
         <tbody>
           <tr v-for="(f, i) in files" class="entry" :class="{'folder': f.type=='folder'}" @click="viewFile(f)">
             <td class="number-cell" @click.stop="toggleSelected(f)">
-              <input type="checkbox" v-model="selection[f.path]" @click.stop="toggleSelected(f)">
+              <input v-if="projectRole" type="checkbox" v-model="selection[f.path]" @click.stop="toggleSelected(f)">
             </td>
             <td class="text-cell">
               <icon class="type-icon" v-if="f.type=='folder'" name="folder-o"></icon>
@@ -74,6 +81,7 @@
             </td>
             <td class="number-cell">
               {{f.name}}
+              <span v-if="f.publicUrl">*</span>
             </td>
             <td class="number-cell">
               <span class="tooltip">
@@ -83,7 +91,7 @@
             </td>
             <td class="text-cell">{{f.modifiedAt}}</td>
             <td class="text-cell">
-              <a v-if="projectRole!='Viewer' && ( projectRole=='Editor' ? f.type=='file' : true )"
+              <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? f.type=='file' : true )"
                 @click.stop="openEditNameModal(f)"
                 class="action-icon">
                 <icon name="edit"></icon>
@@ -134,6 +142,12 @@
       :file="editNameModal.file"
       @close-edit-name-modal="closeEditNameModal">
     </edit-name-modal>
+
+    <confirm-modal
+      :opened="confirmModal.opened"
+      :message="confirmModal.message"
+      @close-confirm-modal="closeConfirmModal">
+    </confirm-modal>
   </div>
 </template>
 
@@ -142,6 +156,7 @@ import NewFolderModal from '../modals/NewFolderModal'
 import NewFileModal from '../modals/NewFileModal'
 import FileUploadModal from '../modals/FileUploadModal'
 import EditNameModal from '../modals/EditNameModal'
+import ConfirmModal from '../modals/ConfirmModal'
 
 export default {
   name: 'folder',
@@ -150,7 +165,8 @@ export default {
     NewFolderModal,
     NewFileModal,
     FileUploadModal,
-    EditNameModal
+    EditNameModal,
+    ConfirmModal
   },
   data () {
     return {
@@ -166,6 +182,11 @@ export default {
       editNameModal: {
         opened: false,
         file: null
+      },
+      confirmModal: {
+        opened: false,
+        message: '',
+        context: null
       },
       urls: {},
       typeOrder: ['folder', 'image', 'pdf', 'text', 'unknown'],
@@ -253,7 +274,7 @@ export default {
       }
     },
     getDownloadUrl(f) {
-      this.$http.get(xHTTPx + '/get_download_url/' + this.projectId + "/" + f.dataPath).then(response => {
+      this.$http.get(xHTTPx + '/get_download_url/' + f.projectId + "/" + f.dataPath).then(response => {
         var url = xHTTPx + response.body
         this.$set(this.urls, f.path, url)
       }, response => {
@@ -307,6 +328,38 @@ export default {
         this.pasting = false
         console.log('failed to paste')
       })
+    },
+    publicFolder(){
+      var message = 'Are you sure to make this folder public?'
+      var context = {callback: this.publicFolderConfirmed, args: []}
+      this.openConfirmModal(message, context)
+    },
+    publicFolderConfirmed(){
+      var message = {
+        'projectId': this.projectId,
+        'dataPath': this.folder.dataPath
+      }
+      this.$http.post(xHTTPx + '/make_folder_public', message).then(response => {
+        this.$emit('content-changed', true)
+      }, response => {
+        console.log('failed to paste')
+      })
+    },
+    openConfirmModal(message, context){
+      this.confirmModal.message = message
+      this.confirmModal.context = context
+      this.confirmModal.opened = true
+    },
+    closeConfirmModal(result){
+      this.confirmModal.message = ''
+      this.confirmModal.opened = false
+      if(result && this.confirmModal.context){
+          var context = this.confirmModal.context
+          if(context.callback){
+              context.callback.apply(this, context.args)
+          }
+      }
+      this.confirmModal.context = null
     },
   },
   mounted () {

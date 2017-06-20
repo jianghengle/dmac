@@ -6,7 +6,8 @@ export const state = {
   showNav: false,
   nodeMap: {},
   showArchive: false,
-  clipboard: {projectId: null, dataPaths: []}
+  clipboard: {projectId: null, dataPaths: []},
+  publicDataPath: ''
 }
 
 // mutations
@@ -37,6 +38,11 @@ export const mutations = {
       Vue.set(state.nodeMap, users.path, users)
     }
 
+    var urls = initPublicUrls(project)
+    if(!state.nodeMap[urls.path]){
+      Vue.set(state.nodeMap, urls.path, urls)
+    }
+
     var root = initFile({
       projectId: project.id,
       type: 'folder',
@@ -50,7 +56,7 @@ export const mutations = {
       Vue.set(state.nodeMap, root.path, root)
     }
 
-    var children = [users.path, root.path]
+    var children = [urls.path, users.path, root.path]
     updateNode(state, project, children)
   },
 
@@ -62,7 +68,31 @@ export const mutations = {
     }
     patchChain(state.nodeMap, project, file.path)
     if(file.type == 'folder'){
-      var files = resp.slice(2).map(initFile)
+      var files = resp.slice(2).map(function(f){
+        return initFile(f)
+      })
+
+      var children = []
+      files.forEach(function(f){
+        var nf = updateNode(state, f)
+        children.push(nf.path)
+      })
+      updateNode(state, file, children)
+    }else{
+      updateNode(state, file)
+    }
+  },
+
+  setPublicFile (state, resp) {
+    var pub = resp[0]
+    state.publicDataPath = pub.dataPath
+    var file = initFile(resp[1], null, pub)
+
+    patchPublicChain(state.nodeMap, pub, file.path)
+    if(file.type == 'folder'){
+      var files = resp.slice(2).map(function(f){
+        return initFile(f, null, pub)
+      })
       var children = []
       files.forEach(function(f){
         var nf = updateNode(state, f)
@@ -77,7 +107,7 @@ export const mutations = {
   openNode (state, path) {
     var node = state.nodeMap[path]
     if(node){
-        node.options.open = true
+      node.options.open = true
     }
   },
 
@@ -167,10 +197,23 @@ function initUsers(project) {
   }
 }
 
+function initPublicUrls(project) {
+  return {
+    type: 'urls',
+    path: '/projects/'+ project.id + '/urls',
+    name: 'Urls',
+    options: {open: false}
+  }
+}
 
-function initFile(file, options){
+
+function initFile(file, options, pub){
   var f = Object.assign({}, file)
-  f.path = '/projects/' + f.projectId + '/data/' + f.dataPath
+  if(pub){
+    f.path = '/public/' + pub.key + '/' + f.dataPath
+  }else{
+    f.path = '/projects/' + f.projectId + '/data/' + f.dataPath
+  }
   f.modifiedAt = DateForm(f.modifiedTime*1000, 'mmm dd yyyy HH:MM')
   if(f.type == 'file'){
     var iconMap = {
@@ -342,6 +385,39 @@ function findParent(path){
   return parent
 }
 
+
+function patchPublicChain(nodeMap, pub, path){
+  var parent = findPublicParent(pub.dataPath, path)
+  while(parent && !nodeMap[parent.path]){
+    var folder = {
+      type: 'folder',
+      name: parent.name,
+      path: parent.path,
+      dataPath: parent.dataPath,
+      size: 0,
+      modifiedTime: 0
+    }
+    var folder = initFile(folder, {open: true}, pub)
+    folder.children = [parent.childPath]
+    Vue.set(nodeMap, folder.path, folder)
+    parent = findPublicParent(pub.dataPath, parent.path)
+  }
+}
+
+function findPublicParent(pdp, path){
+  var ss = path.split('/')
+  if(ss.length != 4) return null
+  if(ss[3] == pdp) return null
+  if(ss[3].indexOf(pdp) != 0) return null
+
+  var sss = ss[3].split('--')
+  var parent = {childPath: path}
+  parent.type = 'folder'
+  parent.dataPath = sss.slice(0, -1).join('--')
+  parent.path = '/public/' + ss[2] + '/' + parent.dataPath
+  parent.name = sss[sss.length-2]
+  return parent
+}
 
 export default {
   namespaced: true,
