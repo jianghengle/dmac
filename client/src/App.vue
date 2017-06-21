@@ -1,10 +1,10 @@
 <template>
   <div id="app">
     <dmac-header></dmac-header>
-    <div v-if="!token">
+    <div v-if="showLogin">
       <dmac-login></dmac-login>
     </div>
-    <div v-if="token" class="columns">
+    <div v-if="!showLogin" class="columns">
       <div class="column is-one-quarter" v-show="showNav">
         <dmac-nav></dmac-nav>
       </div>
@@ -30,6 +30,13 @@ export default {
   computed: {
     token () {
       return this.$store.state.user.token
+    },
+    publicKey () {
+      return this.$route.params.publicKey
+    },
+    showLogin () {
+      if(this.publicKey) return false
+      return !this.token
     },
     showNav () {
       return this.$store.state.projects.showNav

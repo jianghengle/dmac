@@ -46,6 +46,9 @@ export default {
     path () {
       return this.$route.path
     },
+    publicKey () {
+      return this.$route.params.publicKey
+    },
   },
   watch: {
     path: function (val) {
@@ -54,11 +57,19 @@ export default {
   },
   methods: {
     getDownloadUrl() {
-      this.$http.get(xHTTPx + '/get_download_url/' + this.file.projectId + "/" + this.file.dataPath).then(response => {
-        this.url = xHTTPx + response.body
-      }, response => {
-        console.log('failed to get url')
-      })
+      if(this.publicKey){
+        this.$http.get(xHTTPx + '/get_public_download_url/' + this.publicKey + "/" + this.file.projectId + "/" + this.file.dataPath).then(response => {
+          this.url = xHTTPx + response.body
+        }, response => {
+          console.log('failed to get url')
+        })
+      }else{
+        this.$http.get(xHTTPx + '/get_download_url/' + this.file.projectId + "/" + this.file.dataPath).then(response => {
+          this.url = xHTTPx + response.body
+        }, response => {
+          console.log('failed to get url')
+        })
+      }
     }
   },
   mounted () {

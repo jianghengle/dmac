@@ -225,7 +225,10 @@ export default {
     },
     canPaste () {
       return this.clipboard.projectId && this.clipboard.dataPaths.length
-    }
+    },
+    publicKey () {
+      return this.$route.params.publicKey
+    },
   },
   watch: {
     files: function (val) {
@@ -274,12 +277,21 @@ export default {
       }
     },
     getDownloadUrl(f) {
-      this.$http.get(xHTTPx + '/get_download_url/' + f.projectId + "/" + f.dataPath).then(response => {
-        var url = xHTTPx + response.body
-        this.$set(this.urls, f.path, url)
-      }, response => {
-        console.log('failed to get url')
-      })
+      if(this.publicKey){
+        this.$http.get(xHTTPx + '/get_public_download_url/' + this.publicKey + "/" + f.projectId + "/" + f.dataPath).then(response => {
+          var url = xHTTPx + response.body
+          this.$set(this.urls, f.path, url)
+        }, response => {
+          console.log('failed to get url')
+        })
+      }else{
+        this.$http.get(xHTTPx + '/get_download_url/' + f.projectId + "/" + f.dataPath).then(response => {
+          var url = xHTTPx + response.body
+          this.$set(this.urls, f.path, url)
+        }, response => {
+          console.log('failed to get url')
+        })
+      }
     },
     sortNodeChildren(field, order){
       this.$store.commit('projects/sortNodeChildren', {path: this.folder.path, field: field, order: order})

@@ -88,10 +88,11 @@ export default {
       return this.nodeProject && this.nodeProject.projectRole
     },
     showNode () {
+      var node = this.node
+      if(!node) return false
       if(this.publicKey) return true
 
-      var node = this.node
-      var type = node && this.node.type
+      var type = node && node.type
       if(type == 'projects') return true
       if(type == 'project'){
         if(this.showArchive) return true

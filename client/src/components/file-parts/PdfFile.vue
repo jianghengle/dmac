@@ -53,6 +53,9 @@ export default {
     path () {
       return this.$route.path
     },
+    publicKey () {
+      return this.$route.params.publicKey
+    },
   },
   watch: {
     path: function (val) {
@@ -61,7 +64,11 @@ export default {
   },
   methods: {
     getDownloadUrl() {
-      this.$http.get(xHTTPx + '/get_download_url/' + this.file.projectId + "/" + this.file.dataPath).then(response => {
+      var url = xHTTPx + '/get_download_url/' + this.file.projectId + "/" + this.file.dataPath
+      if(this.publicKey){
+        url = xHTTPx + '/get_public_download_url/' + this.publicKey + "/" + this.file.projectId + "/" + this.file.dataPath
+      }
+      this.$http.get(url).then(response => {
         this.url = xHTTPx + response.body
         this.waiting = true
         this.$http.get(this.url, {responseType: 'blob'}).then(response => {

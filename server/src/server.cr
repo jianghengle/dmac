@@ -107,6 +107,10 @@ module DMACServer
         HttpAPI::DownloadController.get_download_url(env)
       end
 
+      get "/get_public_download_url/:public_key/:project_id/:data_path" do |env|
+        HttpAPI::DownloadController.get_public_download_url(env)
+      end
+
       get "/download_file/:key" do |env|
         HttpAPI::DownloadController.download_file(env)
       end
