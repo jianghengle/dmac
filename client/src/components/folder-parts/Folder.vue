@@ -47,7 +47,7 @@
                 <icon name="sort-desc" v-if="!sortOption.asc"></icon>
               </span>
             </th>
-            <th class="number-cell is-clickable" @click="sortNodeChildren('name', 'string')">Name
+            <th class="is-clickable" @click="sortNodeChildren('name', 'string')">Name
               <span v-if="sortOption.field=='name'">
                 <icon class="asc-icon" name="sort-asc" v-if="sortOption.asc"></icon>
                 <icon name="sort-desc" v-if="!sortOption.asc"></icon>
@@ -79,7 +79,7 @@
                 <icon class="type-icon" :name="f.icon"></icon>
               </span>
             </td>
-            <td class="number-cell">
+            <td>
               {{f.name}}
               <span v-if="f.publicUrl">*</span>
             </td>
