@@ -1,6 +1,6 @@
 <template>
   <div class="node-container">
-    <div class="node" v-if="node && (node.type!='project' || node.status!='Archived' || showArchive)">
+    <div class="node" v-if="showNode">
       <span class="node-icon" @click="toggleOpen">
         <icon v-if="node.type=='projects'" name="database"></icon>
         <icon class="is-clickable" v-if="open && node.type=='project'" name="folder-open"></icon>
@@ -79,6 +79,33 @@ export default {
     publicDataPath () {
       return this.$store.state.projects.publicDataPath
     },
+    nodeProject () {
+      if(this.node)
+        return this.nodeMap['/projects/' + this.node.projectId]
+      return null
+    },
+    nodeProjectRole () {
+      return this.nodeProject && this.nodeProject.projectRole
+    },
+    showNode () {
+      if(this.publicKey) return true
+
+      var node = this.node
+      var type = node && this.node.type
+      if(type == 'projects') return true
+      if(type == 'project'){
+        if(this.showArchive) return true
+        if(node.status == 'Archived') return false
+        return true
+      }
+
+      var role = this.nodeProjectRole
+      if(!role) return false
+      if(type == 'users' || type == 'urls'){
+        return role == 'Owner' || role == 'Admin'
+      }
+      return true
+    }
   },
   watch: {
     isCurrent: function (val) {

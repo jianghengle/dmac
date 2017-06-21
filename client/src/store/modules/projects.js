@@ -190,6 +190,7 @@ function initProject(project, options){
 
 function initUsers(project) {
   return {
+    projectId: project.id,
     type: 'users',
     path: '/projects/'+ project.id + '/users',
     name: 'Users',
@@ -199,6 +200,7 @@ function initUsers(project) {
 
 function initPublicUrls(project) {
   return {
+    projectId: project.id,
     type: 'urls',
     path: '/projects/'+ project.id + '/urls',
     name: 'Urls',
