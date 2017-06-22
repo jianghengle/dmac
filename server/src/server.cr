@@ -139,6 +139,18 @@ module DMACServer
         HttpAPI::PublicController.get_public_file(env)
       end
 
+      get "/get_logs/:project_id" do |env|
+        HttpAPI::GitController.get_logs(env)
+      end
+
+      get "/get_commit/:project_id/:hash" do |env|
+        HttpAPI::GitController.get_commit(env)
+      end
+
+      post "/revert_commits" do |env|
+        HttpAPI::GitController.revert_commits(env)
+      end
+
       Kemal.run
       end
   end

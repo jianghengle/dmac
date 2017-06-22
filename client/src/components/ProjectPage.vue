@@ -15,26 +15,45 @@
       </div>
     </div>
 
-    <div class="columns">
-      <div class="column action">
-        <a class="button is-info" @click="viewData">
-          <icon name="folder-open"></icon>&nbsp;
-          Data Explorer
-        </a>
+    <nav class="nav">
+      <div class="nav-left">
+        <div class="nav-item">
+          <div class="field is-grouped">
+            <p class="control">
+              <a class="button is-info"  @click="viewData">
+                <icon name="folder-open"></icon>&nbsp;
+                <span>Data Explorer</span>
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="column action">
-        <a class="button is-info" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
-          <icon name="share-alt"></icon>&nbsp;
-          Public Urls
-        </a>
+
+      <div class="nav-right">
+        <div class="nav-item">
+          <div class="field is-grouped">
+            <p class="control">
+              <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewHistory">
+                <icon name="history"></icon>&nbsp;
+                <span>History</span>
+              </a>
+            </p>
+            <p class="control">
+              <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
+                <icon name="share-alt"></icon>&nbsp;
+                <span>Public Urls</span>
+              </a>
+            </p>
+            <p class="control">
+              <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
+                <icon name="user"></icon>&nbsp;
+                <span>Users</span>
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="column action">
-        <a class="button is-info" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
-          <icon name="user"></icon>&nbsp;
-          Users Management
-        </a>
-      </div>
-    </div>
+    </nav>
 
     <div class="details">
       <div class="field is-horizontal project-field">
@@ -170,6 +189,9 @@ export default {
     },
     viewPublicUrls () {
       this.$router.push('/projects/' + this.projectId + '/urls')
+    },
+    viewHistory () {
+      this.$router.push('/projects/' + this.projectId + '/history')
     },
     viewData () {
       this.$router.push('/projects/' + this.projectId + '/data/-root-')

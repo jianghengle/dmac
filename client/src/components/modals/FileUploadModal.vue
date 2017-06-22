@@ -8,6 +8,10 @@
         <button class="delete" @click="close"></button>
       </header>
       <section class="modal-card-body modal-body">
+        <div v-if="error" class="notification is-danger">
+          <button class="delete" @click="error=''"></button>
+          {{error}}
+        </div>
         <input v-if="opened" type="file" class="files-input" multiple @change="onFileChange">
         <div v-if="Object.keys(uploads).length">
           <table class="table is-narrow">
@@ -44,7 +48,8 @@ export default {
     return {
       files: null,
       uploads: {},
-      waiting: false
+      waiting: false,
+      error: ''
     }
   },
   watch: {
@@ -135,7 +140,7 @@ export default {
         vm.$emit('close-file-upload-modal', true)
       }, (response) => {
         vm.waiting = false
-        console.log('Error occurred...')
+        vm.error = 'Some uploads failed...'
       })
     }
   },

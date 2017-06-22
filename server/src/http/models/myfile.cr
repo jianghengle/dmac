@@ -109,7 +109,7 @@ module DMACServer
         files << dir
         return files if dir.type.to_s == "file"
         Dir.foreach dir.full_path do |filename|
-          if filename.to_s != "." && filename.to_s != ".."
+          if filename.to_s != "." && filename.to_s != ".." && filename.to_s != ".git"
             dp = filename
             dp = data_path + "--" + dp unless data_path == "-root-"
             if filename.to_s[0] != '.'
@@ -178,6 +178,7 @@ module DMACServer
 
       def self.upload_file(project, data_path, file)
         full_path = @@root + "/" + project.key.to_s
+        prefix_length = full_path.size + 1
         full_path = full_path + "/" + data_path.gsub("--", "/") if data_path != "-root-"
 
         filename = file.filename
@@ -187,6 +188,8 @@ module DMACServer
         File.open(target_path, "w") do |f|
           IO.copy(file.tmpfile, f)
         end
+
+        return target_path[prefix_length..-1]
       end
 
       def self.make_target(path, name)

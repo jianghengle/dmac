@@ -98,6 +98,7 @@ module DMACServer
           project = Project.create_project(name, description)
           Control.create_control(email, project, "Owner")
           MyFile.create_folder(project, "-root-")
+          Git.init(project)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -180,6 +181,8 @@ module DMACServer
 
 
           MyFile.create_file(project, data_path)
+          rel_path = data_path.gsub("--", "/")
+          Git.commit(project, email + " created file " + rel_path)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -200,6 +203,10 @@ module DMACServer
           raise "Permission denied" if control.role.to_s == "Viewer"
 
           MyFile.update_folder_file_name(project, data_path, name)
+
+          rel_path = data_path.gsub("--", "/")
+          Git.commit(project, email + " renamed " + rel_path + " to " + name)
+
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -219,6 +226,10 @@ module DMACServer
           raise "Permission denied" if control.role.to_s == "Viewer"
 
           MyFile.delete_folder_file(project, data_path)
+
+          rel_path = data_path.gsub("--", "/")
+          Git.commit(project, email + " deleted " + rel_path)
+
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -238,7 +249,9 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
 
-          MyFile.upload_file(project, data_path, file)
+          rel_path = MyFile.upload_file(project, data_path, file)
+          Git.commit(project, email + " uploaded " + rel_path)
+
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -259,6 +272,10 @@ module DMACServer
           raise "Permission denied" if control.role.to_s == "Viewer"
 
           MyFile.save_text_file(project, data_path, text)
+
+          rel_path = data_path.gsub("--", "/")
+          Git.commit(project, email + " save file " + rel_path)
+
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -292,6 +309,10 @@ module DMACServer
           end
           target_file = MyFile.new(target_project, target_data_path)
           MyFile.copy_files(source_files, target_file)
+
+          rel_path = target_data_path.gsub("--", "/")
+          Git.commit(target_project, email + " copy something into " + rel_path)
+
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

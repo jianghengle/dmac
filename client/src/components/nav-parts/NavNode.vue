@@ -12,6 +12,7 @@
         </span>
         <icon v-if="node.type=='users'" name="user-o"></icon>
         <icon v-if="node.type=='urls'" name="share-alt"></icon>
+        <icon v-if="node.type=='history'" name="history"></icon>
       </span>
       <span class="node-name is-clickable"
         :class="{'is-current': isCurrent}"
@@ -62,7 +63,11 @@ export default {
       return this.$route.path
     },
     isCurrent () {
-      return this.node && this.routePath == this.node.path
+      if(!this.node) return false
+      if(this.node.type == 'history'){
+        return this.routePath.indexOf(this.node.path) == 0
+      }
+      return this.routePath == this.node.path
     },
     open () {
       return this.node && this.node.options && this.node.options.open
@@ -102,7 +107,7 @@ export default {
 
       var role = this.nodeProjectRole
       if(!role) return false
-      if(type == 'users' || type == 'urls'){
+      if(type == 'users' || type == 'urls' || type == 'history'){
         return role == 'Owner' || role == 'Admin'
       }
       return true

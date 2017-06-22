@@ -4,7 +4,7 @@
       <div class="view-title column">
         <icon name="folder-open-o"></icon>&nbsp;
         {{folder && folder.name}}
-        <a v-if="folder.publicUrl" :href="folder.publicUrl">
+        <a v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
           <icon class="action-icon" name="share-alt"></icon>
         </a>
       </div>

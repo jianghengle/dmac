@@ -21,7 +21,7 @@
     </div>
  
     <div>
-      <table class="table is-narrow">
+      <table class="table">
         <thead>
           <tr>
             <th class="number-cell">#</th>

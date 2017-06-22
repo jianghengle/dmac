@@ -54,6 +54,10 @@ export default {
           nodes.push(this.getNode('/projects/' + this.projectId + '/users'))
         }else if(this.routeName == 'PublicUrlsPage'){
           nodes.push(this.getNode('/projects/' + this.projectId + '/urls'))
+        }else if(this.routeName == 'HistoryPage'){
+          nodes.push(this.getNode('/projects/' + this.projectId + '/history'))
+        }else if(this.routeName == 'CommitPage'){
+          nodes.push(this.getNode('/projects/' + this.projectId + '/history'))
         }else{
           nodes.push(this.getNode('/projects/' + this.projectId + '/data/-root-'))
           var files = this.dataPath.split('--')

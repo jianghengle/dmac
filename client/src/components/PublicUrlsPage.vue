@@ -17,7 +17,7 @@
         </span>
         <span class="info">{{url.createdAt}}</span>
       </div>
-      <div class="description">{{url.url}}</div>
+      <div class="description"><a class="link" :href="url.url" target="_blank">{{url.url}}</a></div>
       <div class="action">
         <a class="button is-danger" @click="deleteUrl(url)">
           Delete
@@ -128,6 +128,7 @@ export default {
       this.$http.post(xHTTPx + '/remove_folder_public', message).then(response => {
         var index = this.publicUrls.indexOf(url)
         this.publicUrls.splice(index, 1)
+        this.waiting = false
       }, response => {
         this.waiting = false
         console.log('failed to paste')
@@ -213,7 +214,9 @@ export default {
 
 }
 
-
+.link{
+  color: #3273dc;
+}
 
 
 

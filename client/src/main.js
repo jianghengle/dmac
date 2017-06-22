@@ -35,6 +35,7 @@ import 'vue-awesome/icons/sort-desc'
 import 'vue-awesome/icons/copy'
 import 'vue-awesome/icons/paste'
 import 'vue-awesome/icons/share-alt'
+import 'vue-awesome/icons/history'
 import Icon from 'vue-awesome/components/Icon'
 Vue.component('icon', Icon)
 

@@ -5,6 +5,8 @@ import ProjectPage from '@/components/ProjectPage'
 import UsersPage from '@/components/UsersPage'
 import PublicUrlsPage from '@/components/PublicUrlsPage'
 import FolderFilePage from '@/components/FolderFilePage'
+import HistoryPage from '@/components/HistoryPage'
+import CommitPage from '@/components/CommitPage'
 
 Vue.use(Router)
 
@@ -33,6 +35,16 @@ export default new Router({
       path: '/projects/:projectId/urls',
       name: 'PublicUrlsPage',
       component: PublicUrlsPage
+    },
+    {
+      path: '/projects/:projectId/history',
+      name: 'HistoryPage',
+      component: HistoryPage
+    },
+    {
+      path: '/projects/:projectId/history/:hash',
+      name: 'CommitPage',
+      component: CommitPage
     },
     {
       path: '/projects/:projectId/data/:dataPath',
