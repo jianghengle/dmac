@@ -28,9 +28,18 @@
               </span>
             </p>
           </div>
+          <div class="field" v-if="newRole=='Editor' || newRole=='Viewer'">
+            <label class="label">Group</label>
+            <p class="control">
+              <input class="input" type="text" v-model="newGroup">
+            </p>
+            <p class="help is-info">
+              Group Name must only contain charactors from 'a'~'z', 'A'~'Z' and '0'~'9'
+            </p>
+          </div>
         </section>
         <footer class="modal-card-foot">
-          <a class="button is-info" :class="{'is-loading': waiting}" :disabled="!newEmailValid" @click="addUser">Add</a>
+          <a class="button is-info" :class="{'is-loading': waiting}" :disabled="!newEmailValid || !newGroupValid" @click="addUser">Add</a>
           <a class="button button-right" @click="close">Cancel</a> 
         </footer>
       </div>
@@ -48,7 +57,8 @@ export default {
       error: '',
       waiting: false,
       newEmail: '',
-      newRole: ''
+      newRole: '',
+      newGroup: ''
     }
   },
   computed: {
@@ -69,6 +79,10 @@ export default {
         return false
       }
       return !this.userMap[this.newEmail]
+    },
+    newGroupValid () {
+      var re = /^[a-zA-Z0-9]*$/
+      return re.test(this.newGroup)
     }
   },
   watch: {
@@ -89,7 +103,7 @@ export default {
       var vm = this
       vm.newEmail = vm.newEmail.toLowerCase()
       vm.waiting = true
-      var message = {projectId: vm.projectId, email: vm.newEmail, role: vm.newRole}
+      var message = {projectId: vm.projectId, email: vm.newEmail, role: vm.newRole, group: vm.newGroup}
       vm.$http.post(xHTTPx + '/add_project_control', message).then(response => {
         var resp = response.body
         vm.waiting= false

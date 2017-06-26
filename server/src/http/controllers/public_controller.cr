@@ -38,7 +38,7 @@ module DMACServer
 
           project_id = public.project_id
           project = Project.get_project!(project_id)
-          files = MyFile.collect_files("Viewer", project, data_path)
+          files = MyFile.collect_files("Viewer", "", project, data_path)
 
           arr = [] of String
           arr << public.to_json

@@ -13,7 +13,7 @@
           <icon name="plus"></icon>&nbsp;
           Folder
         </a>
-        <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFileModal">
+        <a class="button" v-if="projectRole && projectRole!='Viewer'" @click="openNewFileModal">
           <icon name="plus"></icon>&nbsp;
           File
         </a>

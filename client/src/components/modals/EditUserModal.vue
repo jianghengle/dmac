@@ -28,6 +28,15 @@
               </span>
             </p>
           </div>
+          <div class="field" v-if="newRole=='Editor' || newRole=='Viewer'">
+            <label class="label">Group</label>
+            <p class="control">
+              <input class="input" type="text" v-model="newGroup">
+            </p>
+            <p class="help is-info">
+              Group Name must only contain charactors from 'a'~'z', 'A'~'Z' and '0'~'9'
+            </p>
+          </div>
         </section>
         <footer class="modal-card-foot">
           <a class="button is-danger" :class="{'is-loading': waiting}" :disabled="changed" @click="deleteUser">Delete</a>
@@ -60,11 +69,12 @@ export default {
       waiting: false,
       newEmail: '',
       newRole: '',
+      newGroup: '',
       confirmModal: {
         opened: false,
         message: '',
         context: null
-      }
+      },
     }
   },
   computed: {
@@ -81,17 +91,24 @@ export default {
       return um
     },
     changeValid () {
+      var re = /^[a-zA-Z0-9]*$/
+      if(!re.test(this.newGroup)) {
+        return false
+      }
+
       if(!emailRegex.test(this.newEmail)){
         return false
       }
-      if(this.user.role == this.newRole){
-        return !this.userMap[this.newEmail]
+
+      if(this.newEmail != this.user.email && this.userMap[this.newEmail]){
+        return false
       }
-      return !this.userMap[this.newEmail] || this.newEmail == this.user.email
+
+      return this.changed
     },
     changed () {
       if(!this.user) return false
-      var changed = this.newEmail != this.user.email || this.newRole != this.user.role
+      var changed = this.newEmail != this.user.email || this.newRole != this.user.role || this.newGroup != this.user.group
       return changed
     }
   },
@@ -100,6 +117,7 @@ export default {
       if(val && this.user){
         this.newEmail = this.user.email
         this.newRole = this.user.role
+        this.newGroup = this.user.group
         this.error = ''
       }
     },
@@ -114,7 +132,7 @@ export default {
       var vm = this
       vm.newEmail = vm.newEmail.toLowerCase()
       vm.waiting = true
-      var message = {projectId: vm.user.projectId, id: vm.user.id, email: vm.newEmail, role: vm.newRole}
+      var message = {projectId: vm.user.projectId, id: vm.user.id, email: vm.newEmail, role: vm.newRole, group: vm.newGroup}
       vm.$http.post(xHTTPx + '/update_project_control', message).then(response => {
         var resp = response.body
         vm.waiting= false
@@ -163,6 +181,7 @@ export default {
     if(this.user){
       this.newEmail = this.user.email
       this.newRole = this.user.role
+      this.newGroup = this.user.group
     }
   }
 }

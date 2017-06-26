@@ -115,7 +115,7 @@
         <div class="field-body">
           <div class="field">
             <div class="control">
-              <input class="input field-text" type="text" readonly :value="project && project.projectRole">
+              <input class="input field-text" type="text" readonly :value="projectRoleLabel">
             </div>
           </div>
         </div>
@@ -164,6 +164,15 @@ export default {
     },
     projectRole () {
       return this.project && this.project.projectRole
+    },
+    projectRoleLabel () {
+      if(!this.projectRole) return ''
+      var label = this.project.projectUser + ' as ' + this.projectRole
+      if(this.projectRole == 'Owner' || this.projectRole == 'Admin')
+        return label
+      if(this.project.projectGroup)
+        return label + '(' + this.project.projectGroup + ')'
+      return label
     },
     textAreaHeight () {
       if(!this.project) return 1

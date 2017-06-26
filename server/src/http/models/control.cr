@@ -5,6 +5,7 @@ module DMACServer
         field :project_id, Int32
         field :email, String
         field :role, String
+        field :group_name, String
         belongs_to :project, Project
       end
 
@@ -15,6 +16,7 @@ module DMACServer
           str << "\"projectId\":" << @project_id << ","
           str << "\"email\":" << @email.to_json << ","
           str << "\"role\":" << @role.to_json << ","
+          str << "\"group\":" << @group_name.to_json << ","
           str << "\"createdTime\":" << @created_at.as(Time).epoch << ","
           str << "\"updatedTime\":" << @updated_at.as(Time).epoch
           str << "}"
@@ -51,11 +53,12 @@ module DMACServer
         raise "Project permission denied"
       end
 
-      def self.create_control(email, project, role)
+      def self.create_control(email, project, role, group)
         control = Control.new
         control.project_id = project.id
         control.email = email
         control.role = role
+        control.group_name = group
         changeset = Repo.insert(control)
         raise changeset.errors.to_s unless changeset.valid?
         changeset.changes.each do |change|
@@ -71,12 +74,13 @@ module DMACServer
         Repo.delete_all(Control, query)
       end
 
-      def self.update_control(id, email, role)
+      def self.update_control(id, email, role, group)
         control = Repo.get(Control, id)
         raise "Cannot find control" if control.nil?
-        control = control.as(Control) 
+        control = control.as(Control)
         control.email = email
         control.role = role
+        control.group_name = group
         changeset = Repo.update(control)
         raise changeset.errors.to_s unless changeset.valid?
         return control

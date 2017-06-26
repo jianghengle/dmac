@@ -43,7 +43,9 @@ module DMACServer
           owner = Control.get_project_owner(project)
           
           fields = {} of String => String
+          fields["projectUser"] = control.email.to_s
           fields["projectRole"] = control.role.to_s
+          fields["projectGroup"] = control.group_name.to_s
           fields["owner"] = owner.email.to_s unless owner.nil?
           return project.to_json(fields)
         rescue ex : InsufficientParameters
@@ -62,7 +64,7 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          files = MyFile.collect_files(control.role.to_s, project, data_path)
+          files = MyFile.collect_files(control.role.to_s, control.group_name.to_s, project, data_path)
 
           paths = [] of String
           files.each do |f|
@@ -96,7 +98,7 @@ module DMACServer
           name = get_param!(ctx, "name")
           description = get_param!(ctx, "description")
           project = Project.create_project(name, description)
-          Control.create_control(email, project, "Owner")
+          Control.create_control(email, project, "Owner", "")
           MyFile.create_folder(project, "-root-")
           Git.init(project)
           {"ok": true}.to_json
@@ -202,7 +204,7 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
 
-          MyFile.update_folder_file_name(project, data_path, name)
+          MyFile.update_folder_file_name(project, data_path, name, control)
 
           rel_path = data_path.gsub("--", "/")
           Git.commit(project, email + " renamed " + rel_path + " to " + name)
@@ -225,7 +227,7 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
 
-          MyFile.delete_folder_file(project, data_path)
+          MyFile.delete_folder_file(project, data_path, control)
 
           rel_path = data_path.gsub("--", "/")
           Git.commit(project, email + " deleted " + rel_path)
@@ -249,7 +251,7 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
 
-          rel_path = MyFile.upload_file(project, data_path, file)
+          rel_path = MyFile.upload_file(project, data_path, file, control)
           Git.commit(project, email + " uploaded " + rel_path)
 
           {"ok": true}.to_json
@@ -271,7 +273,7 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
 
-          MyFile.save_text_file(project, data_path, text)
+          MyFile.save_text_file(project, data_path, text, control)
 
           rel_path = data_path.gsub("--", "/")
           Git.commit(project, email + " save file " + rel_path)
@@ -299,7 +301,7 @@ module DMACServer
           raise "Permission denied" if target_control.role.to_s == "Viewer"
 
           source_files = [] of MyFile
-          source_data_paths.split(",").each do |dp|
+          source_data_paths.split(",") do |dp|
             f = MyFile.new(source_project, dp)
             if f.type == "file"
               source_files << f
@@ -308,7 +310,7 @@ module DMACServer
             end
           end
           target_file = MyFile.new(target_project, target_data_path)
-          MyFile.copy_files(source_files, target_file)
+          MyFile.copy_files(source_files, target_file, source_control, target_control)
 
           rel_path = target_data_path.gsub("--", "/")
           Git.commit(target_project, email + " copy something into " + rel_path)

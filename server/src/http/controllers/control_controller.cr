@@ -36,12 +36,13 @@ module DMACServer
           project_id = get_param!(ctx, "projectId")
           newEmail = get_param!(ctx, "email")
           newRole = get_param!(ctx, "role")
+          newGroup = get_param!(ctx, "group")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          new_control = Control.create_control(newEmail, project, newRole)
+          new_control = Control.create_control(newEmail, project, newRole, newGroup)
           new_control.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -57,12 +58,12 @@ module DMACServer
           id = get_param!(ctx, "id")
           newEmail = get_param!(ctx, "email")
           newRole = get_param!(ctx, "role")
+          newGroup = get_param!(ctx, "group")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
-
-          new_control = Control.update_control(id, newEmail, newRole)
+          new_control = Control.update_control(id, newEmail, newRole, newGroup)
           new_control.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

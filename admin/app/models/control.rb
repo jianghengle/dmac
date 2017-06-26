@@ -10,6 +10,7 @@ class Control < ApplicationRecord
           ['Owner', 'Admin', 'Editor', 'Viewer']
         end
       end
+      field :group_name
     end
   end
 end

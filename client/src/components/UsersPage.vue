@@ -25,9 +25,30 @@
         <thead>
           <tr>
             <th class="number-cell">#</th>
-            <th class="text-cell">Email</th>
-            <th class="text-cell">Role</th>
-            <th class="text-cell">Joined At</th>
+            <th class="text-cell is-clickable" @click="setSort('email')">Email
+              <span v-if="sortBy=='email'">
+                <icon class="asc-icon" name="sort-asc" v-if="asc"></icon>
+                <icon name="sort-desc" v-if="!asc"></icon>
+              </span>
+            </th>
+            <th class="text-cell is-clickable" @click="setSort('role')">Role
+              <span v-if="sortBy=='role'">
+                <icon class="asc-icon" name="sort-asc" v-if="asc"></icon>
+                <icon name="sort-desc" v-if="!asc"></icon>
+              </span>
+            </th>
+            <th class="text-cell is-clickable" @click="setSort('group')">Group
+              <span v-if="sortBy=='group'">
+                <icon class="asc-icon" name="sort-asc" v-if="asc"></icon>
+                <icon name="sort-desc" v-if="!asc"></icon>
+              </span>
+            </th>
+            <th class="text-cell is-clickable" @click="setSort('joinedAt')">Joined At
+              <span v-if="sortBy=='joinedAt'">
+                <icon class="asc-icon" name="sort-asc" v-if="asc"></icon>
+                <icon name="sort-desc" v-if="!asc"></icon>
+              </span>
+            </th>
             <th class="text-cell">Action</th>
           </tr>
         </thead>
@@ -39,6 +60,7 @@
               <span v-if="u.self">(Me)</span>
             </td>
             <td class="text-cell">{{u.role}}</td>
+            <td class="text-cell"><span v-if="u.role=='Editor'||u.role=='Viewer'">{{u.group}}</span></td>
             <td class="text-cell">{{u.joinedAt}}</td>
             <td class="text-cell">
               <a class="edit-icon"
@@ -166,6 +188,14 @@ export default {
         vm.waiting = false
       })
     },
+    setSort (field) {
+      if(this.sortBy == field){
+        this.asc = !this.asc
+      }else{
+        this.sortBy = field
+      }
+      this.sortUsers()
+    },
     sortUsers () {
       var vm = this
       vm.users.sort(function(u1, u2){
@@ -173,7 +203,10 @@ export default {
           var index1 = vm.roles.indexOf(u1.role)
           var index2 = vm.roles.indexOf(u2.role)
           if(index1 == index2){
-            return vm.compareEmails(u1, u2)
+            if(u1.group == u2.group){
+              return vm.compareEmails(u1, u2)
+            }
+            return vm.compareGroups(u1, u2)
           }
           if(vm.asc){
             return index1 - index2
@@ -184,6 +217,8 @@ export default {
             return u1.createdTime - u2.createdTime
           }
           return u2.createdTime - u1.createdTime
+        }else if(vm.sortBy == 'group'){
+          return vm.compareGroups(u1, u2)
         }
         return vm.compareEmails(u1, u2)
       })
@@ -193,6 +228,12 @@ export default {
         return u1.email.localeCompare(u2.email)
       }
       return -u1.email.localeCompare(u2.email)
+    },
+    compareGroups(u1, u2){
+      if(this.asc){
+        return u1.group.localeCompare(u2.group)
+      }
+      return -u1.group.localeCompare(u2.group)
     },
     openNewUserModal(){
       this.newUserModal.opened = true
@@ -218,6 +259,7 @@ export default {
         }else{
           this.users[index].email = result.email
           this.users[index].role = result.role
+          this.users[index].group = result.group
           this.sortUsers()
         }
       }
@@ -269,4 +311,12 @@ export default {
   top: 3px;
 }
 
+.asc-icon {
+  position: relative;
+  top: 5px;
+}
+
+.is-clickable {
+  cursor: pointer;
+}
 </style>
