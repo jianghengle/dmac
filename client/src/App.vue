@@ -8,7 +8,7 @@
       <div class="column is-one-quarter" v-show="showNav">
         <dmac-nav></dmac-nav>
       </div>
-      <div class="column" :class="{'is-three-quarter': showNav}">
+      <div class="column main-window" :class="{'is-three-quarter': showNav}">
         <router-view></router-view>
       </div>
     </div>
@@ -61,6 +61,10 @@ body {
 
 .spinner-container {
   text-align: center;
+}
+
+.main-window {
+  max-width: 100%;
 }
 
 </style>

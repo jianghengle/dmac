@@ -42,7 +42,7 @@ export default {
   computed: {
     nameTip () {
       if(this.role == 'Editor'){
-        return "Name must be less or equal than 255 charactors and only contain charactors from 'a'~'z', '0'~'9', '.', '_' and '-', and it must not start or end with '.' or '-' or '_' or contain '--'"
+        return "Name must be less or equal than 255 charactors and only contain charactors from 'a'~'z', '0'~'9', '.', '_' and '-', and it must not start or end with '.' or '-' or '_' or '~' or contain '--'"
       }
       return "Name must be less or equal than 255 charactors and only contain charactors from 'a'~'z', '0'~'9', '.', '_' and '-', and it must not start with '-' or end with '-' or contain '--'"
     },
@@ -57,12 +57,12 @@ export default {
     newNameValid () {
       var len = this.newName.length
       if(len > 255) return false
-      var re = /^[a-zA-Z0-9\._-]+$/
+      var re = /^[a-zA-Z0-9\._-~]+$/
       if(!re.test(this.newName)) return false
       if(this.newName[0] == '-' || this.newName[len-1] == '-') return false
       if(this.newName.indexOf('..') > -1) return false
       if(this.newName[len-1] == '.') return false
-      if(this.role == 'Editor' && (this.newName[0] == '.' || this.newName[0] == '_')) return false
+      if(this.role == 'Editor' && (this.newName[0] == '.' || this.newName[0] == '_' || this.newName[0] == '~')) return false
       if(this.nameMap[this.newName]) return false
       return true
     }

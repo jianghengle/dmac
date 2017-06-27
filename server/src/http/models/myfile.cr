@@ -10,6 +10,10 @@ module DMACServer
       property size : UInt64
       property modified_at : Time
       property fileType : String
+      property hidden : Bool
+      property readonly : Bool
+      property group : String
+
 
       raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
       @@root = ENV["DMAC_ROOT"]
@@ -39,7 +43,8 @@ module DMACServer
       @@typeMap[".html"] = "text"
       @@typeMap[".css"] = "text"
       @@typeMap[".vue"] = "text"
-      @@typeMap[".csv"] = "text"
+      @@typeMap[".csv"] = "csv"
+      @@typeMap[".tsv"] = "csv"
 
       def initialize(@project, @data_path)
         if @data_path == "-root-"
@@ -71,6 +76,25 @@ module DMACServer
 
         @name = File.basename(@full_path)
         @modified_at = File.stat(@full_path).mtime
+
+        @hidden = false
+        @readonly = false
+        @group = ""
+        return if @data_path == "-root-"
+
+        chain = @data_path.split("--")
+        chain.each do |s|
+          if s[0] == '.'
+            @hidden = true
+          elsif s[0] == '~'
+            @readonly = true
+          elsif @group == "" && @type == "folder"
+            ss = s.split("_")
+            next if ss.size < 3 || ss[0] != ""
+            @group = ss[1]
+          end
+        end
+
       end
 
 
@@ -84,6 +108,7 @@ module DMACServer
           str << "\"dataPath\":\"" << @data_path << "\","
           str << "\"publicUrl\":\"" << public_url << "\","
           str << "\"size\":\"" << @size << "\","
+          str << "\"readonly\":" << @readonly << ","
           if read_text
             str << "\"text\":" << get_text.to_json << ","
           else
@@ -103,76 +128,38 @@ module DMACServer
         File.write(@full_path, text)
       end
 
-      def self.collect_files(role, group, project, data_path)
+      def viewable?(control)
+        role = control.role.to_s
+        group = control.group_name.to_s
+        return true if role == "Owner" || role == "Admin"
+        return false if @hidden
+        return true if group == "" || @group == ""
+        return group == @group
+      end
+
+      def editable?(control)
+        role = control.role.to_s
+        return true if role == "Owner" || role == "Admin"
+        return false if role == "Viewer"
+        return false if !viewable?(control)
+        return !@readonly
+      end
+
+      def self.collect_files(control, project, data_path)
         files = [] of MyFile
-        raise "You do not have permission" unless MyFile.check(role, group, data_path)
         dir = MyFile.new(project, data_path)
+        raise "You do not have permission" unless dir.viewable?(control)
         files << dir
         return files if dir.type.to_s == "file"
         Dir.foreach dir.full_path do |filename|
           if filename.to_s != "." && filename.to_s != ".." && filename.to_s != ".git" && filename.to_s != ".gitignore"
             dp = filename
             dp = data_path + "--" + dp unless data_path == "-root-"
-            if MyFile.check(role, group, dp)
-              files << MyFile.new(project, dp)
-            end
+            file = MyFile.new(project, dp)
+            files << file if file.viewable?(control)
           end
         end
         return files
-      end
-
-      def self.check(role, group, data_path)
-        return true if data_path == "-root-"
-        return true if role == "Owner" || role == "Admin"
-        return false if MyFile.is_hidden(data_path)
-        return true if group == ""
-        fg = MyFile.group_own(data_path)
-        return true if fg == ""
-        return fg == group
-      end
-
-      def self.check_full_path(control, project_root, full_path)
-        data_path = "-root-"
-        if project_root != full_path
-          data_path = full_path[project_root.size+1..-1].gsub("/", "--")
-        end
-        return true if data_path == "-root-"
-        return true if control.role.to_s == "Owner" || control.role.to_s == "Admin"
-        return false if MyFile.is_hidden(data_path)
-        return true if control.group_name.to_s == ""
-        fg = MyFile.group_own(data_path)
-        return true if fg == ""
-        return fg == control.group_name.to_s
-      end
-
-      def self.is_hidden(data_path)
-        hidden = false
-        data_path.split("--") do |s|
-          if s[0] == '.'
-            hidden = true
-            break
-          end
-        end
-        return hidden
-      end
-
-      def self.group_own(data_path)
-        group = ""
-        data_path.split("--") do |s|
-          g = ""
-          i = 0
-          s.split("_") do |ss|
-            break if i == 0 && ss != ""
-            g = ss if i == 1
-            i = i + 1
-            break if i >= 3
-          end
-          if g != "" && i >= 3
-            group = g
-            break
-          end
-        end
-        return group
       end
 
       def self.create_folder(project, data_path)
@@ -183,13 +170,22 @@ module DMACServer
         Dir.mkdir(full_path)
       end
 
-      def self.create_file(project, data_path)
+      def self.create_file(project, data_path, control)
+        raise "No permission" unless MyFile.check_parent(project, data_path, control)
         full_path = @@root + "/" + project.key.to_s
         if data_path != "-root-"
           full_path = full_path + "/" + data_path.gsub("--", "/")
         end
         raise "Already exist" if File.exists?(full_path)
         File.write(full_path, "")
+      end
+
+      def self.check_parent(project, data_path, control)
+        index = data_path.rindex("--")
+        parent_data_path = "-root-"
+        parent_data_path = data_path[0, index] unless index.nil?
+        file = MyFile.new(project, parent_data_path)
+        return file.editable?(control)
       end
 
       def self.delete_folder(project, data_path)
@@ -199,7 +195,6 @@ module DMACServer
         end
         MyFile.delete_files(full_path)
       end
-
 
       def self.delete_files(path)
         return unless File.exists?(path)
@@ -217,27 +212,28 @@ module DMACServer
       end
 
       def self.update_folder_file_name(project, data_path, name, control)
-        full_path = @@root + "/" + project.key.to_s + "/" + data_path.gsub("--", "/")
-        raise "Cannot find file" unless File.exists?(full_path)
-        raise "No permission" unless MyFile.check(control.role.to_s, control.group_name.to_s, data_path)
+        file = MyFile.new(project, data_path)
+        raise "No permission" unless file.editable?(control)
+        full_path = file.full_path
         dirname = File.dirname(full_path)
         new_full_path = dirname.to_s + "/" + name
         File.rename(full_path, new_full_path)
       end
 
       def self.delete_folder_file(project, data_path, control)
-        raise "No permission" unless MyFile.check(control.role.to_s, control.group_name.to_s, data_path)
-        full_path = @@root + "/" + project.key.to_s + "/" + data_path.gsub("--", "/")
-        MyFile.delete_files(full_path)
+        file = MyFile.new(project, data_path)
+        raise "No permission" unless file.editable?(control)
+        MyFile.delete_files(file.full_path)
       end
 
       def self.upload_file(project, data_path, file, control)
+        dir = MyFile.new(project, data_path)
+        raise "Target is not a folder" unless dir.type == "folder"
+        raise "No permission" unless dir.editable?(control)
+
         full_path = @@root + "/" + project.key.to_s
         prefix_length = full_path.size + 1
         full_path = full_path + "/" + data_path.gsub("--", "/") if data_path != "-root-"
-
-        raise "Cannot find file" unless File.exists?(full_path)
-        raise "No permission" unless MyFile.check(control.role.to_s, control.group_name.to_s, data_path)
 
         filename = file.filename
         raise "No filename included in upload" if !filename.is_a?(String)
@@ -265,6 +261,8 @@ module DMACServer
             elsif ord == 95
               str << c
             elsif ord >= 97 && ord <= 122
+              str << c
+            elsif ord == 126
               str << c
             else
               str << "_"
@@ -296,28 +294,28 @@ module DMACServer
       end
 
       def self.save_text_file(project, data_path, text, control)
-        raise "No permission" unless MyFile.check(control.role.to_s, control.group_name.to_s, data_path)
         file = MyFile.new(project, data_path)
-        raise "No such file" unless file.fileType == "text"
+        raise "No permission" unless file.editable?(control)
+        raise "Not text file" unless file.fileType == "text" || file.fileType == "csv"
         file.save_text(text)
       end
 
       def self.copy_files(source_files, target_file, source_control, target_control)
-        raise "No permission" unless MyFile.check(target_control.role.to_s, target_control.group_name.to_s, target_file.data_path)
-
+        raise "Target is not a folder" unless target_file.type == "folder"
+        raise "No permission" unless target_file.editable?(target_control)
         new_folders = {} of String => Bool
         source_files.each do |f|
-          project_root = @@root + "/" + f.project.key.to_s
+          source_project = f.project
           if f.type == "file"
-            MyFile.copy_file(f.full_path, target_file.full_path, source_control, project_root)
+            MyFile.copy_file(f.full_path, target_file.full_path, source_control, source_project)
           else
-            MyFile.copy_folder(f.full_path, target_file.full_path, new_folders, source_control, project_root)
+            MyFile.copy_folder(f.full_path, target_file.full_path, new_folders, source_control, source_project)
           end
         end
       end
 
-      def self.copy_file(source_full_path, target_full_path, control, project_root)
-        return unless MyFile.check_full_path(control, project_root, source_full_path)
+      def self.copy_file(source_full_path, target_full_path, control, project)
+        return unless MyFile.check_source(control, project, source_full_path)
         new_full_path = MyFile.make_name(source_full_path, target_full_path)
         File.open(new_full_path, "w") do |tf|
           File.open(source_full_path) do |sf|
@@ -326,8 +324,8 @@ module DMACServer
         end
       end
 
-      def self.copy_folder(source_full_path, target_full_path, new_folders, control, project_root)
-        return unless MyFile.check_full_path(control, project_root, source_full_path)
+      def self.copy_folder(source_full_path, target_full_path, new_folders, control, project)
+        return unless MyFile.check_source(control, project, source_full_path)
         new_target_full_path = MyFile.make_name(source_full_path, target_full_path)
         Dir.mkdir(new_target_full_path)
         new_folders[new_target_full_path] = true
@@ -335,12 +333,20 @@ module DMACServer
           if filename.to_s != "." && filename.to_s != ".."
             new_source_full_path = source_full_path + "/" + filename
             if File.file? new_source_full_path
-              MyFile.copy_file(new_source_full_path, new_target_full_path, control, project_root)
+              MyFile.copy_file(new_source_full_path, new_target_full_path, control, project)
             elsif (File.directory? new_source_full_path) && (!new_folders.has_key?(new_source_full_path))
-              MyFile.copy_folder(new_source_full_path, new_target_full_path, new_folders, control, project_root)
+              MyFile.copy_folder(new_source_full_path, new_target_full_path, new_folders, control, project)
             end
           end
         end
+      end
+
+      def self.check_source(control, project, full_path)
+        project_root = @@root + "/" + project.key.to_s
+        rel_path = full_path[(project_root.size+1)..-1]
+        data_path = rel_path.gsub("/", "--")
+        file = MyFile.new(project, data_path)
+        return file.viewable?(control)
       end
 
       def self.make_name(source_name, target_path)
@@ -360,7 +366,6 @@ module DMACServer
 
         return target_path + "/" + new_name
       end
-
     end
 
   end

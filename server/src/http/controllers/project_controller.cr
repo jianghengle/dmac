@@ -64,7 +64,7 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          files = MyFile.collect_files(control.role.to_s, control.group_name.to_s, project, data_path)
+          files = MyFile.collect_files(control, project, data_path)
 
           paths = [] of String
           files.each do |f|
@@ -79,7 +79,7 @@ module DMACServer
 
           files.each_index do |i|
             f = files[i]
-            read_text = i == 0 && f.fileType == "text"
+            read_text = i == 0 && (f.fileType == "text" || f.fileType == "csv")
             public_url = ""
             public_url = publics[f.rel_path] if publics.has_key? f.rel_path
             arr << f.to_json(read_text, public_url)
@@ -159,8 +159,7 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Viewer"
-
+          raise "Permission denied" if control.role.to_s == "Viewer" || control.role.to_s == "Editor"
 
           MyFile.create_folder(project, data_path)
           {"ok": true}.to_json
@@ -182,7 +181,7 @@ module DMACServer
           raise "Permission denied" if control.role.to_s == "Viewer"
 
 
-          MyFile.create_file(project, data_path)
+          MyFile.create_file(project, data_path, control)
           rel_path = data_path.gsub("--", "/")
           Git.commit(project, email + " created file " + rel_path)
           {"ok": true}.to_json

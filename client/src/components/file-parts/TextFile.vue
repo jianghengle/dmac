@@ -6,7 +6,7 @@
         {{file && file.name}}
       </div>
       <div class="column buttons">
-        <a class="button" :disabled="!textChanged" :class="{'is-danger': textChanged}" v-if="projectRole && projectRole!='Viewer'" @click="saveTextFile">
+        <a class="button" :disabled="!textChanged" :class="{'is-danger': textChanged}" v-if="canEdit" @click="saveTextFile">
           <icon name="save"></icon>&nbsp;
           Save
         </a>
@@ -21,7 +21,7 @@
     <div class="field">
       <p class="control">
         <textarea class="textarea"
-          :readonly="!projectRole || projectRole=='Viewer'"
+          :readonly="!canEdit"
           :class="{'is-danger': textChanged}"
           :style="{height: textAreaHeight}"
           v-model="textInput">
@@ -60,11 +60,19 @@ export default {
       return this.$route.path
     },
     textAreaHeight () {
-      var lines = this.textInput.split('\n').length
+      var re=/\r\n|\n\r|\n|\r/g
+      var lines = this.textInput.replace(re,'\n').split('\n').length
       return 25*lines + 'px'
     },
     textChanged () {
       return this.textInput != this.file.text
+    },
+    canEdit () {
+      if(!this.file) return false
+      if(!this.projectRole) return false
+      if(this.projectRole == 'Viewer') return false
+      if(this.projectRole == 'Owner' || this.projectRole == 'Admin') return true
+      return !this.file.readonly
     }
   },
   watch: {

@@ -31,6 +31,11 @@
         :file="folderFile"
         @content-changed="contentChanged">
       </text-file>
+      <csv-file
+        v-if="folderFile.fileType == 'csv'"
+        :file="folderFile"
+        @content-changed="contentChanged">
+      </csv-file>
     </div>
 
     <div class="spinner-container" v-if="waiting">
@@ -47,6 +52,7 @@ import NormalFile from './file-parts/NormalFile'
 import ImageFile from './file-parts/ImageFile'
 import PdfFile from './file-parts/PdfFile'
 import TextFile from './file-parts/TextFile'
+import CsvFile from './file-parts/CsvFile'
 
 export default {
   name: 'folder-file-page',
@@ -56,7 +62,8 @@ export default {
     NormalFile,
     ImageFile,
     PdfFile,
-    TextFile
+    TextFile,
+    CsvFile
   },
   data () {
     return {

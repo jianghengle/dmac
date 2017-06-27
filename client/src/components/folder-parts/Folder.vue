@@ -13,11 +13,11 @@
           <icon name="plus"></icon>&nbsp;
           Folder
         </a>
-        <a class="button" v-if="projectRole && projectRole!='Viewer'" @click="openNewFileModal">
+        <a class="button" v-if="canEditFolder" @click="openNewFileModal">
           <icon name="plus"></icon>&nbsp;
           File
         </a>
-        <a class="button" v-if="projectRole && projectRole!='Viewer'" @click="openFileUploadModal">
+        <a class="button" v-if="canEditFolder" @click="openFileUploadModal">
           <icon name="upload"></icon>&nbsp;
           File
         </a>
@@ -25,7 +25,7 @@
           <icon name="copy"></icon>&nbsp;
           Copy
         </a>
-        <a class="button" v-if="projectRole && projectRole!='Viewer'" :disabled="!canPaste" @click="pasteSelection">
+        <a class="button" v-if="canEditFolder" :disabled="!canPaste" @click="pasteSelection">
           <icon name="paste"></icon>&nbsp;
           Paste
         </a>
@@ -91,7 +91,7 @@
             </td>
             <td class="text-cell">{{f.modifiedAt}}</td>
             <td class="text-cell">
-              <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? f.type=='file' : true )"
+              <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (f.type=='file' && !f.readonly) : true )"
                 @click.stop="openEditNameModal(f)"
                 class="action-icon">
                 <icon name="edit"></icon>
@@ -189,7 +189,7 @@ export default {
         context: null
       },
       urls: {},
-      typeOrder: ['folder', 'image', 'pdf', 'text', 'unknown'],
+      typeOrder: ['folder', 'image', 'pdf', 'text', 'csv', 'unknown'],
       pasting: false,
       selection: {}
     }
@@ -206,6 +206,13 @@ export default {
     },
     projectRole () {
       return this.project && this.project.projectRole
+    },
+    canEditFolder () {
+      if(!this.folder) return false
+      if(!this.projectRole) return false
+      if(this.projectRole == 'Viewer') return false
+      if(this.projectRole == 'Owner' || this.projectRole == 'Admin') return true
+      return !this.folder.readonly
     },
     files () {
       if(this.folder){
