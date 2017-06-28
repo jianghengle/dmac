@@ -8,7 +8,7 @@
       <div class="column is-one-quarter" v-show="showNav">
         <dmac-nav></dmac-nav>
       </div>
-      <div class="column main-window" :class="{'is-three-quarter': showNav}">
+      <div class="column main-window" :class="{'is-three-quarter': showNav, 'show-nav': showNav}">
         <router-view></router-view>
       </div>
     </div>
@@ -45,7 +45,7 @@ export default {
 }
 </script>
 
-<style>
+<style >
 @import "../node_modules/bulma/css/bulma.css";
 
 body {
@@ -65,6 +65,21 @@ body {
 
 .main-window {
   max-width: 100%;
+}
+
+.show-nav {
+  max-width: 75%;
+}
+
+.dygraph-title {
+  text-align: center;
+  font-weight: bold;
+}
+
+.dygraph-legend {
+  position: absolute;
+  right: 0px;
+  left: unset!important;
 }
 
 </style>
