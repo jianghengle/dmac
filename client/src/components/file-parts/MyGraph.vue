@@ -95,7 +95,7 @@ export default {
   position: absolute;
   top: 30px;
   right: 10px;
-  z-index: 10;
+  z-index: 20;
 }
 
 .my-canvas {

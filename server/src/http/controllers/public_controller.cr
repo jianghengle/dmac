@@ -47,7 +47,7 @@ module DMACServer
           arr << public.to_json
           files.each_index do |i|
             f = files[i]
-            read_text = i == 0 && f.fileType == "text"
+            read_text = i == 0 && (f.fileType == "text" || f.fileType == "csv")
             arr << f.to_json(read_text)
           end
           json_array(arr)
