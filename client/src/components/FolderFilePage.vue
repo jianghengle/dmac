@@ -102,6 +102,7 @@ export default {
           var resp = response.body
           this.$store.commit('projects/setFile', resp)
           this.waiting = false
+
         }, response => {
           this.error = 'Failed to get file!'
           this.waiting = false

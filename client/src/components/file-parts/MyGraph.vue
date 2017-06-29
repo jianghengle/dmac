@@ -37,8 +37,19 @@ export default {
         title: this.graphData.title,
         axes: { 
           x: {
+            axisLabelFormatter: (decimal, granularity, opts, dygraph) =>{
+              if(this.graphData.xs){
+                if(this.graphData.xs[decimal])
+                  return this.graphData.xs[decimal]
+                return ""
+              }
+              return decimal
+            },
             valueFormatter: (decimal, opts, seriesName, dygraphObj, row, col) =>{
-              return decimal    
+              if(this.graphData.xs){
+                return this.graphData.xs[decimal]
+              }
+              return decimal
             }
           },
           y: {

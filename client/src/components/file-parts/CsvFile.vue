@@ -10,10 +10,6 @@
           <icon name="line-chart"></icon>&nbsp;
           Draw Graph
         </a>
-        <a class="button" :disabled="!textChanged" :class="{'is-danger': textChanged}" v-if="canEdit" @click="saveTextFile">
-          <icon name="save"></icon>&nbsp;
-          Save
-        </a>
       </div>
     </div>
 
@@ -25,34 +21,34 @@
       <icon name="spinner" class="icon is-medium fa-spin"></icon>
     </div>
 
-    <div class="tabs csv-tabs">
-      <ul>
-        <li :class="{'is-active': activeTab=='text'}">
-          <a @click="activeTab = 'text'">Text</a>
-        </li>
-        <li :class="{'is-active': activeTab=='table'}">
-          <a @click="activeTab = 'table'">Table</a>
-        </li>
-        <li :class="{'is-active': activeTab=='graphs'}">
-          <a @click="activeTab = 'graphs'">Graphs</a>
-        </li>
-      </ul>
-    </div>
+    <div class="columns">
+      <div class="column tabs is-toggle csv-tabs">
+        <ul>
+          <li :class="{'is-active': activeTab=='table'}">
+            <a class="tab-button" @click="activeTab = 'table'">Table</a>
+          </li>
+          <li :class="{'is-active': activeTab=='graphs'}">
+            <a class="tab-button" @click="activeTab = 'graphs'">Graph</a>
+          </li>
+        </ul>
+      </div>
 
-    <div class="field" v-show="activeTab=='text'">
-      <p class="control">
-        <textarea class="textarea csv-textarea"
-          :class="{'is-danger': textChanged}"
-          :style="{'height': textAreaHeight}"
-          v-model="textData">
-        </textarea>
-      </p>
+      <nav class="column pagination is-right csv-pages" v-show="activeTab=='table'">
+        <ul class="pagination-list">
+          <li v-show="currentPage > 0"><a class="pagination-link" @click="showPage(0)">1</a></li>
+          <li v-show="currentPage-1 > 0"><a class="pagination-link" @click="showPage(currentPage-1)">Pre</a></li>
+          <li><a class="pagination-link is-current">{{currentRange}}</a></li>
+          <li v-show="currentPage+1 < totalPages-1"><a class="pagination-link" @click="showPage(currentPage+1)">Next</a></li>
+          <li v-show="currentPage < totalPages-1"><a class="pagination-link" @click="showPage(totalPages-1)">{{totalPages}}</a></li>
+        </ul>
+      </nav>
     </div>
 
     <div v-show="activeTab=='table'" class="csv-table">
       <table class="table is-narrow" v-if="yCols.length">
         <thead>
           <tr>
+            <th class="number-cell">#</th>
             <th class="number-cell" v-for="(h, i) in tableHeader">
               <div class="csv-header" @click="sortData(i)">
                 <span>{{h}}</span>
@@ -73,7 +69,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in tableData">
+          <tr v-for="(row, i) in pageData">
+            <td class="number-cell">{{i+1}}</td>
             <td class="number-cell" v-for="cell in row">
               {{cell}}
             </td>
@@ -102,7 +99,6 @@ export default {
   props: ['file'],
   data () {
     return {
-      textData: '',
       waiting: false,
       error: '',
       activeTab: 'table',
@@ -111,7 +107,10 @@ export default {
       graphs: [],
       sortIndex: 0,
       asc: true,
-      lineNumbers: [],
+      currentPage: 0,
+      pageSize: 1000,
+      tableHeader: [],
+      tableData: []
     }
   },
   computed: {
@@ -130,65 +129,70 @@ export default {
     path () {
       return this.$route.path
     },
-    textLines () {
+    pageData () {
+      var index = this.currentPage * this.pageSize
+      var page = this.tableData.slice(index, index + this.pageSize)
+      return page
+    },
+    totalCount () {
+      return this.tableData.length
+    },
+    totalPages () {
+      return Math.ceil(this.totalCount / this.pageSize)
+    },
+    currentRange () {
+      var start = this.currentPage * this.pageSize + 1
+      var end = (this.currentPage + 1) * this.pageSize
+      if(end > this.totalCount){
+        end = this.totalCount
+      }
+      return start + '~' + end
+    },
+  },
+  watch: {
+    path: function (val) {
+      this.loadTable()
+    },
+    file: function (val) {
+      this.loadTable()
+    },
+  },
+  methods: {
+    loadTable(){
+      if(!this.file.text) return []
       var re=/\r\n|\n\r|\n|\r/g
-      return this.textData.replace(re,'\n').split('\n')
+      var lines = this.file.text.replace(re,'\n').split('\n')
+      this.loadHeader(lines)
+      this.loadData(lines)
+      this.loadCheckboxes()
     },
-    textAreaHeight () {
-      return 25*this.textLines.length + 'px'
-    },
-    tableHeader () {
-      if(!this.textLines.length) return []
+    loadHeader(lines){
+      if(!lines.length) return []
       var header = ['Ln#']
-      var firstLine = this.textLines[0]
+      var firstLine = lines[0]
       firstLine.split(/,|\t/g).forEach(function(s){
         header.push(s.trim())
       })
-      return header
+      this.tableHeader = header
     },
-    tableData () {
-      if(this.textLines.length < 2) return []
+    loadData(lines){
+      if(lines.length < 2) return []
       var tableData = []
-
-      for(var i=1;i<this.textLines.length;i++){
-        var line = this.textLines[i]
+      for(var i=1;i<lines.length;i++){
+        var line = lines[i]
         var row = [i]
-        if(this.lineNumbers[i-1] == undefined){
-          this.lineNumbers.push(i)
-        }else{
-          var row = [this.lineNumbers[i-1]]
-        }
-        var ss = line.split(/,|\t/g)
+        var ss = line.split(',')
         for(var j=0;j<ss.length;j++){
           row.push(ss[j].trim())
         }
         tableData.push(row)
       }
-
-      return tableData
+      this.tableData = tableData
     },
-    textChanged () {
-      return this.textData != this.file.text
-    },
-    canEdit () {
-      if(!this.file) return false
-      if(!this.projectRole) return false
-      if(this.projectRole == 'Viewer') return false
-      if(this.projectRole == 'Owner' || this.projectRole == 'Admin') return true
-      return !this.file.readonly
-    }
-  },
-  watch: {
-    path: function (val) {
-      this.updateText()
-    },
-    file: function (val) {
-      this.updateText()
-    },
-    tableHeader: function (val) {
-      if(!val.length) return
+    loadCheckboxes(){
+      if(!this.tableHeader.length) return
       var yCols = []
-      for(var i=0;i<val.length;i++){
+      for(var i=0;i<this.tableHeader.length;i++){
         var yCol = false
         if(i < this.yCols.length){
           yCol = this.yCols[i]
@@ -196,11 +200,6 @@ export default {
         yCols.push(yCol)
       }
       this.yCols = yCols
-    },
-  },
-  methods: {
-    updateText() {
-      this.textData = this.file.text
     },
     getGraphPoints(){
       var data = {}
@@ -221,28 +220,44 @@ export default {
                 d.count = d.count ? d.count + 1 : 1
               }else{
                 if(isNaN(y)){
-                  d = null
+                  data[x][j] = null
                 }else{
+                  y = Number(y)
                   d.count = d.count ? d.count + 1 : 1
-                  d.max = d.max == undefined ? Number(y) : Math.max(y, d.max)
-                  d.min = d.min == undefined ? Number(y) : Math.min(y, d.max)
-                  d.average = d.average == undefined ? Number(y) : (d.average * (d.count - 1)/d.count + y/d.count)
+                  d.max = d.max === undefined ? y : Math.max(y, d.max)
+                  d.min = d.min === undefined ? y : Math.min(y, d.min)
+                  d.average = d.average === undefined ? y : (d.average * (d.count - 1)/d.count + y/d.count)
                 }
               }
-              data[x][j] = d
             }
           }
         }
       }
 
       var xs = Object.keys(data)
+      var xIsNum = true
+      if(xs.length){
+        if(isNaN(xs[0])){
+          xIsNum = false
+        }
+      }
+
       xs.sort(function(a,b){
+        if(isNaN(a) || isNaN(b)){
+          xIsNum = false
+          return a.localeCompare(b)
+        }
         return a - b
       })
       var points = []
+
       for(var i=0;i<xs.length;i++){
+        var x = Number(xs[i])
+        if(!xIsNum){
+          x = i
+        }
+        var point = [x]
         var d = data[xs[i]]
-        var point = [Number(xs[i])]
         for(var j=0;j<this.yCols.length;j++){
           if(!this.yCols[j]) continue
           if(!d[j]){
@@ -256,17 +271,42 @@ export default {
         }
         points.push(point)
       }
-      return points
+      var result = {points: points}
+      if(!xIsNum){
+        result.xs = xs
+        if(xs.length){
+          var first = points[0].slice()
+          for(var i=0;i<first.length;i++){
+            if(i == 0){
+              first[i] = first[i] - 1
+            }else{
+              first[i] = null
+            }
+          }
+          points.unshift(first)
+          var last = points[points.length-1].slice()
+          for(var i=0;i<last.length;i++){
+            if(i == 0){
+              last[i] = last[i] + 1
+            }else{
+              last[i] = null
+            }
+          }
+          points.push(last)
+        }
+      }
+      return result
     },
     addGraph() {
-      var points = this.getGraphPoints()
+      var result = this.getGraphPoints()
+      var points = result.points
       var xLabel = this.tableHeader[this.xCol]
       var yLabels = []
       for(var j=0;j<this.yCols.length;j++){
         if(!this.yCols[j]) continue
         var name = this.tableHeader[j]
         if(j == this.xCol){
-          yLabels.push('count(' + name + ')')
+          yLabels.push('Count(' + name + ')')
         }else{
           yLabels.push(name)
         }
@@ -281,13 +321,17 @@ export default {
 
       this.activeTab = 'graphs'
 
-      this.graphs.unshift({
+      var graph = {
         ordinal: ordinal,
         id: 'csvGraph' + ordinal,
         title: 'Graph ' + ordinal,
         labels: labels,
         points: points,
-      })
+      }
+      if(result.xs){
+        graph.xs = result.xs
+      }
+      this.graphs.unshift(graph)
     },
     deleteGraph(graph){
       var index = this.graphs.indexOf(graph)
@@ -299,13 +343,10 @@ export default {
       }else{
         this.sortIndex = index
       }
-      var data = this.tableData.slice()
       var vm = this
-      data.sort(function(a, b){
+      vm.tableData.sort(function(a, b){
         return vm.compareData(a, b)
       })
-
-      this.textData = this.makeText(data)
     },
     compareData(a, b) {
       if(isNaN(a[this.sortIndex]) || isNaN(b[this.sortIndex])){
@@ -320,32 +361,12 @@ export default {
       }
       return b[this.sortIndex] - a[this.sortIndex]
     },
-    makeText(data) {
-      var ext = this.file.name.slice(-4)
-      var separator = ext == '.csv' ? ',' : '\t'
-      var lines = [this.tableHeader.slice(1).join(separator)]
-      var lineNumbers = []
-      for(var i=0;i<data.length;i++){
-        lineNumbers.push(data[i][0])
-        lines.push(data[i].slice(1).join(separator))
-      }
-      this.lineNumbers = lineNumbers
-      return lines.join('\n')
-    },
-    saveTextFile(){
-      this.waiting = true
-      var message = {projectId: this.projectId, dataPath: this.file.dataPath, text: this.textData}
-      this.$http.post(xHTTPx + '/save_text_file', message).then(response => {
-        this.waiting = false
-        this.$emit('content-changed', true)
-      }, response => {
-        this.error = 'Failed to save file!'
-        this.waiting = false
-      })
+    showPage(pageNumber){
+      this.currentPage = pageNumber
     }
   },
   mounted () {
-    this.updateText()
+    this.loadTable()
   }
 }
 </script>
@@ -372,8 +393,19 @@ export default {
 }
 
 .csv-tabs {
-  margin-top: -30px;
   margin-bottom: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.tab-button {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.csv-pages {
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .csv-table {

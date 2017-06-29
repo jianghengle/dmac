@@ -1,6 +1,6 @@
 <template>
-  <div class="node-container">
-    <div class="node" v-if="showNode">
+  <div class="node-container" v-if="showNode">
+    <div class="node">
       <span class="node-icon" @click="toggleOpen">
         <icon v-if="node.type=='projects'" name="database"></icon>
         <icon class="is-clickable" v-if="open && node.type=='project'" name="folder-open"></icon>

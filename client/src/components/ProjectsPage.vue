@@ -102,6 +102,9 @@ export default {
     showArchive: function (val) {
       this.showArchiveInput = val
     },
+    projects: function(val) {
+      this.initShowArchive()
+    }
   },
   methods: {
     requestProjects(){
@@ -140,6 +143,20 @@ export default {
     },
     toggleShowArchive(){
       this.$store.commit('projects/setShowArchive', this.showArchiveInput)
+    },
+    initShowArchive(){
+      if(this.projects && this.projects.length){
+        var noActive = true
+        for(var i=0;i<this.projects.length;i++){
+          if(this.projects[i].status == 'Active'){
+            noActive = false
+            break
+          }
+        }
+        if(noActive){
+          this.$store.commit('projects/setShowArchive', true)
+        }
+      }
     }
   },
   mounted () {
@@ -148,6 +165,7 @@ export default {
       vm.requestProjects()
     })
     this.showArchiveInput = this.showArchive
+    this.initShowArchive()
   },
 }
 </script>
