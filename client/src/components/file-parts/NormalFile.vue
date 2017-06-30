@@ -15,11 +15,11 @@
     </div>
     <a v-if="!url"
       @click="getDownloadUrl"
-      class="button is-info">
+      class="button main-btn">
       <icon name="download"></icon> &nbsp;
       Download
     </a>
-    <a v-if="url" :href="url">Download Link</a>
+    <a class="main-link" v-if="url" :href="url">Download Link</a>
   </div>
 </template>
 
@@ -42,7 +42,7 @@ export default {
       return this.$store.state.projects.nodeMap
     },
     project () {
-      return this.nodeMap['/' + this.projectId]
+      return this.nodeMap['projects/' + this.projectId]
     },
     projectRole () {
       return this.project && this.project.projectRole

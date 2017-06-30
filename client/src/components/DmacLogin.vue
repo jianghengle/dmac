@@ -35,7 +35,7 @@
 
     <div class="field is-grouped">
       <p class="control">
-        <button class="button is-info" :class="{'is-loading': sent}" @click="login">Login</button>
+        <button class="button main-btn" :class="{'is-loading': sent}" @click="login">Login</button>
       </p>
     </div>
   </div>

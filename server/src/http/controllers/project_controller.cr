@@ -322,6 +322,29 @@ module DMACServer
         end
       end
 
+      def extract_file(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
+
+          MyFile.extract_file(project, data_path)
+
+          rel_path = data_path.gsub("--", "/")
+          Git.commit(project, email + " extract " + rel_path)
+
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
     end
   end
 end

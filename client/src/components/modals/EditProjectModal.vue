@@ -44,7 +44,7 @@
             @click="deleteProject">
             Delete
           </a>
-          <a class="button is-info"
+          <a class="button main-btn"
             :class="{'is-loading': waiting}"
             :disabled="!newName.length || !projectChanged"
             @click="update">

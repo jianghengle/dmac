@@ -17,6 +17,11 @@ module DMACServer
 
       raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
       @@root = ENV["DMAC_ROOT"]
+
+      @@tmp : String
+      @@tmp = @@root + "/tmp"
+      raise "No temp folder" unless File.directory? @@tmp
+
       @@typeMap = {} of String => String
       @@typeMap[".png"] = "image"
       @@typeMap[".jpg"] = "image"
@@ -45,6 +50,14 @@ module DMACServer
       @@typeMap[".vue"] = "text"
       @@typeMap[".csv"] = "csv"
       @@typeMap[".tsv"] = "csv"
+      @@typeMap[".zip"] = "zip"
+
+      @@ignore = {} of String => Bool
+      @@ignore["."] = true
+      @@ignore[".."] = true
+      @@ignore[".git"] = true
+      @@ignore[".gitignore"] = true
+
 
       def initialize(@project, @data_path)
         if @data_path == "-root-"
@@ -152,12 +165,11 @@ module DMACServer
         files << dir
         return files if dir.type.to_s == "file"
         Dir.foreach dir.full_path do |filename|
-          if filename.to_s != "." && filename.to_s != ".." && filename.to_s != ".git" && filename.to_s != ".gitignore"
-            dp = filename
-            dp = data_path + "--" + dp unless data_path == "-root-"
-            file = MyFile.new(project, dp)
-            files << file if file.viewable?(control)
-          end
+          next if @@ignore.has_key? filename.to_s
+          dp = filename
+          dp = data_path + "--" + dp unless data_path == "-root-"
+          file = MyFile.new(project, dp)
+          files << file if file.viewable?(control)
         end
         return files
       end
@@ -238,7 +250,7 @@ module DMACServer
         filename = file.filename
         raise "No filename included in upload" if !filename.is_a?(String)
 
-        target_path = MyFile.make_target(full_path, filename)
+        target_path = MyFile.make_target(full_path, filename, true)
         File.open(target_path, "w") do |f|
           IO.copy(file.tmpfile, f)
         end
@@ -246,13 +258,11 @@ module DMACServer
         return target_path[prefix_length..-1]
       end
 
-      def self.make_target(path, name)
+      def self.make_target(path, name, upload)
         new_name = String.build do |str|
           name.chars.each do |c|
             ord = c.ord
-            if ord == 45
-              str << c
-            elsif ord == 46
+            if ord == 46
               str << c
             elsif ord >= 48 && ord <= 57
               str << c
@@ -270,6 +280,16 @@ module DMACServer
           end
         end
         raise "cannot make file name" if new_name == ""
+
+        if(upload && ((new_name.starts_with? '.') || (new_name.starts_with? '~')))
+          new_name = "_" + new_name.lchop
+        end
+        if(new_name.starts_with? '-')
+          new_name = "_" + new_name.lchop
+        end
+        if((new_name.ends_with? '.') || (new_name.ends_with? '-'))
+          new_name = new_name.rchop + "_"
+        end
 
         filenames = {} of String => Bool
         Dir.foreach path do |filename|
@@ -330,13 +350,12 @@ module DMACServer
         Dir.mkdir(new_target_full_path)
         new_folders[new_target_full_path] = true
         Dir.foreach source_full_path do |filename|
-          if filename.to_s != "." && filename.to_s != ".."
-            new_source_full_path = source_full_path + "/" + filename
-            if File.file? new_source_full_path
-              MyFile.copy_file(new_source_full_path, new_target_full_path, control, project)
-            elsif (File.directory? new_source_full_path) && (!new_folders.has_key?(new_source_full_path))
-              MyFile.copy_folder(new_source_full_path, new_target_full_path, new_folders, control, project)
-            end
+          next if @@ignore.has_key? filename.to_s
+          new_source_full_path = source_full_path + "/" + filename
+          if File.file? new_source_full_path
+            MyFile.copy_file(new_source_full_path, new_target_full_path, control, project)
+          elsif (File.directory? new_source_full_path) && (!new_folders.has_key?(new_source_full_path))
+            MyFile.copy_folder(new_source_full_path, new_target_full_path, new_folders, control, project)
           end
         end
       end
@@ -365,6 +384,60 @@ module DMACServer
         end
 
         return target_path + "/" + new_name
+      end
+
+      def self.extract_file(project, data_path)
+        file = MyFile.new(project, data_path)
+        temp_path = MyFile.extract_to_temp(file.full_path)
+
+        target_path = ""
+        file.full_path.split('/') do |s|
+          target_path = target_path + "/" + s if s != file.name
+        end
+
+        Dir.foreach temp_path do |filename|
+          next if filename.to_s == "." || filename.to_s == ".."
+          source = temp_path + "/" + filename
+          if File.file? source
+            MyFile.copy_file_from_temp(source, target_path)
+          else
+            MyFile.copy_folder_from_temp(source, target_path)
+          end
+        end
+      end
+
+      def self.extract_to_temp(source)
+        temp_path = @@tmp + "/" + SecureRandom.hex(32).to_s
+        Dir.mkdir(temp_path)
+        command = "unzip " + source + " -d " + temp_path
+        io = IO::Memory.new
+        Process.run(command, shell: true, output: io)
+        return temp_path
+      end
+
+      def self.copy_file_from_temp(source, target)
+        name = File.basename(source)
+        target_path = MyFile.make_target(target, name, false)
+        File.open(target_path, "w") do |tf|
+          File.open(source) do |sf|
+            IO.copy(sf, tf)
+          end
+        end
+      end
+
+      def self.copy_folder_from_temp(source, target)
+        name = File.basename(source)
+        new_target = MyFile.make_target(target, name, false)
+        Dir.mkdir(new_target)
+        Dir.foreach source do |filename|
+          next if @@ignore.has_key? filename.to_s
+          new_source = source + "/" + filename
+          if File.file? new_source
+            MyFile.copy_file_from_temp(new_source, new_target)
+          else
+            MyFile.copy_folder_from_temp(new_source, new_target)
+          end
+        end
       end
     end
 

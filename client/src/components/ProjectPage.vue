@@ -4,9 +4,11 @@
     
     <div class="columns">
       <div class="view-title column">
-        <icon name="folder-open"></icon>&nbsp;
+        <span class="project-icon">
+          <icon name="folder-open"></icon>
+        </span>&nbsp;
         {{project && project.name}}&nbsp;
-        <span class="edit-icon"
+        <span class="edit-icon main-link"
           v-if="projectRole=='Owner' || projectRole=='Admin'"
           @click="openEditProjectModal(project)">
           <icon name="edit"></icon>
@@ -20,7 +22,7 @@
         <div class="nav-item">
           <div class="field is-grouped">
             <p class="control">
-              <a class="button is-info"  @click="viewData">
+              <a class="button main-btn"  @click="viewData">
                 <icon name="folder-open"></icon>&nbsp;
                 <span>Data Explorer</span>
               </a>
@@ -33,19 +35,19 @@
         <div class="nav-item">
           <div class="field is-grouped">
             <p class="control">
-              <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewHistory">
+              <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewHistory">
                 <icon name="history"></icon>&nbsp;
                 <span>History</span>
               </a>
             </p>
             <p class="control">
-              <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
+              <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
                 <icon name="share-alt"></icon>&nbsp;
                 <span>Public Urls</span>
               </a>
             </p>
             <p class="control">
-              <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
+              <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
                 <icon name="user"></icon>&nbsp;
                 <span>Users</span>
               </a>
@@ -233,6 +235,11 @@ export default {
 
 .project-page {
   padding: 10px;
+}
+
+.project-icon {
+  position: relative;
+  top: 3px;
 }
 
 .action {

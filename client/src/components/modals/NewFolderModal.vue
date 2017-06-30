@@ -21,7 +21,7 @@
           </div>
         </section>
         <footer class="modal-card-foot">
-          <a class="button is-info" :class="{'is-loading': waiting}" :disabled="!newNameValid" @click="create">Create</a>
+          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!newNameValid" @click="create">Create</a>
           <a class="button button-right" @click="close">Cancel</a> 
         </footer>
       </div>

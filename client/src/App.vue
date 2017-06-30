@@ -45,18 +45,45 @@ export default {
 }
 </script>
 
-<style >
-@import "../node_modules/bulma/css/bulma.css";
+<style lang="scss">
+@import "~bulma/sass/utilities/initial-variables";
+$primary: #2e1052;
+@import "~bulma";
+
 
 body {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: black;
+}
+
+.main-btn {
+  color: white!important;
+  background-color: #2e1052!important;
+  border-color: #2e1052!important;
+}
+
+.main-btn:hover {
+  color: #e6e6e6!important;
+}
+
+.default-btn {
+  color: #2e1052!important;
+}
+
+.main-link {
+  color: #2e1052;
+}
+
+.main-link:hover {
+  color: #866ba6;
 }
 
 .view-title {
   font-size: 24px;
   font-weight: bold;
+  color: #2e1052;
 }
 
 .spinner-container {
@@ -80,6 +107,14 @@ body {
   position: absolute;
   right: 0px;
   left: unset!important;
+}
+
+.table {
+  color: unset!important;
+}
+
+.table thead th{
+  color: unset!important;
 }
 
 </style>

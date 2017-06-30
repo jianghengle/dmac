@@ -33,9 +33,12 @@
       </text-file>
       <csv-file
         v-if="folderFile.fileType == 'csv'"
-        :file="folderFile"
-        @content-changed="contentChanged">
+        :file="folderFile">
       </csv-file>
+      <zip-file
+        v-if="folderFile.fileType == 'zip'"
+        :file="folderFile">
+      </zip-file>
     </div>
 
     <div class="spinner-container" v-if="waiting">
@@ -53,6 +56,7 @@ import ImageFile from './file-parts/ImageFile'
 import PdfFile from './file-parts/PdfFile'
 import TextFile from './file-parts/TextFile'
 import CsvFile from './file-parts/CsvFile'
+import ZipFile from './file-parts/ZipFile'
 
 export default {
   name: 'folder-file-page',
@@ -63,7 +67,8 @@ export default {
     ImageFile,
     PdfFile,
     TextFile,
-    CsvFile
+    CsvFile,
+    ZipFile
   },
   data () {
     return {

@@ -8,7 +8,7 @@
         {{commit.date}}
       </div>
       <div class="column commit-buttons">
-        <a class="button is-info" @click="revertCommits">
+        <a class="button main-btn" @click="revertCommits">
           <icon name="history"></icon>&nbsp;
           Rollback to This Point
         </a>

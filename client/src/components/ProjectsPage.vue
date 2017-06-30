@@ -10,7 +10,7 @@
           Show Archive
         </label>
         &nbsp;
-        <a class="button is-info" @click="openNewProjectModal">
+        <a class="button main-btn" @click="openNewProjectModal">
           <icon name="plus"></icon>&nbsp;New Project
         </a>
       </span>
@@ -27,7 +27,7 @@
           {{project.name}}
           <span v-if="project.status == 'Archived'">(Archived)</span>
         </span>&nbsp;
-        <span class="edit-icon"
+        <span class="edit-icon main-link"
           v-if="project.projectRole=='Owner' || project.projectRole=='Admin'"
           @click.stop="openEditProjectModal(project)">
           <icon name="edit"></icon>

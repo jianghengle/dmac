@@ -6,7 +6,7 @@
         {{file && file.name}}
       </div>
       <div class="column buttons">
-        <a class="button" @click="addGraph">
+        <a class="button default-btn" @click="addGraph">
           <icon name="line-chart"></icon>&nbsp;
           Draw Graph
         </a>
@@ -25,21 +25,21 @@
       <div class="column tabs is-toggle csv-tabs">
         <ul>
           <li :class="{'is-active': activeTab=='table'}">
-            <a class="tab-button" @click="activeTab = 'table'">Table</a>
+            <a class="tab-button" :class="{'active-btn': activeTab=='table'}" @click="activeTab = 'table'">Table</a>
           </li>
           <li :class="{'is-active': activeTab=='graphs'}">
-            <a class="tab-button" @click="activeTab = 'graphs'">Graph</a>
+            <a class="tab-button" :class="{'active-btn': activeTab=='graphs'}" @click="activeTab = 'graphs'">Graph</a>
           </li>
         </ul>
       </div>
 
       <nav class="column pagination is-right csv-pages" v-show="activeTab=='table'">
         <ul class="pagination-list">
-          <li v-show="currentPage > 0"><a class="pagination-link" @click="showPage(0)">1</a></li>
-          <li v-show="currentPage-1 > 0"><a class="pagination-link" @click="showPage(currentPage-1)">Pre</a></li>
-          <li><a class="pagination-link is-current">{{currentRange}}</a></li>
-          <li v-show="currentPage+1 < totalPages-1"><a class="pagination-link" @click="showPage(currentPage+1)">Next</a></li>
-          <li v-show="currentPage < totalPages-1"><a class="pagination-link" @click="showPage(totalPages-1)">{{totalPages}}</a></li>
+          <li v-show="currentPage > 0"><a class="pagination-link default-btn" @click="showPage(0)">1</a></li>
+          <li v-show="currentPage-1 > 0"><a class="pagination-link default-btn" @click="showPage(currentPage-1)">Pre</a></li>
+          <li><a class="pagination-link is-current active-btn">{{currentRange}}</a></li>
+          <li v-show="currentPage+1 < totalPages-1"><a class="pagination-link default-btn" @click="showPage(currentPage+1)">Next</a></li>
+          <li v-show="currentPage < totalPages-1"><a class="pagination-link default-btn" @click="showPage(totalPages-1)">{{totalPages}}</a></li>
         </ul>
       </nav>
     </div>
@@ -401,6 +401,11 @@ export default {
 .tab-button {
   padding-top: 5px;
   padding-bottom: 5px;
+}
+
+.active-btn {
+  background-color: #2e1052!important;
+  border-color: #2e1052!important;
 }
 
 .csv-pages {

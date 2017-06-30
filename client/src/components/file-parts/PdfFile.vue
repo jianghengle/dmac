@@ -4,7 +4,7 @@
       <div class="view-title column">
         <icon :name="file.icon"></icon>&nbsp;
         {{file && file.name}}&nbsp;
-        <a :href="dataUrl" :download="file && file.name" target="_blank" class="action-icon"><icon name="download"></icon></a>
+        <a :href="dataUrl" :download="file && file.name" target="_blank" class="action-icon main-link"><icon name="download"></icon></a>
       </div>
       <div class="column buttons">
         
@@ -109,7 +109,6 @@ export default {
 }
 
 .action-icon {
-  color: #3273dc;
   position: relative;
   top: 3px;
 }

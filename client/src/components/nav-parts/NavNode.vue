@@ -14,7 +14,7 @@
         <icon v-if="node.type=='urls'" name="share-alt"></icon>
         <icon v-if="node.type=='history'" name="history"></icon>
       </span>
-      <span class="node-name is-clickable"
+      <span class="node-name is-clickable main-link"
         :class="{'is-current': isCurrent}"
         @click="viewNode">
         {{node.name}}
@@ -229,6 +229,7 @@ export default {
 .node-icon {
   position: relative;
   top: 3px;
+  color: #2e1052;
 }
 
 .node-name {
@@ -238,7 +239,7 @@ export default {
 
 .is-current {
   color: white;
-  background-color: #3273dc;
+  background-color: #2e1052;
   font-weight: bold;
 }
 

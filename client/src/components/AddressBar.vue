@@ -5,8 +5,8 @@
     </span>
     &nbsp
     <span v-for="(node, i) in nodes">
-      <span v-if="i != 0">&nbsp;/</span>
-      <a @click="viewNode(node)" class="address-text">
+      <span v-if="i != 0">/</span>
+      <a @click="viewNode(node)" class="address-text main-link">
         {{node.name}}
         <span v-if="node.publicUrl">*</span>
       </a>
@@ -108,12 +108,11 @@ export default {
 
 <style lang="scss" scoped>
 
-.address-text {
-  color: #3273dc;
-}
-
 .nav-icon {
   cursor: pointer;
+  position: relative;
+  top: 3px;
+  color: #2e1052;
 }
 
 </style>

@@ -8,7 +8,7 @@
         Project Users
       </div>
       <div class="column buttons">
-        <a class="button is-info" @click="openNewUserModal">
+        <a class="button main-btn" @click="openNewUserModal">
           <icon name="plus"></icon>&nbsp;
           User
         </a>
@@ -63,7 +63,7 @@
             <td class="text-cell"><span v-if="u.role=='Editor'||u.role=='Viewer'">{{u.group}}</span></td>
             <td class="text-cell">{{u.joinedAt}}</td>
             <td class="text-cell">
-              <a class="edit-icon"
+              <a class="edit-icon main-link"
                 v-if="!u.self && (isOwner || u.role=='Editor' || u.role=='Viewer')"
                 @click="openEditUserModal(u)">
                 <icon name="edit"></icon>
@@ -306,7 +306,6 @@ export default {
 }
 
 .edit-icon {
-  color: #3273dc;
   position: relative;
   top: 3px;
 }

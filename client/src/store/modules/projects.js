@@ -238,7 +238,8 @@ function initFile(file, options, pub){
       image: 'file-image-o',
       pdf: 'file-pdf-o',
       text: 'file-code-o',
-      csv: 'file-code-o'
+      csv: 'file-code-o',
+      zip: 'file-zip-o'
     }
     f.icon = iconMap[f.fileType]
     f.sizeLabel = f.size
@@ -258,7 +259,7 @@ function initFile(file, options, pub){
   }
   opts.sortOption = {
     field: 'fileType',
-    order: ['folder', 'image', 'pdf', 'text', 'csv', 'unknown'],
+    order: ['folder', 'zip', 'image', 'pdf', 'text', 'csv', 'unknown'],
     asc: true
   }
   if(options){

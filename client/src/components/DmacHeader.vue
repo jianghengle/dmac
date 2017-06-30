@@ -7,7 +7,7 @@
           </router-link>
         </div>
         <div class="nav-right">
-          <span class="nav-item app-item" v-if="token">{{email}}</span>
+          <span class="nav-item app-item" v-if="token">Hi, {{name}}</span>
           <a class="nav-item app-item" v-if="token" @click="logout">
             <icon name="sign-out"></icon>&nbsp;Logout
           </a>
@@ -34,8 +34,9 @@ export default {
       }
       return token
     },
-    email () {
-      return this.$store.state.user.email
+    name () {
+      var email = this.$store.state.user.email
+      return email.split('@')[0]
     }
   },
   methods: {
@@ -49,7 +50,7 @@ export default {
 
 <style lang="scss" scoped>
 .header {
-  background-color: #333333;
+  background-color: #2e1052;
   border-radius: 3px;
 }
 

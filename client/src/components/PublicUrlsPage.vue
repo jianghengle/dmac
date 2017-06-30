@@ -17,7 +17,7 @@
         </span>
         <span class="info">{{url.createdAt}}</span>
       </div>
-      <div class="description"><a class="link" :href="url.url" target="_blank">{{url.url}}</a></div>
+      <div class="description"><a class="main-link" :href="url.url" target="_blank">{{url.url}}</a></div>
       <div class="action">
         <a class="button is-danger" @click="deleteUrl(url)">
           Delete

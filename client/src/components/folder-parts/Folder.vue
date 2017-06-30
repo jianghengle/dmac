@@ -4,32 +4,32 @@
       <div class="view-title column">
         <icon name="folder-open-o"></icon>&nbsp;
         {{folder && folder.name}}
-        <a v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
+        <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
           <icon class="action-icon" name="share-alt"></icon>
         </a>
       </div>
       <div class="column buttons">
-        <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFolderModal">
+        <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFolderModal">
           <icon name="plus"></icon>&nbsp;
           Folder
         </a>
-        <a class="button" v-if="canEditFolder" @click="openNewFileModal">
+        <a class="button default-btn" v-if="canEditFolder" @click="openNewFileModal">
           <icon name="plus"></icon>&nbsp;
           File
         </a>
-        <a class="button" v-if="canEditFolder" @click="openFileUploadModal">
+        <a class="button default-btn" v-if="canEditFolder" @click="openFileUploadModal">
           <icon name="upload"></icon>&nbsp;
           File
         </a>
-        <a class="button" v-if="projectRole" @click="copySelection">
+        <a class="button default-btn" v-if="projectRole" @click="copySelection">
           <icon name="copy"></icon>&nbsp;
           Copy
         </a>
-        <a class="button" v-if="canEditFolder" :disabled="!canPaste" @click="pasteSelection">
+        <a class="button default-btn" v-if="canEditFolder" :disabled="!canPaste" @click="pasteSelection">
           <icon name="paste"></icon>&nbsp;
           Paste
         </a>
-        <a class="button" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="publicFolder">
+        <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="publicFolder">
           <icon name="share-alt"></icon>&nbsp;
           Public
         </a>
@@ -93,15 +93,15 @@
             <td class="text-cell">
               <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (f.type=='file' && !f.readonly) : true )"
                 @click.stop="openEditNameModal(f)"
-                class="action-icon">
+                class="action-icon main-link">
                 <icon name="edit"></icon>
               </a>
               <a v-if="f.type=='file' && !urls[f.path]"
                 @click.stop="getDownloadUrl(f)"
-                class="action-icon">
+                class="action-icon main-link">
                 <icon name="download"></icon>
               </a>
-              <a v-if="urls[f.path]" :href="urls[f.path]" @click.stop="">link</a>
+              <a class="main-link" v-if="urls[f.path]" :href="urls[f.path]" @click.stop="">link</a>
             </td>
           </tr>
         </tbody>
@@ -189,7 +189,7 @@ export default {
         context: null
       },
       urls: {},
-      typeOrder: ['folder', 'image', 'pdf', 'text', 'csv', 'unknown'],
+      typeOrder: ['folder', 'zip', 'image', 'pdf', 'text', 'csv', 'unknown'],
       pasting: false,
       selection: {}
     }
@@ -422,7 +422,6 @@ export default {
 }
 
 .action-icon {
-  color: #3273dc;
   position: relative;
   top: 3px;
 }
@@ -430,6 +429,7 @@ export default {
 .type-icon {
   position: relative;
   top: 3px;
+  color: #2e1052;
 }
 
 .asc-icon {

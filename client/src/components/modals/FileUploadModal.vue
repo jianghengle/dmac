@@ -33,7 +33,7 @@
         </div>
       </section>
       <footer class="modal-card-foot">
-        <a class="button is-info" :class="{'is-loading': waiting}" @click="uploadFiles">Upload</a>
+        <a class="button main-btn" :class="{'is-loading': waiting}" @click="uploadFiles">Upload</a>
         <a class="button button-right" @click="close">Cancel</a>
       </footer>
     </div>

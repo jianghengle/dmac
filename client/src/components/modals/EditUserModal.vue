@@ -40,7 +40,7 @@
         </section>
         <footer class="modal-card-foot">
           <a class="button is-danger" :class="{'is-loading': waiting}" :disabled="changed" @click="deleteUser">Delete</a>
-          <a class="button is-info" :class="{'is-loading': waiting}" :disabled="!changeValid" @click="updateUser">Update</a>
+          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!changeValid" @click="updateUser">Update</a>
           <a class="button button-right" @click="close">Cancel</a> 
         </footer>
       </div>
