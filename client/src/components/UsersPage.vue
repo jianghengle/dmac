@@ -12,6 +12,13 @@
           <icon name="plus"></icon>&nbsp;
           User
         </a>
+        <a class="button default-btn" @click="openImportUsersModal">
+          <span>Import</span>
+        </a>
+        <a class="button default-btn" target="_blank"
+          :href="exportUrl" download="users.csv">
+          <span>Export</span>
+        </a>
       </div>
     </div>
 
@@ -95,6 +102,13 @@
       :user="editUserModal.user"
       @close-edit-user-modal="closeEditUserModal">
     </edit-user-modal>
+
+    <import-users-modal
+      :opened="importUsersModal.opened"
+      :users="users"
+      :project-id="projectId"
+      @close-import-users-modal="closeImportUsersModal">
+    </import-users-modal>
     
   </div>
 </template>
@@ -104,13 +118,15 @@ import AddressBar from './AddressBar'
 import DateForm from 'dateformat'
 import NewUserModal from './modals/NewUserModal'
 import EditUserModal from './modals/EditUserModal'
+import ImportUsersModal from './modals/ImportUsersModal'
 
 export default {
   name: 'UsersPage',
   components: {
     AddressBar,
     NewUserModal,
-    EditUserModal
+    EditUserModal,
+    ImportUsersModal
   },
   data () {
     return {
@@ -129,6 +145,9 @@ export default {
         opened: false,
         user: null
       },
+      importUsersModal: {
+        opened: false
+      },
     }
   },
   computed: {
@@ -144,6 +163,14 @@ export default {
     project () {
       return this.nodeMap['/projects/' + this.projectId]
     },
+    exportUrl () {
+      var csv = 'Email, Role, Group\r\n'
+      this.users.forEach(function(u){
+        csv = csv + u.email + ', ' + u.role + ', ' + u.group + '\r\n'
+      })
+      var blob = new Blob([csv], {type: 'file'})
+      return URL.createObjectURL(blob)
+    }
   },
   watch: {
     projectId: function (val) {
@@ -151,7 +178,7 @@ export default {
       if(!this.project){
         this.requestProject()
       }
-    },
+    }
   },
   methods: {
     requestProject () {
@@ -269,7 +296,16 @@ export default {
         if(this.users[i].id == user.id)
           return i
       }
-    }
+    },
+    openImportUsersModal(){
+      this.importUsersModal.opened = true
+    },
+    closeImportUsersModal(result){
+      this.importUsersModal.opened = false
+      if(result){
+        this.requestUsers()
+      }
+    },
   },
   mounted () {
     var vm = this
