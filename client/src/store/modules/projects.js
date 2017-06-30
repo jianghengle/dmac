@@ -5,7 +5,7 @@ import DateForm from 'dateformat'
 export const state = {
   showNav: false,
   nodeMap: {},
-  showArchive: false,
+  showAll: false,
   clipboard: {projectId: null, dataPaths: []},
   publicDataPath: ''
 }
@@ -138,8 +138,8 @@ export const mutations = {
     sortChildren(node, state.nodeMap)
   },
 
-  setShowArchive(state, val) {
-    state.showArchive = val
+  setShowAll(state, val) {
+    state.showAll = val
   },
 
   toggleSelected(state, path) {

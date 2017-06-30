@@ -5,9 +5,9 @@
       <icon name="database"></icon>
       Projects
       <span class="options">
-        <label class="checkbox" @click="toggleShowArchive">
-          <input type="checkbox" v-model="showArchiveInput">
-          Show Archive
+        <label class="checkbox" @click="toggleShowAll">
+          <input type="checkbox" v-model="showAllInput">
+          Show All
         </label>
         &nbsp;
         <a class="button main-btn" @click="openNewProjectModal">
@@ -20,12 +20,13 @@
       <button class="delete" @click="error=''"></button>
       {{error}}
     </div>
-    <div class="box project-box" :class="{'archived': project.status=='Archived'}" v-for="project in projects":key="project.id"
-      v-if="project.status!='Archived' || showArchive" @click="viewProject(project)">
+    <div class="box project-box" :class="{'inactive': project.status!='Active'}" v-for="project in projects":key="project.id"
+      v-if="project.status=='Active' || showAll" @click="viewProject(project)">
       <div class="header">
         <span class="name">
           {{project.name}}
           <span v-if="project.status == 'Archived'">(Archived)</span>
+          <span v-if="project.status == 'Template'">(Template)</span>
         </span>&nbsp;
         <span class="edit-icon main-link"
           v-if="project.projectRole=='Owner' || project.projectRole=='Admin'"
@@ -45,6 +46,7 @@
 
     <new-project-modal
       :opened="newProjectModal.opened"
+      :templates="templates"
       @close-new-project-modal="closeNewProjectModal">
     </new-project-modal>
 
@@ -79,7 +81,7 @@ export default {
         opened: false,
         project: null
       },
-      showArchiveInput: false
+      showAllInput: false
     }
   },
   computed: {
@@ -94,16 +96,23 @@ export default {
         return vm.nodeMap[c]
       })
     },
-    showArchive () {
-      return this.$store.state.projects.showArchive
+    templates () {
+      var templates = this.projects.filter(function(p){
+        return p.status == 'Template' && (p.projectRole == 'Owner' || p.projectRole == 'Admin')
+      })
+      templates.unshift({id: '', name: '(blank)'})
+      return templates
+    },
+    showAll () {
+      return this.$store.state.projects.showAll
     }
   },
   watch: {
-    showArchive: function (val) {
-      this.showArchiveInput = val
+    showAll: function (val) {
+      this.showAllInput = val
     },
     projects: function(val) {
-      this.initShowArchive()
+      this.initShowAll()
     }
   },
   methods: {
@@ -141,10 +150,10 @@ export default {
         this.requestProjects()
       }
     },
-    toggleShowArchive(){
-      this.$store.commit('projects/setShowArchive', this.showArchiveInput)
+    toggleShowAll(){
+      this.$store.commit('projects/setShowAll', this.showAllInput)
     },
-    initShowArchive(){
+    initShowAll(){
       if(this.projects && this.projects.length){
         var noActive = true
         for(var i=0;i<this.projects.length;i++){
@@ -154,7 +163,8 @@ export default {
           }
         }
         if(noActive){
-          this.$store.commit('projects/setShowArchive', true)
+          console.log('commit')
+          this.$store.commit('projects/setShowAll', true)
         }
       }
     }
@@ -164,8 +174,8 @@ export default {
     vm.$nextTick(function(){
       vm.requestProjects()
     })
-    this.showArchiveInput = this.showArchive
-    this.initShowArchive()
+    this.showAllInput = this.showAll
+    this.initShowAll()
   },
 }
 </script>
@@ -190,7 +200,7 @@ export default {
   padding-bottom: 10px;
   margin-bottom: 15px;
   
-  &.archived {
+  &.inactive {
     color: #7a7a7a;
   }
 

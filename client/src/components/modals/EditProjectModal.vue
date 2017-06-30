@@ -25,6 +25,7 @@
                 <select v-model="newStatus">
                   <option>Active</option>
                   <option>Archived</option>
+                  <option>Template</option>
                 </select>
               </span>
             </p>

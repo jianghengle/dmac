@@ -97,10 +97,21 @@ module DMACServer
           email = verify_token(ctx)
           name = get_param!(ctx, "name")
           description = get_param!(ctx, "description")
+          template_id = get_param!(ctx, "templateId")
+          copy_users = get_param!(ctx, "copyUsers")
+
           project = Project.create_project(name, description)
           Control.create_control(email, project, "Owner", "")
           MyFile.create_folder(project, "-root-")
-          Git.init(project)
+          if template_id != ""
+            template = Project.get_project!(template_id)
+            MyFile.copy_project_files(template, project)
+            if copy_users == "true"
+              Control.copy_controls(template, project, email)
+            end
+          end
+
+          Git.init(project, email)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -179,7 +190,7 @@ module DMACServer
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
-
+          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
 
           MyFile.create_file(project, data_path, control)
           rel_path = data_path.gsub("--", "/")
@@ -202,6 +213,7 @@ module DMACServer
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
+          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
 
           MyFile.update_folder_file_name(project, data_path, name, control)
 
@@ -225,6 +237,7 @@ module DMACServer
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
+          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
 
           MyFile.delete_folder_file(project, data_path, control)
 
@@ -249,6 +262,7 @@ module DMACServer
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
+          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
 
           rel_path = MyFile.upload_file(project, data_path, file, control)
           Git.commit(project, email + " uploaded " + rel_path)
@@ -271,6 +285,7 @@ module DMACServer
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
+          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
 
           MyFile.save_text_file(project, data_path, text, control)
 
@@ -298,6 +313,7 @@ module DMACServer
           target_project = Project.get_project!(target_project_id)
           target_control = Control.get_control!(email, target_project)
           raise "Permission denied" if target_control.role.to_s == "Viewer"
+          raise "Permission denied" if (target_control.role.to_s == "Editor" && target_project.status != "Active")
 
           source_files = [] of MyFile
           source_data_paths.split(",") do |dp|

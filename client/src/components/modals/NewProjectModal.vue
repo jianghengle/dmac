@@ -24,6 +24,26 @@
               <textarea class="textarea" v-model="newDescription"></textarea>
             </p>
           </div>
+          <div class="field">
+            <label class="label">Template</label>
+            <p class="control">
+              <span class="select">
+                <select v-model="templateId">
+                  <option v-for="option in templates" v-bind:value="option.id">
+                    {{ option.name }}
+                  </option>
+                </select>
+              </span>
+            </p>
+          </div>
+          <div class="field" v-if="templateId">
+            <p class="control">
+              <label class="checkbox">
+                <input type="checkbox" v-model="copyUsers">
+                Copy Users
+              </label>
+            </p>
+          </div>
         </section>
         <footer class="modal-card-foot">
           <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!newName.length" @click="create">Create</a>
@@ -36,13 +56,15 @@
 <script>
 export default {
   name: 'new-project-modal',
-  props: ['opened'],
+  props: ['opened', 'templates'],
   data () {
     return {
       error: '',
       waiting: false,
       newName: '',
-      newDescription: ''
+      newDescription: '',
+      templateId: '',
+      copyUsers: ''
     }
   },
   watch: {
@@ -51,6 +73,7 @@ export default {
         this.newName = ''
         this.newDescription = ''
         this.error = ''
+        this.waiting = false
       }
     },
   },
@@ -64,7 +87,7 @@ export default {
       if(!this.newName.length) return
       var vm = this
       vm.waiting = true
-      var message = {name: vm.newName, description: vm.newDescription}
+      var message = {name: vm.newName, description: vm.newDescription, templateId: vm.templateId, copyUsers: vm.copyUsers}
       vm.$http.post(xHTTPx + '/create_project', message).then(response => {
         vm.waiting= false
         vm.newName = ''

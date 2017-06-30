@@ -75,8 +75,8 @@ export default {
     children () {
       return this.node && this.node.children
     },
-    showArchive () {
-      return this.$store.state.projects.showArchive
+    showAll () {
+      return this.$store.state.projects.showAll
     },
     publicKey () {
       return this.$route.params.publicKey
@@ -100,9 +100,9 @@ export default {
       var type = node && node.type
       if(type == 'projects') return true
       if(type == 'project'){
-        if(this.showArchive) return true
-        if(node.status == 'Archived') return false
-        return true
+        if(this.showAll) return true
+        if(node.status == 'Active') return true
+        return false
       }
 
       var role = this.nodeProjectRole

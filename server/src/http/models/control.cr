@@ -94,6 +94,16 @@ module DMACServer
         raise changeset.errors.to_s unless changeset.valid?
       end
 
+      def self.copy_controls(source, target, email)
+        controls = Control.get_controls_by_project_id(source.id)
+        controls.each do |c|
+          next if c.email.to_s == email
+          role = c.role.to_s
+          role = "Admin" if role == "Owner"
+          Control.create_control(c.email.to_s, target, role, c.group_name.to_s)
+        end
+      end
+
     end
   end
 end

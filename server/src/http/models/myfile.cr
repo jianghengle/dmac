@@ -403,9 +403,9 @@ module DMACServer
           next if filename.to_s == "." || filename.to_s == ".."
           source = temp_path + "/" + filename
           if File.file? source
-            MyFile.copy_file_from_temp(source, target_path)
+            MyFile.copy_file_from_outside(source, target_path)
           else
-            MyFile.copy_folder_from_temp(source, target_path)
+            MyFile.copy_folder_from_outside(source, target_path)
           end
         end
       end
@@ -419,7 +419,7 @@ module DMACServer
         return temp_path
       end
 
-      def self.copy_file_from_temp(source, target)
+      def self.copy_file_from_outside(source, target)
         name = File.basename(source)
         target_path = MyFile.make_target(target, name, false)
         File.open(target_path, "w") do |tf|
@@ -429,7 +429,7 @@ module DMACServer
         end
       end
 
-      def self.copy_folder_from_temp(source, target)
+      def self.copy_folder_from_outside(source, target)
         name = File.basename(source)
         new_target = MyFile.make_target(target, name, false)
         Dir.mkdir(new_target)
@@ -437,9 +437,9 @@ module DMACServer
           next if @@ignore.has_key? filename.to_s
           new_source = source + "/" + filename
           if File.file? new_source
-            MyFile.copy_file_from_temp(new_source, new_target)
+            MyFile.copy_file_from_outside(new_source, new_target)
           else
-            MyFile.copy_folder_from_temp(new_source, new_target)
+            MyFile.copy_folder_from_outside(new_source, new_target)
           end
         end
       end
@@ -455,6 +455,20 @@ module DMACServer
         command = "cd " + temp_path + " && zip -r " + key + " *"
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
+      end
+
+      def self.copy_project_files(source, target)
+        source_path = @@root + "/" + source.key.to_s
+        target_path = @@root + "/" + target.key.to_s
+        Dir.foreach source_path do |filename|
+          next if @@ignore.has_key? filename.to_s
+          path = source_path + "/" + filename
+          if File.file? path
+            MyFile.copy_file_from_outside(path, target_path)
+          else
+            MyFile.copy_folder_from_outside(path, target_path)
+          end
+        end
       end
 
     end

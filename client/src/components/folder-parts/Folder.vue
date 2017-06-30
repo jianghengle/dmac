@@ -91,7 +91,7 @@
             </td>
             <td class="text-cell">{{f.modifiedAt}}</td>
             <td class="text-cell">
-              <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (f.type=='file' && !f.readonly) : true )"
+              <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' &&f.type=='file' && !f.readonly) : true )"
                 @click.stop="openEditNameModal(f)"
                 class="action-icon main-link">
                 <icon name="edit"></icon>
@@ -212,6 +212,7 @@ export default {
       if(!this.projectRole) return false
       if(this.projectRole == 'Viewer') return false
       if(this.projectRole == 'Owner' || this.projectRole == 'Admin') return true
+      if(this.project.status != "Active") return false
       return !this.folder.readonly
     },
     files () {

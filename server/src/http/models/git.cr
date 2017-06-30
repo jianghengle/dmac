@@ -33,9 +33,10 @@ module DMACServer
         result
       end
 
-      def self.init(project)
+      def self.init(project, email)
         project_root = @@root + "/" + project.key.to_s
-        command = "cd " + project_root + " && git init"
+        command = "cd " + project_root + " && git init && git add ."
+        command = command + " && git commit -m\"" + email + " initialized project\""
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
         io.to_s
