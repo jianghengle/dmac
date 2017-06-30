@@ -36,8 +36,6 @@ module DMACServer
         raise "download expired"
       end
 
-
-
     end
   end
 end

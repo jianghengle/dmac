@@ -322,7 +322,7 @@ module DMACServer
         end
       end
 
-      def extract_file(ctx)
+      def unzip_file(ctx)
         begin
           email = verify_token(ctx)
           project_id = get_param!(ctx, "projectId")
@@ -332,7 +332,7 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          MyFile.extract_file(project, data_path)
+          MyFile.unzip_file(project, data_path)
 
           rel_path = data_path.gsub("--", "/")
           Git.commit(project, email + " extract " + rel_path)

@@ -16,6 +16,8 @@ module DMACServer
           control = Control.get_control!(email, project)
 
           download = Download.create_download(project.key.to_s, data_path)
+          MyFile.prepare_download(download, project, data_path, control)
+
           download.to_url.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -33,8 +35,13 @@ module DMACServer
           project = Project.get_project!(project_id)
           public = Public.get_public!(public_key)
           raise "Wrong header" unless data_path.starts_with? public.data_path.to_s
-
           download = Download.create_download(project.key.to_s, data_path)
+
+          control = Control.new
+          control.role = "Viewer"
+          control.group_name = ""
+          MyFile.prepare_download(download, project, data_path, control)
+
           download.to_url.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -49,8 +56,9 @@ module DMACServer
           download = Download.get_download(key)
           project_key = download.project_key.to_s
           data_path = download.data_path.to_s
-          full_path = MyFile.get_full_path(project_key, data_path)
-          filename = File.basename(full_path)
+          full_path = MyFile.get_download_path(download)
+          filename = File.basename(data_path.gsub("--", "/"))
+          filename = filename + ".zip" if full_path.ends_with?(key + "/" + key + ".zip")
           ext= File.extname(full_path)
           ctx.response.headers["Content-Disposition"] =  "attachment; filename=\"" + filename + "\""
           if ext.downcase == ".pdf"

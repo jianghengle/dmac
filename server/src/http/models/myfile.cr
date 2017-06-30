@@ -307,10 +307,14 @@ module DMACServer
         return path + "/" + new_name
       end
 
-      def self.get_full_path(project_key, data_path)
-        full_path = @@root + "/" + project_key.to_s + "/" + data_path.gsub("--", "/")
+      def self.get_download_path(download)
+        key = download.key.to_s
+        project_key = download.project_key.to_s
+        data_path = download.data_path.to_s
+        full_path = @@root + "/" + project_key + "/" + data_path.gsub("--", "/")
         raise "No such path" unless File.exists?(full_path)
-        return full_path
+        return full_path if File.file? full_path
+        return @@tmp + "/" + key + "/" + key + ".zip"
       end
 
       def self.save_text_file(project, data_path, text, control)
@@ -386,9 +390,9 @@ module DMACServer
         return target_path + "/" + new_name
       end
 
-      def self.extract_file(project, data_path)
+      def self.unzip_file(project, data_path)
         file = MyFile.new(project, data_path)
-        temp_path = MyFile.extract_to_temp(file.full_path)
+        temp_path = MyFile.unzip_to_temp(file.full_path)
 
         target_path = ""
         file.full_path.split('/') do |s|
@@ -406,7 +410,7 @@ module DMACServer
         end
       end
 
-      def self.extract_to_temp(source)
+      def self.unzip_to_temp(source)
         temp_path = @@tmp + "/" + SecureRandom.hex(32).to_s
         Dir.mkdir(temp_path)
         command = "unzip " + source + " -d " + temp_path
@@ -439,6 +443,20 @@ module DMACServer
           end
         end
       end
+
+      def self.prepare_download(download, project, data_path, control)
+        file = MyFile.new(project, data_path)
+        return if file.type == "file"
+        key = download.key.to_s
+        temp_path = @@tmp + "/" + key
+        Dir.mkdir(temp_path)
+        new_folders = {} of String => Bool
+        MyFile.copy_folder(file.full_path, temp_path, new_folders, control, project)
+        command = "cd " + temp_path + " && zip -r " + key + " *"
+        io = IO::Memory.new
+        Process.run(command, shell: true, output: io)
+      end
+
     end
 
   end

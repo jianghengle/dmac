@@ -96,7 +96,7 @@
                 class="action-icon main-link">
                 <icon name="edit"></icon>
               </a>
-              <a v-if="f.type=='file' && !urls[f.path]"
+              <a v-if="!urls[f.path]"
                 @click.stop="getDownloadUrl(f)"
                 class="action-icon main-link">
                 <icon name="download"></icon>

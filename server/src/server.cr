@@ -123,8 +123,8 @@ module DMACServer
         HttpAPI::ProjectController.copy_folder_file(env)
       end
 
-      post "/extract_file" do |env|
-        HttpAPI::ProjectController.extract_file(env)
+      post "/unzip_file" do |env|
+        HttpAPI::ProjectController.unzip_file(env)
       end
 
       post "/make_folder_public" do |env|

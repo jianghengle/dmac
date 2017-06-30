@@ -7,7 +7,7 @@
       </div>
       <div class="column buttons">
         <a class="button default-btn" v-if="projectRole == 'Owner' || projectRole == 'Admin'" @click="unzipFile">
-          Extract
+          Unzip here
         </a>
       </div>
     </div>
@@ -116,7 +116,7 @@ export default {
         'projectId': this.projectId,
         'dataPath': this.file.dataPath
       }
-      this.$http.post(xHTTPx + '/extract_file', message).then(response => {
+      this.$http.post(xHTTPx + '/unzip_file', message).then(response => {
         this.status = 'Done extracting.'
         this.waiting = false
       }, response => {
