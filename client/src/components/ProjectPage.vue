@@ -182,6 +182,11 @@ export default {
       return 25*lines + 'px'
     }
   },
+  watch: {
+    projectId: function (val) {
+      this.requestProject()
+    },
+  },
   methods: {
     requestProject () {
       var vm = this

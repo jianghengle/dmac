@@ -38,6 +38,9 @@ export default {
     routeName () {
       return this.$route.name
     },
+    commitHash () {
+      return this.$route.params.hash
+    },
     nodeMap () {
       return this.$store.state.projects.nodeMap
     },
@@ -58,6 +61,11 @@ export default {
           nodes.push(this.getNode('/projects/' + this.projectId + '/history'))
         }else if(this.routeName == 'CommitPage'){
           nodes.push(this.getNode('/projects/' + this.projectId + '/history'))
+          var commitNode = {
+            name: this.commitHash,
+            path: '/projects/' + this.projectId + '/history/' + this.commitHash
+          }
+          nodes.push(commitNode)
         }else{
           nodes.push(this.getNode('/projects/' + this.projectId + '/data/-root-'))
           var files = this.dataPath.split('--')

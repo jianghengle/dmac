@@ -40,6 +40,8 @@ import 'vue-awesome/icons/share-alt'
 import 'vue-awesome/icons/history'
 import 'vue-awesome/icons/line-chart'
 import 'vue-awesome/icons/remove'
+import 'vue-awesome/icons/question'
+import 'vue-awesome/icons/arrow-left'
 import Icon from 'vue-awesome/components/Icon'
 Vue.component('icon', Icon)
 

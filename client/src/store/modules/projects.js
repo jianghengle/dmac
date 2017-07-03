@@ -237,8 +237,9 @@ function initFile(file, options, pub){
       unknown: 'file-o',
       image: 'file-image-o',
       pdf: 'file-pdf-o',
-      text: 'file-code-o',
-      csv: 'file-code-o',
+      text: 'file-o',
+      code: 'file-code-o',
+      csv: 'file-o',
       zip: 'file-zip-o'
     }
     f.icon = iconMap[f.fileType]
@@ -258,8 +259,8 @@ function initFile(file, options, pub){
     opts.open = false
   }
   opts.sortOption = {
-    field: 'fileType',
-    order: ['folder', 'zip', 'image', 'pdf', 'text', 'csv', 'unknown'],
+    field: 'type',
+    order: ['folder', 'file'],
     asc: true
   }
   if(options){

@@ -79,7 +79,7 @@ module DMACServer
 
           files.each_index do |i|
             f = files[i]
-            read_text = i == 0 && (f.fileType == "text" || f.fileType == "csv")
+            read_text = i == 0 && (f.fileType == "text" || f.fileType == "code")
             public_url = ""
             public_url = publics[f.rel_path] if publics.has_key? f.rel_path
             arr << f.to_json(read_text, public_url)

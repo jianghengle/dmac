@@ -41,8 +41,8 @@
         <thead>
           <tr>
             <th class="number-cell is-clickable" @click="toggleAll">{{files.length}}</th>
-            <th class="text-cell is-clickable" @click="sortNodeChildren('fileType', typeOrder)">Type
-              <span v-if="sortOption.field=='fileType'">
+            <th class="text-cell is-clickable" @click="sortNodeChildren('type', typeOrder)">Type
+              <span v-if="sortOption.field=='type'">
                 <icon class="asc-icon" name="sort-asc" v-if="sortOption.asc"></icon>
                 <icon name="sort-desc" v-if="!sortOption.asc"></icon>
               </span>
@@ -189,7 +189,7 @@ export default {
         context: null
       },
       urls: {},
-      typeOrder: ['folder', 'zip', 'image', 'pdf', 'text', 'csv', 'unknown'],
+      typeOrder: ['folder', 'file'],
       pasting: false,
       selection: {}
     }
@@ -430,7 +430,6 @@ export default {
 .type-icon {
   position: relative;
   top: 3px;
-  color: #2e1052;
 }
 
 .asc-icon {

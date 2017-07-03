@@ -24,6 +24,7 @@
           :readonly="!canEdit"
           :class="{'is-danger': textChanged}"
           :style="{height: textAreaHeight}"
+          :spellcheck="file.fileType=='text'"
           v-model="textInput">
         </textarea>
       </p>

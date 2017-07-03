@@ -27,7 +27,7 @@
         :file="folderFile">
       </pdf-file>
       <text-file
-        v-if="folderFile.fileType == 'text'"
+        v-if="folderFile.fileType == 'text' || folderFile.fileType == 'code'"
         :file="folderFile"
         @content-changed="contentChanged">
       </text-file>

@@ -7,6 +7,7 @@ import PublicUrlsPage from '@/components/PublicUrlsPage'
 import FolderFilePage from '@/components/FolderFilePage'
 import HistoryPage from '@/components/HistoryPage'
 import CommitPage from '@/components/CommitPage'
+import HelpPage from '@/components/HelpPage'
 
 Vue.use(Router)
 
@@ -15,6 +16,11 @@ export default new Router({
     {
       path: '/',
       redirect: '/projects'
+    },
+    {
+      path: '/help',
+      name: 'Help',
+      component: HelpPage
     },
     {
       path: '/projects',

@@ -8,6 +8,9 @@
         </div>
         <div class="nav-right">
           <span class="nav-item app-item" v-if="token">Hi, {{name}}</span>
+          <router-link class="nav-item app-item" v-if="token" :to="'/help'">
+            <icon name="question"></icon>&nbsp;Help
+          </router-link>
           <a class="nav-item app-item" v-if="token" @click="logout">
             <icon name="sign-out"></icon>&nbsp;Logout
           </a>
