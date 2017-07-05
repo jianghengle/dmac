@@ -1,20 +1,47 @@
 <template>
 
   <div class="help-page">
+    <div>
+      <a class="button default-btn back-btn" @click="$router.go(-1)">
+        <icon name="arrow-left"></icon>&nbsp;
+        Go Back
+      </a>
+    </div>
 
-    <a class="button default-btn back-btn" @click="$router.go(-1)">
-      <icon name="arrow-left"></icon>&nbsp;
-      Go Back
-    </a>
+    <div class="help-nav">
+      <a class="main-link" @click="scrollToElement('helpOnProject')">
+        Create a Project
+      </a>
+      <br/>
+      <a class="main-link" @click="scrollToElement('helpOnPermission')">
+        Project Status, Role and Permission
+      </a>
+      <br/>
+      <a class="main-link" @click="scrollToElement('helpOnGroup')">
+        Group
+      </a>
+      <br/>
+      <a class="main-link" @click="scrollToElement('helpOnFileTypes')">
+        File Types
+      </a>
+      <br/>
+      <a class="main-link" @click="scrollToElement('HelpOnPublicUrl')">
+        Public Url
+      </a>
+      <br/>
+      <a class="main-link" @click="scrollToElement('helpOnHistory')">
+        History
+      </a>
+    </div>
 
     <div class="content help-content">
       
-      <h3>Create a Project</h3>
+      <h3 id="helpOnProject">Create a Project</h3>
 
       <p>A project is a file container associated with a group of users</p>
       <p>On your projects page, you could create an blank project or from an existing template. A template is simply a project with status of <span class="quote">Template</span>. When creating from a template, all the content from the template will be copied into the new project. You could also check the <span class="quote">Copy Users</span> checkbox, which will copy all users from the template to the new one.</p>
 
-      <h3>Project Status, Role and Permission</h3>
+      <h3 id="helpOnPermission">Project Status, Role and Permission</h3>
 
       <p>A project can be of one of the three status: <span class="quote">Active</span>(default), <span class="quote">Archived</span>, <span class="quote">Template</span>. You could change a project's status by clicking <span class="icon"><icon name="edit"></icon></span> on the project.</p>
       <p>On your projects page, you could only see <span class="quote">Active</span> projects by default. Check <span class="quote">Show All</span> if you want to see all projects.</p>
@@ -33,32 +60,32 @@
         </ul>
       </p>
 
-      <h3>Group</h3>
+      <h3 id="helpOnGroup">Group</h3>
 
       <p><span class="quote">Editors</span> and <span class="quote">Viewers</span> can also be assigned into groups to put more controls on who can access what folders.</p>
       <p>A project user can be edited to be assigned with a group name. A project user with an empty group name is a non-group user.</p>
-      <p>A folder named as the pattern of <span class="quote">_groupname_foldername</span> is a group folder. A group folder can be accessible to its group users and non-group users but not to other group users. A folder does not apply this pattern is a normal folder, which is accessible to all group or non-group users.</p>
+      <p>A folder named as the pattern of <span class="quote">_groupname_foldername</span> is a group folder. A group folder is accessible to its group users and non-group users but not to other group users. A folder does not apply this pattern is a normal folder, which is accessible to all group or non-group users.</p>
 
-      <h3>File Types</h3>
+      <h3 id="helpOnFileTypes">File Types</h3>
 
       <p>The application uses file name and file extension to determine what kind file it is and how to open it in browser. Currently it can open <span class="quote">image</span>, <span class="quote">pdf</span>, <span class="quote">plain text</span>, <span class="quote">csv</span> and <span class="quote">zip</span> files.
         <ul>
           <li><span class="quote">image</span>: <span class="quote">.png</span>, <span class="quote">.jpg</span>, <span class="quote">.jpeg</span>, <span class="quote">.gif</span>, <span class="quote">.bmp</span></li>
           <li><span class="quote">pdf</span>: <span class="quote">.pdf</span></li>
           <li><span class="quote">plain text</span>: <span class="quote">.txt</span>, <span class="quote">.md</span>, <span class="quote">.r</span>, <span class="quote">.m</span>, <span class="quote">.py</span>, <span class="quote">.rb</span>, <span class="quote">.sh</span>, <span class="quote">makefile</span>, <span class="quote">.c</span>, <span class="quote">.h</span>, <span class="quote">.cpp</span>, <span class="quote">.hpp</span>, <span class="quote">.js</span>, <span class="quote">.json</span>, <span class="quote">.cr</span>, <span class="quote">.html</span>, <span class="quote">.css</span>, <span class="quote">.vue</span> They are also editable in browser.</li>
-          <li><span class="quote">csv</span>: <span class="quote">.csv</span>, <span class="quote">.tsv</span></li>
+          <li><span class="quote">csv</span>: <span class="quote">.csv</span>, <span class="quote">.tsv</span> Columns could be drawn into graphs.</li>
           <li><span class="quote">zip</span>: <span class="quote">.zip</span> They can be unzipped online.</li>
           <li>Other files will be only opened for download.</li>
         </ul>
       </p>
       
-      <h3>Public Url</h3>
+      <h3 id="HelpOnPublicUrl">Public Url</h3>
 
       <p>A public url allows other people to access a folder inside of a project. Those people do not need be project users or even DMAC users as long as they know the url.</p>
       <p>To generate a public url, go to the folder you want to make public and click <span class="quote">Public</span> button, then a public url is generated. You could test it by click <span class="icon"><icon name="share-alt"></icon></span> near folder name. You could send it to anyone you want to let them to view your folder. Anyone access the folder through public url can ONLY view but not edit the files inside.</p>
       <p>To view and manage public urls of a project, click <span class="quote">Public Urls</span> button on the project page, and then you could see all the public urls of this project, and delete anyone if you want.</p>
 
-      <h3>History</h3>
+      <h3 id="helpOnHistory">History</h3>
 
       <p>History allow you view all this edit history of your project. To view the history, click <span class="quote">History</span> button on the project page, then you will see a list of edit history from latest to oldest.</p>
       <p>You could click into each record to see what changes it made. The red lines starting with <span class="quote red">-</span> are what were deleted, while the green lines starting with <span class="quote green">+</span> are what were added.</p>
@@ -75,6 +102,12 @@
 
 export default {
   name: 'help-page',
+  methods: {
+    scrollToElement(id){
+      var el = document.getElementById(id)
+      window.scroll(0, el.offsetTop)
+    }
+  }
 }
 </script>
 
@@ -88,9 +121,22 @@ export default {
   margin-bottom: 10px;
 }
 
+.help-nav {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #EEEEEE;
+  border-radius: 5px;
+  background-color: #EEEEEE;
+}
+
 .help-content {
   padding: 10px;
   color: black!important;
+}
+
+h3 {
+  color: #2e1052;
 }
 
 .quote {
