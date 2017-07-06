@@ -1,2 +1,30 @@
-# dmac
-dmac web app
+# DMAC
+The prototype of Data Management and Analysis Core.
+  
+Need to install Postgres, Git, Zip and Unzip on the server to make the application fully work.
+
+It has three components: `admin`, `server`, `client`. Each need to be install and run seperately. Refer to the README inside each for installation instruction.
+
+
+The `admin` is a rails application for database migration and management.
+
+The `server` is the backend, which is a pure Rest API server in Crystal.
+
+The `client` is the frontend, which is a Vuejs application.
+
+The frontend and backend is fully decoupled. The built `client` code can be served from anywhere.
+
+Currently, I deployed all codes on one Anvil instance. The code is checked out in the HOME directory, and run as SystemD services: `dmac_admin.service`, `dmac_server.service`. The built `client` is also in HOME as the `dist` directory and served by the API server together. Additionally, there is a `dmac_cleaner.service` running daily by the timer `dmac_cleaner.service`. You could take a look at the service files in `services` in HOME, but the actually service files are in `\usr\lib\systemd\system`.
+
+The project files are in `HOME/dmac-root`, which is set as environment variable `DMAC_ROOT`. You could take a look at `dmac_server.service` to see this variable and `PG_URL` variable, which contains the database info.
+
+To redeploy the application:
+* Go to `dmac` directory and checkout the latest dev
+* If `admin` needs to be redeployed:
+  - If there is new migrations, go to `admin` and run `rake db:migrate`
+  - Restart the service: `sudo systemctl restart dmac_admin`
+* If `server` needs to be redeployed:
+  - Go to `server` and run `shards build`
+  - Restart the service: `sudo systemctl restart dmac_server`
+* If `client` needs to be redeployed:
+  - build `client` locally and `scp -r dist centos@server:~`
