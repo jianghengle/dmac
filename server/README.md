@@ -16,3 +16,7 @@ Cleaner `crystal src/cleaner.cr`
 
 ## Build for deployment
 `shards build`
+
+## Serve client
+Make a symbolic link called `public` to your client `dist` folder `ln -s your_dist public`
+
