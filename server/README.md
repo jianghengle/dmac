@@ -1,5 +1,5 @@
 # Server
-This is the API server for DMAC
+This is the API server for DMAC in Kemal (http://kemalcr.com) in Crystal (https://crystal-lang.org)
 
 Envrionmental variables:  
 PG_URL: the database url like: postgres://username:password@localhost:5432/dmac_development
