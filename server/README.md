@@ -10,7 +10,7 @@ DMAC_ROOT: the root directory for projects
 2. `shards install`
 
 ## Usage
-API Server `crystal src/server.cr`
+API Server `crystal src/server.cr`. It serves on port 3000.
 
 Cleaner `crystal src/cleaner.cr`
 
