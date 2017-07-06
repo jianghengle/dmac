@@ -470,6 +470,18 @@ module DMACServer
         end
       end
 
+      def self.clean_temp
+        now = Time.now
+        Dir.foreach @@tmp do |filename|
+          next if filename.to_s == "." || filename.to_s == ".."
+          path = @@tmp + "/" + filename
+          created_at = File.stat(path).ctime
+          span = now - created_at.as(Time)
+          next if span.total_minutes < 60
+          MyFile.delete_files(path)
+        end
+      end
+
     end
 
   end

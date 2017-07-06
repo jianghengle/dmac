@@ -7,6 +7,8 @@ authors:
 targets:
   server:
     main: src/server.cr
+  cleaner:
+    main: src/cleaner.cr
 
 crystal: 0.22.0
 

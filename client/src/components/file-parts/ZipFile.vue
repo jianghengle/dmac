@@ -13,7 +13,9 @@
     </div>
 
     <div class="file-content">
-      You could extract it to the same folder ...
+      <div v-if="projectRole == 'Owner' || projectRole == 'Admin'">
+        You could extract it to the same folder ...
+      </div>
       <div>{{status}}</div>
       <div v-if="error" class="notification is-danger">
         <button class="delete" @click="error=''"></button>

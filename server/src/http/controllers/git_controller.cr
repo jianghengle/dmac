@@ -67,6 +67,25 @@ module DMACServer
         end
       end
 
+      def delete_history(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          hash = get_param!(ctx, "hash")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
+
+          Git.delete_history(project, hash, email)
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
     end
   end
 end

@@ -36,6 +36,23 @@ module DMACServer
         raise "download expired"
       end
 
+      def self.clean_downloads
+        query = Query.new
+        downloads = Repo.all(Download, query)
+        return if downloads.nil?
+        downloads = downloads.as(Array)
+        now = Time.now
+        download_ids = [] of Int32 | Int64 | Nil
+        downloads.each do |download|
+          download = download.as(Download)
+          span = now - download.created_at.as(Time)
+          next if span.total_minutes < 60
+          download_ids << download.id
+        end
+        query = Query.where(:id, download_ids)
+        Repo.delete_all(Download, query)
+      end
+
     end
   end
 end

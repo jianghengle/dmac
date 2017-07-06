@@ -55,7 +55,7 @@ const groupRegex = /^[a-zA-Z0-9]*$/
 
 export default {
   name: 'import-users-modal',
-  props: ['opened', 'projectId', 'users'],
+  props: ['opened', 'projectId', 'users', 'isOwner'],
   data () {
     return {
       newUsers: [],
@@ -69,6 +69,7 @@ export default {
         return !u.deleted
       })
     },
+
   },
   watch: {
     opened: function (val) {
@@ -92,7 +93,10 @@ export default {
       this.users.forEach(function(u){
         emails[u.email] = true
       })
-      var roles = {Editor: 'Editor', Admin: 'Admin', Owner: 'Owner'}
+      var roles = {Editor: 'Editor', Admin: 'Admin', Owner: 'Admin'}
+      if(!this.isOwner){
+        roles = {Editor: 'Editor', Admin: 'Editor', Owner: 'Editor'}
+      }
 
       var vm = this
       var reader = new FileReader()

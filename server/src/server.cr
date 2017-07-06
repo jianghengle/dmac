@@ -155,6 +155,10 @@ module DMACServer
         HttpAPI::GitController.revert_commits(env)
       end
 
+      post "/delete_history" do |env|
+        HttpAPI::GitController.delete_history(env)
+      end
+
       Kemal.run
       end
   end

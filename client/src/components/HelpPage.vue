@@ -91,6 +91,7 @@
       <p>You could click into each record to see what changes it made. The red lines starting with <span class="quote red">-</span> are what were deleted, while the green lines starting with <span class="quote green">+</span> are what were added.</p>
       <p>By clicking <span class="quote">Rollback to This Point</span> button, you could rollback to this record, which means all the following changes will be reverted until this one, and your project goes back to the state of this record.</p>
       <p>Rolling back does not delete any history. Instead it reverts the changes and added another record in the history. So you are not going lose any data, and you still can go back to any other record freely.</p>
+      <p>By clicking <span class="quote">Delete History before This Point</span> button, you could delete history until this record. Although it won't change the current state of the project, you will not be able to rollback to any one before this record after doing that.</p>
 
     </div>
 

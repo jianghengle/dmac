@@ -8,9 +8,11 @@
         {{commit.date}}
       </div>
       <div class="column commit-buttons">
-        <a class="button main-btn" @click="revertCommits">
-          <icon name="history"></icon>&nbsp;
+        <a class="button default-btn" @click="revertCommits">
           Rollback to This Point
+        </a>
+        <a class="button default-btn" @click="deleteHistory">
+          Delete History before This Point
         </a>
       </div>
     </div>
@@ -107,6 +109,7 @@ export default {
         'projectId': this.projectId,
         'hash': this.hash
       }
+      this.waiting = true
       this.$http.post(xHTTPx + '/revert_commits', message).then(response => {
         var path = '/projects/' + this.projectId + '/history'
         this.$router.push(path)
@@ -114,6 +117,27 @@ export default {
       }, response => {
         this.waiting = false
         this.error = 'Failed to revert commits!'
+      })
+    },
+    deleteHistory(){
+      var message = 'Are you sure to delete ALL the history before this point, which is NOT reversible? '
+      message += "Although it won't change the current state of the project, you will NOT be able to rollback to any points before this point then. It may take couple minutes to finish."
+      var context = {callback: this.deleteHistoryConfirmed, args: []}
+      this.openConfirmModal(message, context)
+    },
+    deleteHistoryConfirmed(){
+      var message = {
+        'projectId': this.projectId,
+        'hash': this.hash
+      }
+      this.waiting = true
+      this.$http.post(xHTTPx + '/delete_history', message).then(response => {
+        var path = '/projects/' + this.projectId + '/history'
+        this.$router.push(path)
+        this.waiting = false
+      }, response => {
+        this.waiting = false
+        this.error = 'Failed to delete history!'
       })
     },
     openConfirmModal(message, context){

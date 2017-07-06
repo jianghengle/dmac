@@ -71,19 +71,20 @@ export default {
       return nm
     },
     newNameValid () {
-      var len = this.newName.length
+      var newName = this.newName.trim()
+      var len = newName.length
       if(len > 255) return false
       var re = /^[a-zA-Z0-9\._-~]+$/
-      if(!re.test(this.newName)) return false
-      if(this.newName[0] == '-' || this.newName[len-1] == '-') return false
-      if(this.newName.indexOf('..') > -1) return false
-      if(this.newName[len-1] == '.') return false
-      if(this.role == 'Editor' && (this.newName[0] == '.' || this.newName[0] == '_' || this.newName[0] == '~')) return false
-      if(this.nameMap[this.newName]) return false
+      if(!re.test(newName)) return false
+      if(newName[0] == '-' || newName[len-1] == '-') return false
+      if(newName.indexOf('..') > -1) return false
+      if(newName[len-1] == '.') return false
+      if(this.role == 'Editor' && (newName[0] == '.' || newName[0] == '_' || newName[0] == '~')) return false
+      if(this.nameMap[newName]) return false
       return true
     },
     changed () {
-      return this.file && this.file.name != this.newName
+      return this.file && this.file.name != this.newName.trim()
     }
   },
   watch: {
@@ -102,7 +103,7 @@ export default {
       if(!this.newNameValid) return
       var vm = this
       vm.waiting = true
-      var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath, newName: vm.newName}
+      var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath, newName: vm.newName.trim()}
       vm.$http.post(xHTTPx + '/update_folder_file_name', message).then(response => {
         var resp = response.body
         vm.waiting= false

@@ -107,6 +107,7 @@
       :opened="importUsersModal.opened"
       :users="users"
       :project-id="projectId"
+      :is-owner="isOwner"
       @close-import-users-modal="closeImportUsersModal">
     </import-users-modal>
     
