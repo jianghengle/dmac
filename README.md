@@ -23,6 +23,7 @@ To redeploy the application:
 * If `admin` needs to be redeployed:
   - If there is new migrations, go to `admin` and run `rake db:migrate`
   - Restart the service: `sudo systemctl restart dmac_admin`
+  - Note that the admin site is on port `3001`
 * If `server` needs to be redeployed:
   - Go to `server` and run `shards build`
   - Restart the service: `sudo systemctl restart dmac_server`
