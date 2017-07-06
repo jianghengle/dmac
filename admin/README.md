@@ -1,6 +1,6 @@
 # README
 
-This is a Rails application to do DMAC database migrations and management.
+This is a Ruby on Rails (rails_admin https://github.com/sferik/rails_admin) application to do DMAC database migrations and management.
 
 ## installation
 1. install rvm: https://rvm.io/
