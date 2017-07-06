@@ -30,4 +30,4 @@ To redeploy the application on the same server:
 * If `client` needs to be redeployed:
   - build `client` locally and `scp -r dist centos@server:~`
   
-To install the application from scratch, first install Postgres, Git, Zip and Unzip, and then install `admin`, `server` and `client` as instructed in their READMEs.
+To install the application from scratch, first install Postgres(https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-centos-7), Git, Zip and Unzip, and then install `admin`, `server` and `client` as instructed in their READMEs.
