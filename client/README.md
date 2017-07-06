@@ -1,8 +1,9 @@
 # client
 
-> A Vue.js project
+The DMAC frontend in Vuejs (https://vuejs.org)
 
 ## Build Setup
+Install Nodejs.
 
 ``` bash
 # install dependencies
@@ -14,8 +15,9 @@ npm run dev
 # build for production with minification
 npm run build
 
-# build for production and view the bundle analyzer report
-npm run build --report
 ```
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+## Deployment
+1. `npm run build` will build the whole app into a `dist` folder.
+2. Copy the content of `dist` anywhere you want to be served by a http server.
+
