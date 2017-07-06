@@ -18,7 +18,7 @@ Currently, I deployed all on one Anvil instance. The code is checked out in the 
 
 The project files are in `HOME/dmac-root`, which is set as environment variable `DMAC_ROOT`. You could take a look at `dmac_server.service` to see this variable and `PG_URL` variable, which contains the database info.
 
-To redeploy the application:
+To redeploy the application on the same server:
 * Go to `dmac` directory and checkout the latest dev
 * If `admin` needs to be redeployed:
   - If there is new migrations, go to `admin` and run `rake db:migrate`
@@ -29,3 +29,5 @@ To redeploy the application:
   - Restart the service: `sudo systemctl restart dmac_server`
 * If `client` needs to be redeployed:
   - build `client` locally and `scp -r dist centos@server:~`
+  
+To install the application from scratch, first install Postgres, Git, Zip and Unzip, and then install `admin`, `server` and `client` as instructed in their READMEs.
