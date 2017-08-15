@@ -1,6 +1,13 @@
 <template>
   <div class="login-page">
-    <div class="welcome">Welcome to DMAC system!</div>
+    <div class="welcome">
+      <p><strong>Welcome to DMAC system!</strong></p>
+      <p>DMAC works like a group dropbox, as each project is a container of files for a group of project users.</p>
+      <p>I made a demo project that anyone can play with. Just login as demo_owner@dmac.com. There is NO password for all users.</p>
+      <p>You could also play with other roles for the demo project by logging in as demo_admin@dmac.com or demo_editor@dmac.com or demo_viewer@dmac.com. </p>
+      <p>You could also create your own project, but please remember this is a demo version and there is NO password for all users and NO protection for all data you uploaded.</p>
+      <p>If you are interested, feel free to contact me at jianghengle@gmail.com.</p>
+    </div>
     <div class="field">
       <p class="control has-icons-left">
         <input class="input login-text" type="text" placeholder="Email" v-model="email">
@@ -107,6 +114,11 @@ export default {
 
   .welcome {
     padding-bottom: 10px;
+
+    p{
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
   }
 
   .login-text {
