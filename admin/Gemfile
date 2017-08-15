@@ -58,4 +58,4 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 # Allow CORS
 gem 'rack-cors', :require => 'rack/cors'
 
-gem "cancancan"
+gem "cancancan", '~>1.16.0'
