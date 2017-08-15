@@ -43,6 +43,10 @@ module DMACServer
         HttpAPI::UserController.get_user(env)
       end
 
+      post "/create_user" do |env|
+        HttpAPI::UserController.create_user(env)
+      end
+
       get "/get_projects" do |env|
         HttpAPI::ProjectController.get_projects(env)
       end

@@ -9,20 +9,24 @@ module DMACServer
       def get_projects(ctx)
         begin
           email = verify_token(ctx)
+          user = User.get_user_by_email(email)
           controls = Control.get_controls_by_user(email)
-          return "[]" if controls.size == 0
-          project_ids = [] of Int32 | Int64 | Nil
-          controls.each do |k, c|
-            project_ids.push(c.project_id)
-          end
-          projects = Project.get_projects_by_ids(project_ids)
-
           arr = [] of String
-          projects.each do |k, v|
-            fields = {} of String => String
-            fields["projectRole"] = controls[k].role.to_s if controls.has_key? k
-            obj = v.to_json(fields)
-            arr.push(obj)
+          arr.push(user.role.to_s.to_json)
+          if controls.size > 0
+            project_ids = [] of Int32 | Int64 | Nil
+            controls.each do |k, c|
+              project_ids.push(c.project_id)
+            end
+            projects = Project.get_projects_by_ids(project_ids)
+
+
+            projects.each do |k, v|
+              fields = {} of String => String
+              fields["projectRole"] = controls[k].role.to_s if controls.has_key? k
+              obj = v.to_json(fields)
+              arr.push(obj)
+            end
           end
           json_array(arr)
         rescue ex : InsufficientParameters
@@ -95,12 +99,14 @@ module DMACServer
       def create_project(ctx)
         begin
           email = verify_token(ctx)
+          user = User.get_user_by_email(email)
+          raise "Permission denied" if user.role.to_s == "Subscriber"
           name = get_param!(ctx, "name")
           description = get_param!(ctx, "description")
           template_id = get_param!(ctx, "templateId")
           copy_users = get_param!(ctx, "copyUsers")
 
-          project = Project.create_project(name, description)
+          project = Project.create_project(name, description, email)
           Control.create_control(email, project, "Owner", "")
           MyFile.create_folder(project, "-root-")
           if template_id != ""

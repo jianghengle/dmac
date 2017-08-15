@@ -10,7 +10,7 @@
           Show All
         </label>
         &nbsp;
-        <a class="button main-btn" @click="openNewProjectModal">
+        <a class="button main-btn" v-if="!isSubscriber" @click="openNewProjectModal">
           <icon name="plus"></icon>&nbsp;New Project
         </a>
       </span>
@@ -81,7 +81,8 @@ export default {
         opened: false,
         project: null
       },
-      showAllInput: false
+      showAllInput: false,
+      isSubscriber: true
     }
   },
   computed: {
@@ -121,7 +122,8 @@ export default {
       vm.waiting = true
       vm.$http.get(xHTTPx + '/get_projects').then(response => {
         var resp = response.body
-        this.$store.commit('projects/setProjects', resp)
+        vm.isSubscriber = resp[0] == 'Subscriber'
+        this.$store.commit('projects/setProjects', resp.slice(1))
         vm.waiting= false
       }, response => {
         vm.error = 'Failed to get projects!'

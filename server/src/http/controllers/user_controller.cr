@@ -60,6 +60,19 @@ module DMACServer
         end
       end
 
+      def create_user(ctx)
+        begin
+          email = get_param!(ctx, "email")
+          password = get_param!(ctx, "password")
+          User.create_user(email, password)
+          {ok: true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
     end
   end
 end

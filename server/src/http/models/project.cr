@@ -47,7 +47,7 @@ module DMACServer
       end
 
 
-      def self.create_project(name, description)
+      def self.create_project(name, description, email)
         project = Project.new
         project.name = name
         project.description = description
@@ -57,7 +57,7 @@ module DMACServer
         changeset.changes.each do |change|
           if(change.has_key?(:id))
             project.id = change[:id].as(Int32)
-            project.key = change[:id].to_s
+            project.key =  email + "@" + change[:id].to_s
           end
         end
         changeset = Repo.update(project)
