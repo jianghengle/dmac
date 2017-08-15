@@ -35,7 +35,6 @@ class Ability
     can :list, :all
 
     # :admin users can manage everything
-    can :manage, :all if user.role == "Admin"
-
+    can :manage, :all
   end
 end

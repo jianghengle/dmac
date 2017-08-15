@@ -19,9 +19,10 @@ class User < ApplicationRecord
       field :last_name
       field :role, :enum do
         enum do
-          ['Admin', 'Normal']
+          ['Admin', 'Manager', 'Subscriber']
         end
       end
+      field :reset_password_token
     end
   end
 end
