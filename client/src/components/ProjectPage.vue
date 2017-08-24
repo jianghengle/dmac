@@ -27,6 +27,12 @@
                 <span>Data Explorer</span>
               </a>
             </p>
+            <p class="control">
+              <a class="button default-btn" v-if="projectRole!='Viewer'" @click="viewChannels">
+                <icon name="upload"></icon>&nbsp;
+                <span>Channels</span>
+              </a>
+            </p>
           </div>
         </div>
       </div>
@@ -205,6 +211,9 @@ export default {
     },
     viewPublicUrls () {
       this.$router.push('/projects/' + this.projectId + '/urls')
+    },
+    viewChannels () {
+      this.$router.push('/projects/' + this.projectId + '/channels')
     },
     viewHistory () {
       this.$router.push('/projects/' + this.projectId + '/history')

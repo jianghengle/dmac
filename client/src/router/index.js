@@ -4,6 +4,7 @@ import ProjectsPage from '@/components/ProjectsPage'
 import ProjectPage from '@/components/ProjectPage'
 import UsersPage from '@/components/UsersPage'
 import PublicUrlsPage from '@/components/PublicUrlsPage'
+import ChannelsPage from '@/components/ChannelsPage'
 import FolderFilePage from '@/components/FolderFilePage'
 import HistoryPage from '@/components/HistoryPage'
 import CommitPage from '@/components/CommitPage'
@@ -41,6 +42,11 @@ export default new Router({
       path: '/projects/:projectId/urls',
       name: 'PublicUrlsPage',
       component: PublicUrlsPage
+    },
+    {
+      path: '/projects/:projectId/channels',
+      name: 'ChannelsPage',
+      component: ChannelsPage
     },
     {
       path: '/projects/:projectId/history',

@@ -112,6 +112,7 @@ module DMACServer
           if template_id != ""
             template = Project.get_project!(template_id)
             MyFile.copy_project_files(template, project)
+            Channel.copy_channels(template, project)
             if copy_users == "true"
               Control.copy_controls(template, project, email)
             end
@@ -160,6 +161,7 @@ module DMACServer
           Project.delete_project(project)
           MyFile.delete_folder(project, "-root-")
           Public.delete_all_by_project(project)
+          Channel.delete_all_by_project(project)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

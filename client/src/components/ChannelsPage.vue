@@ -1,31 +1,38 @@
 <template>
   <div class="projects-page">
   	<address-bar></address-bar>
-    <div class="view-title">
-      <icon name="share-alt"></icon>
-      Project Public Urls
+
+    <div class="columns">
+      <div class="view-title column">
+        <icon name="upload"></icon>
+        Project Channels
+      </div>
+      <div class="column buttons">
+        <a class="button main-btn" @click="openNewChannelModal" v-if="projectRole=='Owner'|| projectRole=='Admin'">
+          <icon name="plus"></icon>&nbsp;
+          Channel
+        </a>
+      </div>
     </div>
 
     <div v-if="error" class="notification is-danger login-text">
       <button class="delete" @click="error=''"></button>
       {{error}}
     </div>
-    <div class="box project-box" v-for="url in publicUrls":key="url.id">
+    <div class="box project-box" v-for="channel in channels":key="channel.id" @click="openUploadChannelModal(channel)">
       <div class="header">
         <span class="name">
-          {{url.relPath}}
+          <a class="main-link" @click.stop="openChannelPath(channel)">{{channel.relPath}}</a>
         </span>
-        <span class="info">{{url.createdAt}}</span>
+        <span class="info">
+          <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
+        </span>
       </div>
-      <div class="description"><a class="main-link" :href="url.url" target="_blank">{{url.url}}</a></div>
-      <div class="action">
-        <a class="button is-danger" @click="deleteUrl(url)">
-          Delete
-        </a>
-      </div>
+      <div class="description">{{channel.instruction}}</div>
     </div>
-    <div v-if="publicUrls && publicUrls.length == 0">
-      No public url in this project yet.
+
+    <div v-if="channels && channels.length == 0">
+      No channels in this project yet.
     </div>
     <div class="spinner-container" v-if="waiting">
       <icon name="spinner" class="icon is-medium fa-spin"></icon>
@@ -36,6 +43,19 @@
       :message="confirmModal.message"
       @close-confirm-modal="closeConfirmModal">
     </confirm-modal>
+
+    <new-channel-modal
+      :opened="newChannelModal.opened"
+      :project="project"
+      @close-new-channel-modal="closeNewChannelModal">
+    </new-channel-modal>
+
+    <upload-channel-modal
+      :opened="uploadChannelModal.opened"
+      :channel="uploadChannelModal.channel"
+      :project="project"
+      @close-upload-channel-modal="closeUploadChannelModal">
+    </upload-channel-modal>
   </div>
 </template>
 
@@ -43,12 +63,16 @@
 import DateForm from 'dateformat'
 import AddressBar from './AddressBar'
 import ConfirmModal from './modals/ConfirmModal'
+import NewChannelModal from './modals/NewChannelModal'
+import UploadChannelModal from './modals/uploadChannelModal'
 
 export default {
-  name: 'public-urls-page',
+  name: 'channels-page',
   components: {
     AddressBar,
-    ConfirmModal
+    ConfirmModal,
+    NewChannelModal,
+    UploadChannelModal
   },
   data () {
     return {
@@ -59,7 +83,14 @@ export default {
         message: '',
         context: null
       },
-      publicUrls: []
+      newChannelModal: {
+        opened: false
+      },
+      uploadChannelModal: {
+        opened: false,
+        channel: null
+      },
+      channels: []
     }
   },
   computed: {
@@ -75,12 +106,15 @@ export default {
     project () {
       return this.nodeMap['/projects/' + this.projectId]
     },
+    projectRole () {
+      return this.project && this.project.projectRole
+    },
   },
   watch: {
     projectId: function (val) {
       this.requestPublicUrls()
       if(!this.project){
-        this.requestProject()
+        this.requestChannels()
       }
     },
   },
@@ -98,40 +132,36 @@ export default {
         vm.waiting = false
       })
     },
-    requestPublicUrls () {
+    requestChannels () {
       var vm = this
       vm.waiting = true
-      vm.$http.get(xHTTPx + '/get_publics/' + vm.projectId).then(response => {
+      vm.$http.get(xHTTPx + '/get_channels/' + vm.projectId).then(response => {
         var resp = response.body
-        vm.publicUrls = resp.map(function(u){
-          u.createdAt = DateForm(u.createdTime*1000, 'mmm dd yyyy HH:MM')
-          u.relPath = u.dataPath.replace(/--/g, '/')
-          u.url = window.location.origin + '/#/public/' + u.key + '/' + u.dataPath
+        vm.channels = resp.map(function(u){
+          u.relPath = u.path.replace(/--/g, '/')
           return u
         })
         vm.waiting = false
       }, response => {
-        vm.error = 'Failed to get project public urls!'
+        vm.error = 'Failed to get project channels!'
         vm.waiting = false
       })
     },
-    deleteUrl(url){
-      var message = 'Are you sure to delete this public url?'
-      var context = {callback: this.deleteUrlConfirmed, args: [url]}
+    deleteChannel(channel){
+      var message = 'Are you sure to delete this channel?'
+      var context = {callback: this.deleteChannelConfirmed, args: [channel]}
       this.openConfirmModal(message, context)
     },
-    deleteUrlConfirmed(url){
+    deleteChannelConfirmed(channel){
       var message = {
         'projectId': this.projectId,
-        'publicKey': url.key
+        'id': channel.id
       }
-      this.$http.post(xHTTPx + '/remove_folder_public', message).then(response => {
-        var index = this.publicUrls.indexOf(url)
-        this.publicUrls.splice(index, 1)
-        this.waiting = false
+      this.$http.post(xHTTPx + '/delete_channel', message).then(response => {
+        this.requestChannels()
       }, response => {
         this.waiting = false
-        console.log('failed to delete')
+        console.log('failed to delete channel')
       })
     },
     openConfirmModal(message, context){
@@ -150,11 +180,32 @@ export default {
       }
       this.confirmModal.context = null
     },
+    openNewChannelModal(){
+      this.newChannelModal.opened = true
+    },
+    closeNewChannelModal(result){
+      this.newChannelModal.opened = false
+      if(result){
+        this.requestChannels()
+      }
+    },
+    openUploadChannelModal(channel){
+      this.uploadChannelModal.channel = channel
+      this.uploadChannelModal.opened = true
+    },
+    closeUploadChannelModal(result){
+      this.uploadChannelModal.opened = false
+      this.uploadChannelModal.channel = null
+    },
+    openChannelPath(channel){
+      var path = '/projects/' + this.projectId + '/data/' + channel.path.slice(0, -2)
+      this.$router.push(path)
+    }
   },
   mounted () {
     var vm = this
     vm.$nextTick(function(){
-      vm.requestPublicUrls()
+      vm.requestChannels()
       if(!vm.project){
         vm.requestProject()
       }
@@ -169,6 +220,11 @@ export default {
   padding: 10px;
 }
 
+.buttons {
+  text-align: right;
+  padding-right: 20px;
+}
+
 .options {
   float: right;
   font-size: 16px;
@@ -181,10 +237,7 @@ export default {
   padding-top: 10px;
   padding-bottom: 10px;
   margin-bottom: 15px;
-  
-  &.archived {
-    color: #7a7a7a;
-  }
+  cursor: pointer;
 
   .header {
     
@@ -212,6 +265,10 @@ export default {
     text-align: right;
   }
 
+}
+
+.project-box:hover{
+  background-color: #f2f2f2; 
 }
 
 .link{

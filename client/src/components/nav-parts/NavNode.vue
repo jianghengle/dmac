@@ -12,6 +12,7 @@
         </span>
         <icon v-if="node.type=='users'" name="user-o"></icon>
         <icon v-if="node.type=='urls'" name="share-alt"></icon>
+        <icon v-if="node.type=='channels'" name="upload"></icon>
         <icon v-if="node.type=='history'" name="history"></icon>
       </span>
       <span class="node-name is-clickable main-link"
@@ -107,8 +108,8 @@ export default {
 
       var role = this.nodeProjectRole
       if(!role) return false
-      if(type == 'users' || type == 'urls' || type == 'history'){
-        return role == 'Owner' || role == 'Admin'
+      if(type == 'users' || type == 'urls' || type == 'history' || type == 'channels'){
+        return this.isCurrent
       }
       return true
     }

@@ -25,7 +25,7 @@ module DMACServer
         return user
       end
 
-      def self.create_user(email : String, password : String)
+      def self.create_user(email : String, password : String, first_name : String, last_name : String)
         old_user = Repo.get_by(User, email: email)
         raise "User existed" unless old_user.nil?
 
@@ -37,6 +37,8 @@ module DMACServer
         user.encrypted_password = encrypted_password.to_s
         user.auth_token = SecureRandom.hex(32).to_s
         user.role = "Subscriber"
+        user.first_name = first_name
+        user.last_name = last_name
         changeset = Repo.insert(user)
         raise changeset.errors.to_s unless changeset.valid?
       end

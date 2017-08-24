@@ -78,6 +78,24 @@
         </p>
       </div>
 
+      <div class="field">
+        <p class="control has-icons-left">
+          <input class="input login-text" type="text" placeholder="First Name" v-model="newFirstName">
+          <span class="icon is-small is-left">
+            <icon name="user"></icon>
+          </span>
+        </p>
+      </div>
+
+      <div class="field">
+        <p class="control has-icons-left">
+          <input class="input login-text" type="text" placeholder="Last Name" v-model="newLastName">
+          <span class="icon is-small is-left">
+            <icon name="user"></icon>
+          </span>
+        </p>
+      </div>
+
       <div v-if="registerError" class="notification is-danger login-text">
         <button class="delete" @click="registerError=''"></button>
         {{registerError}}
@@ -120,6 +138,8 @@ export default {
       newEmail: '',
       newPassword: '',
       newPasswordAgain: '',
+      newFirstName: '',
+      newLastName: '',
       registerError: '',
       registerSuccess: ''
     }
@@ -200,7 +220,7 @@ export default {
 
       this.sent = true
       var vm = this
-      var message = {email: this.newEmail, password: this.newPassword}
+      var message = {email: this.newEmail, password: this.newPassword, firstName: this.newFirstName, lastName: this.newLastName}
       vm.$http.post(xHTTPx + '/create_user', message).then(response => {
         vm.registerInfo = 'Succeed. Go to login page.'
         this.sent = false
