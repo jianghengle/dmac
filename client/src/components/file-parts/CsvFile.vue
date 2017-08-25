@@ -6,10 +6,15 @@
         {{file && file.name}}
       </div>
       <div class="column buttons">
-        <a class="button default-btn" @click="addGraph">
-          <icon name="line-chart"></icon>&nbsp;
-          Draw Graph
-        </a>
+        <label class="checkbox">
+          <input type="checkbox" v-model="showTable">
+          Table
+        </label>
+        &nbsp;&nbsp;
+        <label class="checkbox">
+          <input type="checkbox" v-model="showCharts">
+          Charts
+        </label>
       </div>
     </div>
 
@@ -22,66 +27,122 @@
     </div>
 
     <div class="columns">
-      <div class="column tabs is-toggle csv-tabs">
-        <ul>
-          <li :class="{'is-active': activeTab=='table'}">
-            <a class="tab-button" :class="{'active-btn': activeTab=='table'}" @click="activeTab = 'table'">Table</a>
-          </li>
-          <li :class="{'is-active': activeTab=='graphs'}">
-            <a class="tab-button" :class="{'active-btn': activeTab=='graphs'}" @click="activeTab = 'graphs'">Graph</a>
-          </li>
-        </ul>
+      <div class="column" v-show="showTable"
+        :class="{'half-width': showTable && showCharts, 'full-width': showTable && !showCharts}">
+        <div v-show="totalPages > 1">
+          <nav class="pagination is-small csv-pages">
+            <ul class="pagination-list">
+              <li v-show="currentPage > 0"><a class="pagination-link default-btn" @click="showPage(0)">P1</a></li>
+              <li v-show="currentPage-1 > 0"><a class="pagination-link default-btn" @click="showPage(currentPage-1)">Pre</a></li>
+              <li><a class="pagination-link is-current active-btn">{{currentRange}}</a></li>
+              <li v-show="currentPage+1 < totalPages-1"><a class="pagination-link default-btn" @click="showPage(currentPage+1)">Next</a></li>
+              <li v-show="currentPage < totalPages-1"><a class="pagination-link default-btn" @click="showPage(totalPages-1)">P{{totalPages}}</a></li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="csv-table">
+          <table class="table is-narrow">
+            <thead>
+              <tr>
+                <th class="number-cell">#</th>
+                <th class="number-cell" v-for="(h, i) in tableHeader">
+                  <div class="csv-header" @click="sortData(i)">
+                    <span>{{h}}</span>
+                    <span class="sort-icon" v-if="sortIndex==i">
+                      <icon class="asc-icon" name="sort-asc" v-if="asc"></icon>
+                      <icon name="sort-desc" v-if="!asc"></icon>
+                    </span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, i) in pageData">
+                <td class="number-cell">{{i}}</td>
+                <td class="number-cell" v-for="cell in row">
+                  {{cell}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <nav class="column pagination is-right csv-pages" v-show="activeTab=='table'">
-        <ul class="pagination-list">
-          <li v-show="currentPage > 0"><a class="pagination-link default-btn" @click="showPage(0)">1</a></li>
-          <li v-show="currentPage-1 > 0"><a class="pagination-link default-btn" @click="showPage(currentPage-1)">Pre</a></li>
-          <li><a class="pagination-link is-current active-btn">{{currentRange}}</a></li>
-          <li v-show="currentPage+1 < totalPages-1"><a class="pagination-link default-btn" @click="showPage(currentPage+1)">Next</a></li>
-          <li v-show="currentPage < totalPages-1"><a class="pagination-link default-btn" @click="showPage(totalPages-1)">{{totalPages}}</a></li>
-        </ul>
-      </nav>
-    </div>
-
-    <div v-show="activeTab=='table'" class="csv-table">
-      <table class="table is-narrow" v-if="yCols.length">
-        <thead>
-          <tr>
-            <th class="number-cell">#</th>
-            <th class="number-cell" v-for="(h, i) in tableHeader">
-              <div class="csv-header" @click="sortData(i)">
-                <span>{{h}}</span>
-                <span class="sort-icon" v-if="sortIndex==i">
-                  <icon class="asc-icon" name="sort-asc" v-if="asc"></icon>
-                  <icon name="sort-desc" v-if="!asc"></icon>
-                </span>
-              </div>
-              <div>
-                <label class="radio">
-                  <input type="radio" name="xCol" :value="i" v-model="xCol">
-                </label>
-                <label class="checkbox">
-                  <input type="checkbox" v-model="yCols[i]">
-                </label>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row, i) in pageData">
-            <td class="number-cell">{{i+1}}</td>
-            <td class="number-cell" v-for="cell in row">
-              {{cell}}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div v-show="activeTab=='graphs'">
-      <div v-for="g in graphs" :key="g.id">
-        <my-graph :graph-data="g" @delete-graph="deleteGraph"></my-graph>
+      <div class="column" v-show="showCharts"
+        :class="{'half-width': showTable && showCharts, 'full-width': showTable && !showCharts}">
+        <div class="add-chart-buttons">
+          <a class="button" @click="addChart('Simple')"><icon name="plus"></icon>&nbsp;Simple</a>
+          <a class="button" @click="addChart('XY')"><icon name="plus"></icon>&nbsp;XY</a>
+          <a class="button" @click="addChart('Parallel Coordinates')"><icon name="plus"></icon>&nbsp;Parallel Coordinates</a>
+          <a class="button" @click="addChart('Histogram')"><icon name="plus"></icon>&nbsp;Histogram</a>
+          <a class="button" @click="addChart('Histograms')"><icon name="plus"></icon>&nbsp;Histograms</a>
+          <a class="button" @click="addChart('Correlations')"><icon name="plus"></icon>&nbsp;Correlations</a>
+        </div>
+        <div v-for="c in charts" :key="c.id">
+          <simple-chart
+            v-if="c.type == 'Simple'"
+            :chart="c"
+            :headers="tableHeader"
+            :rows="tableData"
+            :showTable="showTable"
+            :showCharts="showCharts"
+            @delete-chart="deleteChart">
+          </simple-chart>
+          <simple-xy
+            v-if="c.type == 'XY'"
+            :chart="c"
+            :headers="tableHeader"
+            :rows="tableData"
+            :showTable="showTable"
+            :showCharts="showCharts"
+            :groupOptions="groupOptions"
+            :groupColors="groupColors"
+            @delete-chart="deleteChart">
+          </simple-xy>
+          <parallel-coordinates
+            v-if="c.type == 'Parallel Coordinates'"
+            :chart="c"
+            :headers="tableHeader"
+            :rows="tableData"
+            :showTable="showTable"
+            :showCharts="showCharts"
+            :groupOptions="groupOptions"
+            :groupColors="groupColors"
+            @delete-chart="deleteChart">
+          </parallel-coordinates>
+          <histogram-chart
+            v-if="c.type == 'Histogram'"
+            :chart="c"
+            :headers="tableHeader"
+            :rows="tableData"
+            :showTable="showTable"
+            :showCharts="showCharts"
+            :groupOptions="groupOptions"
+            :groupColors="groupColors"
+            @delete-chart="deleteChart">
+          </histogram-chart>
+          <histogram-array
+            v-if="c.type == 'Histograms'"
+            :chart="c"
+            :headers="tableHeader"
+            :rows="tableData"
+            :showTable="showTable"
+            :showCharts="showCharts"
+            :groupOptions="groupOptions"
+            :groupColors="groupColors"
+            @delete-chart="deleteChart">
+          </histogram-array>
+          <correlation-matrix
+            v-if="c.type == 'Correlations'"
+            :chart="c"
+            :headers="tableHeader"
+            :rows="tableData"
+            :showTable="showTable"
+            :showCharts="showCharts"
+            @delete-chart="deleteChart">
+          </correlation-matrix>
+        </div>
       </div>
     </div>
 
@@ -89,28 +150,39 @@
 </template>
 
 <script>
-import MyGraph from './MyGraph'
+import SimpleChart from './csv-charts/SimpleChart'
+import SimpleXy from './csv-charts/SimpleXy'
+import ParallelCoordinates from './csv-charts/ParallelCoordinates'
+import HistogramChart from './csv-charts/HistogramChart'
+import HistogramArray from './csv-charts/HistogramArray'
+import CorrelationMatrix from './csv-charts/CorrelationMatrix'
 
 export default {
   name: 'csv-file',
   components: {
-    MyGraph
+    SimpleChart,
+    SimpleXy,
+    ParallelCoordinates,
+    HistogramChart,
+    HistogramArray,
+    CorrelationMatrix
   },
   props: ['file'],
   data () {
     return {
       waiting: false,
       error: '',
-      activeTab: 'table',
-      xCol: 0,
-      yCols: [],
-      graphs: [],
       sortIndex: 0,
       asc: true,
       currentPage: 0,
       pageSize: 1000,
       tableHeader: [],
-      tableData: []
+      tableData: [],
+      showTable: true,
+      showCharts: true,
+      charts: [],
+      groupOptions: [],
+      groupColors: ['#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#1f77b4']
     }
   },
   computed: {
@@ -141,10 +213,10 @@ export default {
       return Math.ceil(this.totalCount / this.pageSize)
     },
     currentRange () {
-      var start = this.currentPage * this.pageSize + 1
-      var end = (this.currentPage + 1) * this.pageSize
-      if(end > this.totalCount){
-        end = this.totalCount
+      var start = this.currentPage * this.pageSize
+      var end = (this.currentPage + 1) * this.pageSize - 1
+      if(end > this.totalCount - 1){
+        end = this.totalCount - 1
       }
       return start + '~' + end
     },
@@ -164,11 +236,14 @@ export default {
       var lines = this.file.text.replace(re,'\n').split('\n')
       this.loadHeader(lines)
       this.loadData(lines)
-      this.loadCheckboxes()
+      this.loadGroups()
+      this.sortIndex = 0
+      this.asc = true
+      this.charts = []
     },
     loadHeader(lines){
       if(!lines.length) return []
-      var header = ['Ln#']
+      var header = ['Row']
       var firstLine = lines[0]
       firstLine.split(/,|\t/g).forEach(function(s){
         header.push(s.trim())
@@ -180,7 +255,7 @@ export default {
       var tableData = []
       for(var i=1;i<lines.length;i++){
         var line = lines[i]
-        var row = [i]
+        var row = [i-1]
         var ss = line.split(',')
         for(var j=0;j<ss.length;j++){
           row.push(ss[j].trim())
@@ -189,153 +264,34 @@ export default {
       }
       this.tableData = tableData
     },
-    loadCheckboxes(){
-      if(!this.tableHeader.length) return
-      var yCols = []
-      for(var i=0;i<this.tableHeader.length;i++){
-        var yCol = false
-        if(i < this.yCols.length){
-          yCol = this.yCols[i]
+    loadGroups(){
+      this.groupOptions = []
+      if(this.tableData.length > 10){
+        for(var i=0;i<this.tableHeader.length;i++){
+          var opt = {name: this.tableHeader[i], dataIndex: i, values: {}}
+          this.groupOptions.push(opt)
         }
-        yCols.push(yCol)
-      }
-      this.yCols = yCols
-    },
-    getGraphPoints(){
-      var data = {}
-      for(var i=0;i<this.tableData.length;i++){
-        var row = this.tableData[i]
-        var x = row[this.xCol]
-        if(!data[x]) data[x] = {}
-        for(var j=0;j<this.yCols.length;j++){
-          if(!this.yCols[j]) continue
-          var y = row[j]
-          if(this.yCols[j]){
-            if(data[x][j] == undefined){
-              data[x][j] = {}
-            }
-            if(data[x][j]){
-              var d = data[x][j]
-              if(this.xCol == j){
-                d.count = d.count ? d.count + 1 : 1
-              }else{
-                if(isNaN(y)){
-                  data[x][j] = null
-                }else{
-                  y = Number(y)
-                  d.count = d.count ? d.count + 1 : 1
-                  d.max = d.max === undefined ? y : Math.max(y, d.max)
-                  d.min = d.min === undefined ? y : Math.min(y, d.min)
-                  d.average = d.average === undefined ? y : (d.average * (d.count - 1)/d.count + y/d.count)
-                }
-              }
+        for(var i=0;i<this.tableData.length;i++){
+          var row = this.tableData[i]
+          for(var j=0;j<row.length;j++){
+            var value = row[j]
+            var opt = this.groupOptions[j]
+            if(!opt.values) continue
+            if(opt.values[value]) continue
+            opt.values[value] = true
+            if(Object.keys(opt.values).length > 10){
+              opt.values = null
             }
           }
         }
-      }
-
-      var xs = Object.keys(data)
-      var xIsNum = true
-      if(xs.length){
-        if(isNaN(xs[0])){
-          xIsNum = false
-        }
-      }
-
-      xs.sort(function(a,b){
-        if(isNaN(a) || isNaN(b)){
-          xIsNum = false
-          return a.localeCompare(b)
-        }
-        return a - b
-      })
-      var points = []
-
-      for(var i=0;i<xs.length;i++){
-        var x = Number(xs[i])
-        if(!xIsNum){
-          x = i
-        }
-        var point = [x]
-        var d = data[xs[i]]
-        for(var j=0;j<this.yCols.length;j++){
-          if(!this.yCols[j]) continue
-          if(!d[j]){
-            point.push(null)
-          }else if(!d[j].average){
-            var count = d[j].count
-            point.push([count, count, count])
-          }else{
-            point.push([d[j].min, d[j].average, d[j].max])
+        for(var i=this.groupOptions.length-1;i>=0;i--){
+          var opt = this.groupOptions[i]
+          if(!opt.values){
+            this.groupOptions.splice(i, 1)
           }
         }
-        points.push(point)
+        this.groupOptions.unshift({name: 'none'})
       }
-      var result = {points: points}
-      if(!xIsNum){
-        result.xs = xs
-        if(xs.length){
-          var first = points[0].slice()
-          for(var i=0;i<first.length;i++){
-            if(i == 0){
-              first[i] = first[i] - 1
-            }else{
-              first[i] = null
-            }
-          }
-          points.unshift(first)
-          var last = points[points.length-1].slice()
-          for(var i=0;i<last.length;i++){
-            if(i == 0){
-              last[i] = last[i] + 1
-            }else{
-              last[i] = null
-            }
-          }
-          points.push(last)
-        }
-      }
-      return result
-    },
-    addGraph() {
-      var result = this.getGraphPoints()
-      var points = result.points
-      var xLabel = this.tableHeader[this.xCol]
-      var yLabels = []
-      for(var j=0;j<this.yCols.length;j++){
-        if(!this.yCols[j]) continue
-        var name = this.tableHeader[j]
-        if(j == this.xCol){
-          yLabels.push('Count(' + name + ')')
-        }else{
-          yLabels.push(name)
-        }
-      }
-
-      var labels = [xLabel].concat(yLabels)
-
-      var ordinal = 1
-      if(this.graphs.length){
-        ordinal = this.graphs[0].ordinal + 1
-      }
-
-      this.activeTab = 'graphs'
-
-      var graph = {
-        ordinal: ordinal,
-        id: 'csvGraph' + ordinal,
-        title: 'Graph ' + ordinal,
-        labels: labels,
-        points: points,
-      }
-      if(result.xs){
-        graph.xs = result.xs
-      }
-      this.graphs.unshift(graph)
-    },
-    deleteGraph(graph){
-      var index = this.graphs.indexOf(graph)
-      this.graphs.splice(index, 1)
     },
     sortData(index){
       if(this.sortIndex == index){
@@ -363,7 +319,21 @@ export default {
     },
     showPage(pageNumber){
       this.currentPage = pageNumber
-    }
+    },
+    addChart (type) {
+      var id = this.charts.length ? (this.charts[0].id + 1) : 0
+      var chart = {
+        id: id,
+        type: type
+      }
+      this.charts.unshift(chart)
+    },
+    deleteChart (chart) {
+      var index = this.charts.indexOf(chart)
+      if(index > -1){
+        this.charts.splice(index, 1)
+      }
+    },
   },
   mounted () {
     this.loadTable()
@@ -375,33 +345,19 @@ export default {
 
 .buttons {
   text-align: right;
+  margin: auto;
 }
 
-.action-icon {
-  color: #3273dc;
-  position: relative;
-  top: 3px;
+.full-width {
+  width: 100%;
+  max-width: 100%;
 }
 
-.text-area-container {
-  margin-top: 5px;
-  height: 100%;
+.half-width {
+  width: 50%;
+  max-width: 50%;
 }
 
-.csv-textarea {
-  font-size: 14px;
-}
-
-.csv-tabs {
-  margin-bottom: 0px;
-  padding-top: 0px;
-  padding-bottom: 0px;
-}
-
-.tab-button {
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
 
 .active-btn {
   background-color: #2e1052!important;
@@ -418,6 +374,7 @@ export default {
   overflow-x: auto;
 }
 
+
 .number-cell {
   text-align: right;
   font-size: 14px;
@@ -431,6 +388,10 @@ export default {
 .asc-icon {
   position: relative;
   top: 5px;
+}
+
+.add-chart-buttons {
+  padding-left: 20px;
 }
 
 </style>

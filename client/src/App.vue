@@ -49,6 +49,8 @@ export default {
 @import "~bulma/sass/utilities/initial-variables";
 $primary: #2e1052;
 @import "~bulma";
+@import "~c3/c3.css";
+@import "~parcoord-es/dist/parcoords.css";
 
 
 body {
