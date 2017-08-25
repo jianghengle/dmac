@@ -9,20 +9,49 @@
         </header>
         <section class="modal-card-body modal-body">
 
-          <div class="field">
-            <label class="label">Target Folder: <span class="channel-info">{{channel && channel.relPath}}</span></label>
+          <div class="channel-details">
+
+            <div class="field is-horizontal channel-field">
+              <div class="field-label is-normal">
+                <label class="label">Folder</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input class="input field-text" type="text" readonly :value="channel && channel.relPath">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal channel-field" v-if="channel && channel.metaData">
+              <div class="field-label is-normal">
+                <label class="label">Metadata</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input class="input field-text" type="text" readonly :value="channel.metaData">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal channel-field">
+              <div class="field-label is-normal">
+                <label class="label">Instruction</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <textarea class="textarea field-text" readonly>{{channel && channel.instruction}}</textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          <div class="field" v-if="channel && channel.metaData">
-            <label class="label">Metadata File: <span class="channel-info">{{channel.metaData}}</span></label>
-          </div>
-
-          <div class="field instruction-field">
-            <label class="label">Instruction:</label>
-            <p class="control">
-              <textarea class="textarea field-text" :value="channel && channel.instruction" readonly></textarea>
-            </p>
-          </div>
 
           <div v-if="error" class="notification is-danger login-text">
             <button class="delete" @click="error=''"></button>
@@ -34,25 +63,48 @@
               {{success}}
           </div>
 
-          <div class="field">
-            <input v-if="opened" type="file" class="files-input" @change="onFileChange">
+          <div class="field file-field">
+            <input v-if="opened" type="file" class="file-input" @change="onFileChange">
             &nbsp;
             <span class="upload-progress">Uploaded: {{percentage}}%</span>
           </div>
 
-          <div class="field" v-if="channel && channel.rename">
-            <label class="label">Rename File</label>
-            <p class="control">
-              <input class="input" type="text" v-model="newName">
-            </p>
-          </div>
+          <div class="meta-fields">
+            <div class="field is-horizontal meta-field" v-if="channel && channel.rename">
+              <div class="field-label is-normal">
+                <label class="label">Rename</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input class="input" type="text" v-model="newName">
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <div v-if="channel && channel.metaData">
-            <div class="field" v-for="meta in metaData">
-              <label class="label">{{meta.name}}</label>
-              <p class="control">
-                <input class="input" type="text" v-model="meta.value">
-              </p>
+            <div v-if="channel && channel.metaData">
+              <div class="field is-horizontal meta-field" v-for="meta in metaData">
+                <div class="field-label is-normal">
+                  <label class="label">{{meta.name}}</label>
+                </div>
+                <div class="field-body">
+                  <div class="field">
+                    <div class="control">
+                      <div v-if="meta.options">
+                        <div class="select">
+                          <select v-model="meta.value">
+                            <option v-for="option in meta.options">{{option}}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div v-else>
+                        <input class="input" type="text" v-model="meta.value">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -119,7 +171,16 @@ export default {
       this.$http.get(xHTTPx + '/get_metadata/' + this.project.id + '/' + this.channel.id).then(response => {
         this.waiting= false
         this.metaData = response.body.map(function(m){
-          return { name: m, value: '' }
+          var optionsStart = m.indexOf('{')
+          var optionsEnd = m.indexOf('}')
+          if(optionsStart == -1 || optionsEnd == -1 || optionsStart >= optionsEnd){
+            return { name: m, value: '' }
+          }
+          var name = m.slice(0, optionsStart).trim()
+          var options = m.slice(optionsStart+1, optionsEnd).split('|').map(function(s){
+            return s.trim()
+          })
+          return {name: name, value: '', options: options}
         })
       }, response => {
         this.error = 'Failed to get meta data!'
@@ -181,8 +242,12 @@ export default {
   font-weight: normal;
 }
 
-.instruction-field {
+.channel-details {
+  margin-bottom: 20px;
+}
 
+.channel-field {
+  margin-bottom: 0px;
 }
 
 .field-text {
@@ -190,10 +255,14 @@ export default {
   box-shadow: none;
   resize: none;
   position: relative;
-  top: -15px;
+  top: -2px;
 }
 
-.files-input {
+.file-field {
+  margin: 20px;
+}
+
+.file-input {
   font-size: 14px;
 }
 

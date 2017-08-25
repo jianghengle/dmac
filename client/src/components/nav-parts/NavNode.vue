@@ -108,7 +108,7 @@ export default {
 
       var role = this.nodeProjectRole
       if(!role) return false
-      if(type == 'users' || type == 'urls' || type == 'history' || type == 'channels'){
+      if(type == 'users' || type == 'urls' || type == 'history'){
         return this.isCurrent
       }
       return true
