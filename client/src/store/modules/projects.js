@@ -3,7 +3,7 @@ import DateForm from 'dateformat'
 
 // initial state
 export const state = {
-  showNav: false,
+  showNav: true,
   nodeMap: {},
   showAll: false,
   clipboard: {projectId: null, dataPaths: []},
@@ -43,6 +43,11 @@ export const mutations = {
       Vue.set(state.nodeMap, urls.path, urls)
     }
 
+    var channels = initChannels(project)
+    if(!state.nodeMap[channels.path]){
+      Vue.set(state.nodeMap, channels.path, channels)
+    }
+
     var history = initHistory(project)
     if(!state.nodeMap[history.path]){
       Vue.set(state.nodeMap, history.path, history)
@@ -61,7 +66,7 @@ export const mutations = {
       Vue.set(state.nodeMap, root.path, root)
     }
 
-    var children = [history.path, urls.path, users.path, root.path]
+    var children = [history.path, urls.path, users.path, channels.path, root.path]
     updateNode(state, project, children)
   },
 
@@ -213,6 +218,16 @@ function initPublicUrls(project) {
   }
 }
 
+function initChannels(project) {
+  return {
+    projectId: project.id,
+    type: 'channels',
+    path: '/projects/'+ project.id + '/channels',
+    name: 'Channels',
+    options: {open: false}
+  }
+}
+
 function initHistory(project) {
   return {
     projectId: project.id,
@@ -344,29 +359,40 @@ function compareNodes(o1, o2, opt){
 
 function patchChain(nodeMap, project, path){
   var parent = findParent(path)
-  while(parent && !nodeMap[parent.path]){
-    if(parent.type == 'projects'){
-      var root = initRoot()
-      root.children = [parent.childPath]
-      Vue.set(nodeMap, root.path, root)
-    }else if(parent.type == 'project'){
-      var project = initProject(project, {open: true})
-      project.children = [parent.childPath]
-      Vue.set(nodeMap, project.path, project)
-    }else if(parent.type == 'folder'){
-      var folder = {
-        projectId: project.id,
-        type: 'folder',
-        name: parent.name,
-        dataPath: parent.dataPath,
-        size: 0,
-        modifiedTime: 0
+  while(parent){
+    if(!nodeMap[parent.path]){
+      if(parent.type == 'projects'){
+        var root = initRoot()
+        root.children = [parent.childPath]
+        Vue.set(nodeMap, root.path, root)
+      }else if(parent.type == 'project'){
+        var project = initProject(project, {open: true})
+        project.children = [parent.childPath]
+        Vue.set(nodeMap, project.path, project)
+      }else if(parent.type == 'folder'){
+        var folder = {
+          projectId: project.id,
+          type: 'folder',
+          name: parent.name,
+          dataPath: parent.dataPath,
+          size: 0,
+          modifiedTime: 0
+        }
+        var folder = initFile(folder, {open: true})
+        folder.children = [parent.childPath]
+        Vue.set(nodeMap, folder.path, folder)
       }
-      var folder = initFile(folder, {open: true})
-      folder.children = [parent.childPath]
-      Vue.set(nodeMap, folder.path, folder)
+      parent = findParent(parent.path)
+    }else{
+      var existingParent = nodeMap[parent.path]
+      if(!existingParent.children){
+        existingParent.children = [parent.childPath]
+      }else if(existingParent.children.indexOf(parent.childPath) == -1){
+        existingParent.children.push(parent.childPath)
+      }
+      existingParent.options.open = true
+      break
     }
-    parent = findParent(parent.path)
   }
 }
 

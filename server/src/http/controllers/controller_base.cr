@@ -38,6 +38,16 @@ module DMACServer
         raise InsufficientParameters.new("header #{header_string} does not exist")
       end
 
+      private def get_body(ctx, body_string) : String?
+        return ctx.params.body[body_string].to_s if ctx.params.body.has_key?(body_string)
+      end
+
+      private def get_body!(ctx, body_string) : String
+        body = get_body(ctx, body_string)
+        return body unless body.nil?
+        raise InsufficientParameters.new("body #{body_string} does not exist")
+      end
+
       private def verify_token(ctx) 
         token = get_header!(ctx, "Authorization")
         account_server = ""

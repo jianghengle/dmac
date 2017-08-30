@@ -43,6 +43,10 @@ module DMACServer
         HttpAPI::UserController.get_user(env)
       end
 
+      post "/create_user" do |env|
+        HttpAPI::UserController.create_user(env)
+      end
+
       get "/get_projects" do |env|
         HttpAPI::ProjectController.get_projects(env)
       end
@@ -157,6 +161,34 @@ module DMACServer
 
       post "/delete_history" do |env|
         HttpAPI::GitController.delete_history(env)
+      end
+
+      get "/get_channels/:project_id" do |env|
+        HttpAPI::ChannelController.get_channels(env)
+      end
+
+      get "/get_directories/:project_id" do |env|
+        HttpAPI::ChannelController.get_directories(env)
+      end
+
+      get "/get_files/:project_id/:path" do |env|
+        HttpAPI::ChannelController.get_files(env)
+      end
+
+      post "/create_channel" do |env|
+        HttpAPI::ChannelController.create_channel(env)
+      end
+
+      post "/delete_channel" do |env|
+        HttpAPI::ChannelController.delete_channel(env)
+      end
+
+      get "/get_metadata/:project_id/:id" do |env|
+        HttpAPI::ChannelController.get_metadata(env)
+      end
+
+      post "/upload_channel/:project_id/:id" do |env|
+        HttpAPI::ChannelController.upload_channel(env)
       end
 
       Kemal.run

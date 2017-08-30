@@ -6,6 +6,16 @@
         {{file && file.name}}
       </div>
       <div class="column buttons">
+        <div class="tabs is-toggle text-tabs">
+        <ul>
+          <li :class="{'is-active': activeTab=='text'}">
+            <a class="tab-button text-tab-btn" :class="{'active-btn': activeTab=='text'}" @click="activeTab = 'text'">Text</a>
+          </li>
+          <li :class="{'is-active': activeTab=='table'}">
+            <a class="tab-button text-tab-btn" :class="{'active-btn': activeTab=='table'}" @click="activeTab = 'table'">Table</a>
+          </li>
+        </ul>
+      </div>
         <a class="button" :disabled="!textChanged" :class="{'is-danger': textChanged}" v-if="canEdit" @click="saveTextFile">
           <icon name="save"></icon>&nbsp;
           Save
@@ -18,16 +28,38 @@
       {{error}}
     </div>
 
-    <div class="field">
+    <div class="field" v-show="activeTab=='text'">
       <p class="control">
         <textarea class="textarea"
           :readonly="!canEdit"
           :class="{'is-danger': textChanged}"
           :style="{height: textAreaHeight}"
           :spellcheck="file.fileType=='text'"
-          v-model="textInput">
+          v-model="textInput"
+          @keydown="textAreaKeyDown">
         </textarea>
       </p>
+    </div>
+
+    <div v-show="activeTab=='table'" class="text-table">
+      <table class="table is-narrow">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th v-for="(h, i) in tableHeader">
+              <span class="text-table-header">{{h}}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, i) in tableData">
+            <td>{{i+1}}</td>
+            <td v-for="cell in row">
+              <span class="text-table-cell">{{cell}}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -41,7 +73,10 @@ export default {
     return {
       textInput: '',
       waiting: false,
-      error: ''
+      error: '',
+      activeTab: 'text',
+      tableHeader: [],
+      tableData: []
     }
   },
   computed: {
@@ -80,10 +115,16 @@ export default {
   watch: {
     path: function (val) {
       this.updateText()
+      this.activeTab = 'text'
     },
     file: function (val) {
       this.updateText()
     },
+    activeTab: function (val) {
+      if(val == 'table') {
+        this.buildTable()
+      }
+    }
   },
   methods: {
     updateText() {
@@ -99,6 +140,46 @@ export default {
         this.error = 'Failed to save file!'
         this.waiting = false
       })
+    },
+    textAreaKeyDown(e){
+      var keyCode = e.keyCode || e.which;
+
+      if (keyCode == 9) {
+        e.preventDefault()
+        var textarea = e.srcElement
+
+        var start = textarea.selectionStart
+        var end = textarea.selectionEnd
+
+        // set textarea value to: text before caret + tab + text after caret
+        var text = textarea.value
+        textarea.value = text.substring(0, start) + "\t" + text.substring(end)
+        // put caret at right position again
+        textarea.selectionStart = start + 1
+        textarea.selectionEnd = start + 1
+      }
+    },
+    buildTable(){
+      this.tableHeader = [],
+      this.tableData = []
+      var re=/\r\n|\n\r|\n|\r/g
+      var lines = this.textInput.replace(re,'\n').split('\n')
+      if(!lines.length) return
+      this.tableHeader = lines[0].split('\t')
+      var width = this.tableHeader.length
+      var tableData = []
+      for(var i=1;i<lines.length;i++){
+        var row = lines[i].split('\t')
+        tableData.push(row)
+        width = Math.max(row.length, width)
+      }
+      for(var i=0;i<tableData.length;i++){
+        var row = tableData[i]
+        while(row.length < width){
+          row.push('')
+        }
+      }
+      this.tableData = tableData
     }
   },
   mounted () {
@@ -113,6 +194,20 @@ export default {
   text-align: right;
 }
 
+.text-tabs {
+  display: inline-block;
+  margin-bottom: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.text-tab-btn {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
 .action-icon {
   color: #3273dc;
   position: relative;
@@ -122,6 +217,19 @@ export default {
 .text-area-container {
   margin-top: 5px;
   height: 100%;
+}
+
+.text-table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.text-table-header {
+  
+}
+
+.text-table-cell {
+  
 }
 
 </style>

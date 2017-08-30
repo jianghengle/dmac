@@ -9,20 +9,33 @@ module DMACServer
       def get_projects(ctx)
         begin
           email = verify_token(ctx)
-          controls = Control.get_controls_by_user(email)
-          return "[]" if controls.size == 0
-          project_ids = [] of Int32 | Int64 | Nil
-          controls.each do |k, c|
-            project_ids.push(c.project_id)
-          end
-          projects = Project.get_projects_by_ids(project_ids)
 
+          account_server = ""
+          if ENV.has_key?("ACCOUNT_SERVER")
+            account_server = ENV["ACCOUNT_SERVER"].to_s
+          end
+
+          user = User.new
+          user.role = "Manager"
+          user = User.get_user_by_email(email) if account_server == "localhost"
+
+          controls = Control.get_controls_by_user(email)
           arr = [] of String
-          projects.each do |k, v|
-            fields = {} of String => String
-            fields["projectRole"] = controls[k].role.to_s if controls.has_key? k
-            obj = v.to_json(fields)
-            arr.push(obj)
+          arr.push(user.role.to_s.to_json)
+          if controls.size > 0
+            project_ids = [] of Int32 | Int64 | Nil
+            controls.each do |k, c|
+              project_ids.push(c.project_id)
+            end
+            projects = Project.get_projects_by_ids(project_ids)
+
+
+            projects.each do |k, v|
+              fields = {} of String => String
+              fields["projectRole"] = controls[k].role.to_s if controls.has_key? k
+              obj = v.to_json(fields)
+              arr.push(obj)
+            end
           end
           json_array(arr)
         rescue ex : InsufficientParameters
@@ -95,17 +108,29 @@ module DMACServer
       def create_project(ctx)
         begin
           email = verify_token(ctx)
+
+          account_server = ""
+          if ENV.has_key?("ACCOUNT_SERVER")
+            account_server = ENV["ACCOUNT_SERVER"].to_s
+          end
+
+          user = User.new
+          user.role = "Manager"
+          user = User.get_user_by_email(email) if account_server == "localhost"
+
+          raise "Permission denied" if user.role.to_s == "Subscriber"
           name = get_param!(ctx, "name")
           description = get_param!(ctx, "description")
           template_id = get_param!(ctx, "templateId")
           copy_users = get_param!(ctx, "copyUsers")
 
-          project = Project.create_project(name, description)
+          project = Project.create_project(name, description, email)
           Control.create_control(email, project, "Owner", "")
           MyFile.create_folder(project, "-root-")
           if template_id != ""
             template = Project.get_project!(template_id)
             MyFile.copy_project_files(template, project)
+            Channel.copy_channels(template, project)
             if copy_users == "true"
               Control.copy_controls(template, project, email)
             end
@@ -154,6 +179,7 @@ module DMACServer
           Project.delete_project(project)
           MyFile.delete_folder(project, "-root-")
           Public.delete_all_by_project(project)
+          Channel.delete_all_by_project(project)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

@@ -36,6 +36,5 @@ class Ability
 
     # :admin users can manage everything
     can :manage, :all if user.role == "Admin"
-
   end
 end

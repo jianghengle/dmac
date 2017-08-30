@@ -57,6 +57,8 @@ export default {
           nodes.push(this.getNode('/projects/' + this.projectId + '/users'))
         }else if(this.routeName == 'PublicUrlsPage'){
           nodes.push(this.getNode('/projects/' + this.projectId + '/urls'))
+        }else if(this.routeName == 'ChannelsPage'){
+          nodes.push(this.getNode('/projects/' + this.projectId + '/channels'))
         }else if(this.routeName == 'HistoryPage'){
           nodes.push(this.getNode('/projects/' + this.projectId + '/history'))
         }else if(this.routeName == 'CommitPage'){

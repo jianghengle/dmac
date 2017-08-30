@@ -29,7 +29,7 @@
           <icon name="paste"></icon>&nbsp;
           Paste
         </a>
-        <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="publicFolder">
+        <a class="button default-btn" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '-root-'" @click="publicFolder">
           <icon name="share-alt"></icon>&nbsp;
           Public
         </a>
@@ -213,6 +213,7 @@ export default {
       if(this.projectRole == 'Viewer') return false
       if(this.projectRole == 'Owner' || this.projectRole == 'Admin') return true
       if(this.project.status != "Active") return false
+      if(this.folder.dataPath == '-root-') return false
       return !this.folder.readonly
     },
     files () {
