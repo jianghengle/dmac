@@ -26,7 +26,7 @@
       <icon name="spinner" class="icon is-medium fa-spin"></icon>
     </div>
 
-    <div class="columns">
+    <div class="columns" v-if="tableHeader.length">
       <div class="column" v-show="showTable"
         :class="{'half-width': showTable && showCharts, 'full-width': showTable && !showCharts}">
         <div v-show="totalPages > 1">

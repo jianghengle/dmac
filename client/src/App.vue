@@ -80,6 +80,7 @@ body {
 
 .main-link:hover {
   color: #866ba6;
+  text-decoration: underline;
 }
 
 .view-title {
