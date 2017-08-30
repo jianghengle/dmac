@@ -97,14 +97,25 @@ module DMACServer
           scope = "openid profile email urn:globus:auth:scope:transfer.api.globus.org:all"
           state = "_default"
           authorize_uri = oauth2_client.get_authorize_uri(scope: scope, state: state)
+          puts authorize_uri
           ctx.redirect authorize_uri
           return
         end
 
         puts "callback"
-        access_token = oauth2_client.get_access_token_using_authorization_code(code)
-        puts access_token.to_json
-        "back"
+
+        raw = {} of String => Array(String)
+        params = HTTP::Params.new raw
+        params.add("grant_type", "authorization_code")
+        params.add("code", code)
+        params.add("redirect_uri", redirect_uri)
+        params.add("client_id", client_id)
+        puts params.to_s
+        response = HTTP::Client.post("https://auth.globus.org/v2/oauth2/token" + "?" + params.to_s)
+        resp = JSON.parse(response.body)
+        puts response.body.to_s
+        puts resp
+        puts "back"
       end
 
     end
