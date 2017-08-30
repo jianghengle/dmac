@@ -116,7 +116,7 @@ module DMACServer
             headers: HTTP::Headers{"Authorization" => "Basic " + credential})
           resp = JSON.parse(response.body)
           id_token = resp["id_token"].to_s
-
+          puts id_token
           email = retrieve_email(id_token)
           puts email
           puts "back"
@@ -129,7 +129,9 @@ module DMACServer
         email = ""
         id_token.split('.').each do |s|
           begin
-            tokens = JSON.parse(Base64.decode_string(s)).to_h
+            d = Base64.decode_string(s)
+            puts d
+            tokens = JSON.parse(d).as_h
             email = tokens["email"].to_s if tokens.has_key? "email"
           rescue e : Exception
             puts e.message.to_s
