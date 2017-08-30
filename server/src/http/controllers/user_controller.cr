@@ -110,11 +110,13 @@ module DMACServer
         params.add("code", code)
         params.add("redirect_uri", redirect_uri)
         params.add("client_id", client_id)
-        puts params.to_s
-        response = HTTP::Client.post("https://auth.globus.org/v2/oauth2/token" + "?" + params.to_s)
+        credential = Base64.encode(client_id + ":" + client_secret)
+        response = HTTP::Client.post("https://auth.globus.org/v2/oauth2/token" + "?" + params.to_s,
+          headers: HTTP::Headers{"Content-Type" => "application/json", "Authorization" => "Basic " + credential})
         resp = JSON.parse(response.body)
-        puts response.body.to_s
-        puts resp
+        id_token = resp["id_token"].to_s
+        puts id_token
+        puts Base64.decode_string(id_token)
         puts "back"
       end
 
