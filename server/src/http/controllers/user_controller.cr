@@ -119,9 +119,12 @@ module DMACServer
           puts id_token
           email = retrieve_email(id_token)
           puts email
-          puts "back"
+          raise "failed to find email" if email.empty?
+          token = User.make_token(email)
+          puts token
+          "back"
         rescue e : Exception
-          error(ctx, e.message.to_s)
+          e.message.to_s
         end
       end
 

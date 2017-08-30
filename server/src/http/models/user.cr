@@ -49,6 +49,31 @@ module DMACServer
         return user
       end
 
+      def self.make_token(email : String)
+        user = Repo.get_by(User, email: email)
+        if user.nil?
+          password = SecureRandom.hex(32).to_s
+          encrypted_password = Crypto::Bcrypt::Password.create(password)
+          raise "failed to encrypted password" if encrypted_password.nil?
+          user = User.new
+          user.email = email
+          user.encrypted_password = encrypted_password.to_s
+          user.auth_token = SecureRandom.hex(32).to_s
+          user.role = "Subscriber"
+          user.first_name = ""
+          user.last_name = ""
+          changeset = Repo.insert(user)
+          raise changeset.errors.to_s unless changeset.valid?
+          return user.auth_token
+        else
+          user = user.as(User)
+          user.auth_token = SecureRandom.hex(32).to_s
+          changeset = Repo.update(user)
+          raise changeset.errors.to_s unless changeset.valid?
+          return user.auth_token
+        end
+      end
+
     end
   end
 end
