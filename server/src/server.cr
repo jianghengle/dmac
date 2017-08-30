@@ -4,6 +4,7 @@ require "kemal"
 require "json"
 require "crypto/bcrypt/password"
 require "secure_random"
+require "oauth2"
 
 require "./http/models/*"
 require "./http/errors/*"
@@ -29,6 +30,14 @@ module DMACServer
 
       get "/" do |env|
         env.redirect "/index.html"
+      end
+
+      get "/globus_login" do |env|
+        env.redirect "/authcallback"
+      end
+
+      get "/authcallback" do |env|
+        HttpAPI::UserController.authcallback(env)
       end
 
       post "/get_auth_token" do |env|

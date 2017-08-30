@@ -75,6 +75,38 @@ module DMACServer
         end
       end
 
+
+      def authcallback(ctx)
+        client_id = ""
+        if ENV.has_key?("GLOBUS_CLIENT_ID")
+          client_id = ENV["GLOBUS_CLIENT_ID"].to_s
+        end
+
+        client_secret = ""
+        if ENV.has_key?("GLOBUS_CLIENT_SECRET")
+          client_secret = ENV["GLOBUS_CLIENT_SECRET"].to_s
+        end
+
+        auth_server_uri = "auth.globus.org/v2"
+        redirect_uri = "https://34.212.66.157/authcallback"
+
+        oauth2_client = OAuth2::Client.new(auth_server_uri, client_id, client_secret, redirect_uri: redirect_uri)
+
+        code = get_param(ctx, "code")
+        if code.nil?
+          scope = "openid profile email urn:globus:auth:scope:transfer.api.globus.org:all"
+          state = "_default"
+          authorize_uri = oauth2_client.get_authorize_uri(scope: scope, state: state)
+          ctx.redirect authorize_uri
+          return
+        end
+
+        puts "callback"
+        access_token = oauth2_client.get_access_token_using_authorization_code(code)
+        puts access_token.to_json
+        "back"
+      end
+
     end
   end
 end
