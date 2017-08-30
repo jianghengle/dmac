@@ -9,14 +9,6 @@
       <p>You could also create your own project, but please remember this is a demo version and there is NO password for all users and NO protection for all data you uploaded.</p>
       <p>If you are interested, feel free to contact me at jianghengle@gmail.com.</p>
     </div>
-    <div class="field">
-      <p class="control has-icons-left">
-        <input class="input login-text" type="text" placeholder="Email" v-model="email">
-        <span class="icon is-small is-left">
-          <icon name="envelope"></icon>
-        </span>
-      </p>
-    </div>
 
     <div v-if="showLogin">
       <div class="field">
