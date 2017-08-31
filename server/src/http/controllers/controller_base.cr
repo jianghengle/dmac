@@ -55,8 +55,8 @@ module DMACServer
           account_server = ENV["ACCOUNT_SERVER"].to_s
         end
 
-        return token.gsub("--", "@") if account_server == ""
-        return User.get_user(token).email.to_s if account_server == "localhost"
+        return token.gsub("--", "@") if account_server == "" && token.includes?("@")
+        return User.get_user(token).email.to_s
 
         response = HTTP::Client.post(account_server+"/get_user", headers: HTTP::Headers{"Content-Type" => "application/json"}, body: {token: token}.to_json)
         resp = JSON.parse(response.body)
