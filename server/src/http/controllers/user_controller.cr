@@ -10,24 +10,8 @@ module DMACServer
         begin
           email = get_param!(ctx, "email")
           password = get_param!(ctx, "password")
-
-          account_server = ""
-          if ENV.has_key?("ACCOUNT_SERVER")
-            account_server = ENV["ACCOUNT_SERVER"].to_s
-          end
-
-          if account_server == ""
-            {token: email.gsub("@", "--")}.to_json
-          elsif account_server == "localhost"
-            token = User.get_token(email, password)
-            {token: token}.to_json
-          else
-            response = HTTP::Client.post(account_server+"/get_token", headers: HTTP::Headers{"Content-Type" => "application/json"}, body: {email: email, password: password}.to_json)
-            resp = JSON.parse(response.body)
-            token = resp["token"].to_s
-            {token: token}.to_json
-          end
-
+          token = User.get_token(email, password)
+          {token: token}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception
