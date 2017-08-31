@@ -185,6 +185,10 @@ module DMACServer
         HttpAPI::ChannelController.create_channel(env)
       end
 
+      post "/update_channel" do |env|
+        HttpAPI::ChannelController.update_channel(env)
+      end
+
       post "/delete_channel" do |env|
         HttpAPI::ChannelController.delete_channel(env)
       end

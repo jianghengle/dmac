@@ -86,6 +86,19 @@ module DMACServer
         raise changeset.errors.to_s unless changeset.valid?
       end
 
+      def self.update_channel(id, path, meta_data, instruction, rename)
+        channel = Repo.get(Channel, id)
+        raise "Cannot find channel" if channel.nil?
+        channel = channel.as(Channel)
+        channel.path = path
+        channel.meta_data = meta_data
+        channel.instruction = instruction
+        channel.rename = rename == "true"
+        changeset = Repo.update(channel)
+        raise changeset.errors.to_s unless changeset.valid?
+        return channel
+      end
+
       def self.delete_channel(id)
         channel = Repo.get_by(Channel, id: id)
         Repo.delete(channel) unless channel.nil?

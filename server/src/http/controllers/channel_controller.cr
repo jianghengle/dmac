@@ -87,6 +87,29 @@ module DMACServer
         end
       end
 
+      def update_channel(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          id = get_param!(ctx, "id")
+          path = get_param!(ctx, "path")
+          meta_data = get_param!(ctx, "metaData")
+          instruction = get_param!(ctx, "instruction")
+          rename = get_param!(ctx, "rename")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
+
+          Channel.update_channel(id, path, meta_data, instruction, rename)
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
       def delete_channel(ctx)
         begin
           email = verify_token(ctx)

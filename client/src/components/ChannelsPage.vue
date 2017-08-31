@@ -23,6 +23,11 @@
       <div class="header">
         <span class="name">
           <a class="main-link" @click.stop="openChannelPath(channel)">{{channel.relPath}}</a>
+        </span>&nbsp;
+        <span class="edit-icon main-link"
+          v-if="projectRole=='Owner' || projectRole=='Admin'"
+          @click.stop="openEditChannelModal(channel)">
+          <icon name="edit"></icon>
         </span>
         <span class="info">
           <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
@@ -50,6 +55,13 @@
       @close-new-channel-modal="closeNewChannelModal">
     </new-channel-modal>
 
+    <edit-channel-modal
+      :opened="editChannelModal.opened"
+      :project="project"
+      :channel="editChannelModal.channel"
+      @close-edit-channel-modal="closeEditChannelModal">
+    </edit-channel-modal>
+
     <upload-channel-modal
       :opened="uploadChannelModal.opened"
       :channel="uploadChannelModal.channel"
@@ -64,6 +76,7 @@ import DateForm from 'dateformat'
 import AddressBar from './AddressBar'
 import ConfirmModal from './modals/ConfirmModal'
 import NewChannelModal from './modals/NewChannelModal'
+import EditChannelModal from './modals/EditChannelModal'
 import UploadChannelModal from './modals/uploadChannelModal'
 
 export default {
@@ -72,6 +85,7 @@ export default {
     AddressBar,
     ConfirmModal,
     NewChannelModal,
+    EditChannelModal,
     UploadChannelModal
   },
   data () {
@@ -85,6 +99,10 @@ export default {
       },
       newChannelModal: {
         opened: false
+      },
+      editChannelModal: {
+        opened: false,
+        channel: null
       },
       uploadChannelModal: {
         opened: false,
@@ -189,6 +207,16 @@ export default {
         this.requestChannels()
       }
     },
+    openEditChannelModal(channel){
+      this.editChannelModal.channel = channel
+      this.editChannelModal.opened = true
+    },
+    closeEditChannelModal(result){
+      this.editChannelModal.opened = false
+      if(result){
+        this.requestChannels()
+      }
+    },
     openUploadChannelModal(channel){
       this.uploadChannelModal.channel = channel
       this.uploadChannelModal.opened = true
@@ -247,7 +275,6 @@ export default {
     }
 
     .edit-icon {
-      color: #ff3860;
       font-size: 14px;
       position: relative;
       top: 3px;
