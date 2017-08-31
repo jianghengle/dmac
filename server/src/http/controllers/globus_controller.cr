@@ -19,7 +19,7 @@ module DMACServer
           end
 
           auth_server_uri = "auth.globus.org/v2"
-          redirect_uri = "https://34.212.66.157/authcallback"
+          redirect_uri = "https://34.212.66.157/globus_authcallback"
 
           oauth2_client = OAuth2::Client.new(auth_server_uri, client_id, client_secret, redirect_uri: redirect_uri)
 
