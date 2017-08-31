@@ -32,12 +32,8 @@ module DMACServer
         env.redirect "/index.html"
       end
 
-      get "/globus_login" do |env|
-        env.redirect "/authcallback"
-      end
-
-      get "/authcallback" do |env|
-        HttpAPI::UserController.authcallback(env)
+      get "/globus_authcallback" do |env|
+        HttpAPI::GlobusController.authcallback(env)
       end
 
       post "/get_auth_token" do |env|

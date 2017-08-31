@@ -52,7 +52,7 @@ module DMACServer
       def self.make_token(email : String)
         user = Repo.get_by(User, email: email)
         if user.nil?
-          password = SecureRandom.hex(32).to_s
+          password = SecureRandom.base64
           encrypted_password = Crypto::Bcrypt::Password.create(password)
           raise "failed to encrypted password" if encrypted_password.nil?
           user = User.new
