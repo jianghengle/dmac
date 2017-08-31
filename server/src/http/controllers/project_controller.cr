@@ -9,15 +9,7 @@ module DMACServer
       def get_projects(ctx)
         begin
           email = verify_token(ctx)
-
-          account_server = ""
-          if ENV.has_key?("ACCOUNT_SERVER")
-            account_server = ENV["ACCOUNT_SERVER"].to_s
-          end
-
-          user = User.new
-          user.role = "Manager"
-          user = User.get_user_by_email(email) if account_server == "localhost"
+          user = User.get_user_by_email(email)
 
           controls = Control.get_controls_by_user(email)
           arr = [] of String
@@ -108,17 +100,9 @@ module DMACServer
       def create_project(ctx)
         begin
           email = verify_token(ctx)
-
-          account_server = ""
-          if ENV.has_key?("ACCOUNT_SERVER")
-            account_server = ENV["ACCOUNT_SERVER"].to_s
-          end
-
-          user = User.new
-          user.role = "Manager"
-          user = User.get_user_by_email(email) if account_server == "localhost"
-
+          user = User.get_user_by_email(email)
           raise "Permission denied" if user.role.to_s == "Subscriber"
+
           name = get_param!(ctx, "name")
           description = get_param!(ctx, "description")
           template_id = get_param!(ctx, "templateId")

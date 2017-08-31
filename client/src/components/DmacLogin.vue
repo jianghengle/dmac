@@ -2,31 +2,44 @@
   <div class="login-page">
     <div class="welcome">Welcome to DMAC system!</div>
     <div v-if="showLogin">
-      <div class="field">
-        <p class="control has-icons-left">
-          <input class="input login-text" type="text" placeholder="Email" v-model="email">
-          <span class="icon is-small is-left">
-            <icon name="envelope"></icon>
-          </span>
-        </p>
+      <div class="main-link login-option">
+        <a href="/globus_authcallback">
+          Globus login
+        </a>
       </div>
-
-      <div class="field">
-        <p class="control has-icons-left">
-          <input class="input login-text" type="password" placeholder="Password" v-model="password">
-          <span class="icon is-small is-left">
-            <icon name="key"></icon>
-          </span>
-        </p>
+      <div class="login-option">
+        Or
       </div>
+      <div>
+        <div class="login-option">
+          Local login
+        </div>
+        <div class="field">
+          <p class="control has-icons-left">
+            <input class="input login-text" type="text" placeholder="Email" v-model="email">
+            <span class="icon is-small is-left">
+              <icon name="envelope"></icon>
+            </span>
+          </p>
+        </div>
 
-      <div class="field">
-        <p class="control">
-          <label class="checkbox">
-            <input type="checkbox" v-model="rememberMe">
-            Remember me
-          </label>
-        </p>
+        <div class="field">
+          <p class="control has-icons-left">
+            <input class="input login-text" type="password" placeholder="Password" v-model="password">
+            <span class="icon is-small is-left">
+              <icon name="key"></icon>
+            </span>
+          </p>
+        </div>
+
+        <div class="field">
+          <p class="control">
+            <label class="checkbox login-option">
+              <input type="checkbox" v-model="rememberMe">
+              Remember me
+            </label>
+          </p>
+        </div>
       </div>
 
       <div v-if="error" class="notification is-danger login-text">
@@ -49,7 +62,7 @@
     </div>
 
     <div v-else>
-      <div class="welcome">You will register a new "Subscriber" user, who can only join projects but cannot create a new project. If you want to create a new project, first register here, and then contact jianghengle@gmail.com with your name, department and/or your referer so that he can grant you the permission.</div>
+      <div class="login-option">You will register a new "Subscriber" user, who can only join projects but cannot create a new project. If you want to create a new project, first register here, and then contact jianghengle@gmail.com with your name, department and/or your referer so that he can grant you the permission.</div>
 
       <div class="field">
         <p class="control has-icons-left">
@@ -240,6 +253,13 @@ export default {
 
   .welcome {
     padding-bottom: 10px;
+    font-weight: bold;
+    color: #2e1052;
+  }
+
+  .login-option {
+    padding-bottom: 10px;
+    color: #2e1052;
   }
 
   .login-text {

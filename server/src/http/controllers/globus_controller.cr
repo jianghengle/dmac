@@ -28,12 +28,9 @@ module DMACServer
             scope = "openid profile email urn:globus:auth:scope:transfer.api.globus.org:all"
             state = "_default"
             authorize_uri = oauth2_client.get_authorize_uri(scope: scope, state: state)
-            puts authorize_uri
             ctx.redirect authorize_uri
             return
           end
-
-          puts "callback"
 
           raw = {} of String => Array(String)
           params = HTTP::Params.new raw
@@ -46,12 +43,9 @@ module DMACServer
             headers: HTTP::Headers{"Authorization" => "Basic " + credential})
           resp = JSON.parse(response.body)
           id_token = resp["id_token"].to_s
-          puts id_token
           email = retrieve_email(id_token)
-          puts email
           raise "failed to find email" if email.empty?
           token = User.make_token(email)
-          puts token
           ctx.response.content_type = "text/html"
           AuthTokenPage.new(email, token).to_s
         rescue e : Exception
@@ -64,7 +58,6 @@ module DMACServer
         id_token.split('.').each do |s|
           begin
             d = Base64.decode_string(s)
-            puts d
             tokens = JSON.parse(d).as_h
             email = tokens["email"].to_s if tokens.has_key? "email"
           rescue e : Exception
