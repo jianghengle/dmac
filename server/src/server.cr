@@ -10,6 +10,7 @@ require "./http/models/*"
 require "./http/errors/*"
 require "./http/controllers/*"
 require "./http/middleware/*"
+require "./http/templates/*"
 
 
 module Repo

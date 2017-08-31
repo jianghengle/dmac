@@ -52,7 +52,8 @@ module DMACServer
           raise "failed to find email" if email.empty?
           token = User.make_token(email)
           puts token
-          "back"
+          ctx.response.content_type = "text/html"
+          AuthTokenPage.new(email, token).to_s
         rescue e : Exception
           e.message.to_s
         end
