@@ -7,7 +7,7 @@
       <p>I made a demo project that anyone can play with. Just login as demo_owner@dmac.com. There is NO password for all users.</p>
       <p>You could also play with other roles for the demo project by logging in as demo_admin@dmac.com or demo_editor@dmac.com or demo_viewer@dmac.com. </p>
       <p>You could also create your own project, but please remember this is a demo version and there is NO password for all users and NO protection for all data you uploaded.</p>
-      <p>If you are interested, feel free to contact me at jianghengle@gmail.com.</p>
+      <p>The source code is on <a href="https://github.com/jianghengle/dmac">Github</a>. If you are interested, feel free to contact me at jianghengle@gmail.com.</p>
     </div>
 
     <div v-if="showLogin">
