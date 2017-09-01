@@ -14,7 +14,7 @@ The `server` is the backend, which is a pure API server in Crystal.
 
 The `client` is the frontend, which is a Vuejs application.
 
-The frontend and backend are fully decoupled. The built `client` code can be served from anywhere.
+The frontend and backend are fully decoupled. The built `client` code can be served from anywhere. But if you want to Single Sign On through globus, it must be served by the API server directly.
 
 Currently, I deployed all on one Anvil instance. The code is checked out in the HOME directory, and run as SystemD services: `dmac_admin.service`, `dmac_server.service`. The built `client` is also in HOME as the `dist` directory and served by the API server together. Additionally, there is a `dmac_cleaner.service` running daily by the timer `dmac_cleaner.service`. You could take a look at the service files in `services` in HOME, but the actual service files are in `\usr\lib\systemd\system`.
 

@@ -147,7 +147,7 @@ export default {
       error: '',
       sent: false,
       showLogin: true,
-      adminPage: xHTTPx.replace('3000', '3001'),
+      adminPage: xHTTPx.indexOf(':3000') == -1 ? xHTTPx + ':3001' : xHTTPx.replace(':3000', ':3001'),
       newEmail: '',
       newPassword: '',
       newPasswordAgain: '',
