@@ -65,7 +65,8 @@ module DMACServer
         begin
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
-          data_path = get_param!(ctx, "data_path")
+          data_path = get_param(ctx, "data_path")
+          data_path = "" if data_path.nil?
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
@@ -110,7 +111,7 @@ module DMACServer
 
           project = Project.create_project(name, description, email)
           Control.create_control(email, project, "Owner", "")
-          MyFile.create_folder(project, "-root-")
+          MyFile.create_folder(project, "")
           if template_id != ""
             template = Project.get_project!(template_id)
             MyFile.copy_project_files(template, project)
@@ -161,7 +162,7 @@ module DMACServer
 
           Control.delete_all_by_project(project)
           Project.delete_project(project)
-          MyFile.delete_folder(project, "-root-")
+          MyFile.delete_folder(project, "")
           Public.delete_all_by_project(project)
           Channel.delete_all_by_project(project)
           {"ok": true}.to_json
@@ -203,7 +204,7 @@ module DMACServer
           raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
 
           MyFile.create_file(project, data_path, control)
-          rel_path = data_path.gsub("--", "/")
+          rel_path = data_path
           Git.commit(project, email + " created file " + rel_path)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -227,7 +228,7 @@ module DMACServer
 
           MyFile.update_folder_file_name(project, data_path, name, control)
 
-          rel_path = data_path.gsub("--", "/")
+          rel_path = data_path
           Git.commit(project, email + " renamed " + rel_path + " to " + name)
 
           {"ok": true}.to_json
@@ -251,7 +252,7 @@ module DMACServer
 
           MyFile.delete_folder_file(project, data_path, control)
 
-          rel_path = data_path.gsub("--", "/")
+          rel_path = data_path
           Git.commit(project, email + " deleted " + rel_path)
 
           {"ok": true}.to_json
@@ -299,7 +300,7 @@ module DMACServer
 
           MyFile.save_text_file(project, data_path, text, control)
 
-          rel_path = data_path.gsub("--", "/")
+          rel_path = data_path
           Git.commit(project, email + " save file " + rel_path)
 
           {"ok": true}.to_json
@@ -337,7 +338,7 @@ module DMACServer
           target_file = MyFile.new(target_project, target_data_path)
           MyFile.copy_files(source_files, target_file, source_control, target_control)
 
-          rel_path = target_data_path.gsub("--", "/")
+          rel_path = target_data_path
           Git.commit(target_project, email + " copy something into " + rel_path)
 
           {"ok": true}.to_json
@@ -360,7 +361,7 @@ module DMACServer
 
           MyFile.unzip_file(project, data_path)
 
-          rel_path = data_path.gsub("--", "/")
+          rel_path = data_path
           Git.commit(project, email + " extract " + rel_path)
 
           {"ok": true}.to_json

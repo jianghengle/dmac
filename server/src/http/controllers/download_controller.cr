@@ -57,7 +57,7 @@ module DMACServer
           project_key = download.project_key.to_s
           data_path = download.data_path.to_s
           full_path = MyFile.get_download_path(download)
-          filename = File.basename(data_path.gsub("--", "/"))
+          filename = File.basename(data_path)
           filename = filename + ".zip" if full_path.ends_with?(key + "/" + key + ".zip")
           ext= File.extname(full_path)
           ctx.response.headers["Content-Disposition"] =  "attachment; filename=\"" + filename + "\""

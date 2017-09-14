@@ -56,9 +56,9 @@ export const mutations = {
     var root = initFile({
       projectId: project.id,
       type: 'folder',
-      name: '-root-',
-      path: '/projects/' + project.id + '/data/-root-',
-      dataPath: '-root-',
+      name: 'Data',
+      path: '/projects/' + project.id + '/data',
+      dataPath: '',
       size: 0,
       modifiedTime: 0
     })
@@ -73,9 +73,6 @@ export const mutations = {
   setFile (state, resp) {
     var project = initProject(resp[0])
     var file = initFile(resp[1])
-    if(file.dataPath == '-root-'){
-      file.name = '-root-'
-    }
     patchChain(state.nodeMap, project, file.path)
     if(file.type == 'folder'){
       var files = resp.slice(2).map(function(f){
@@ -192,8 +189,7 @@ function initProject(project, options){
     Object.assign(opts, options)
   }
   p.options = opts
-  p.children = ['/projects/'+ p.id + '/users']
-  p.children = ['/projects/'+ p.id + '/-root-']
+  p.children = ['/projects/'+ p.id + '/data']
   return p
 }
 
@@ -242,9 +238,14 @@ function initHistory(project) {
 function initFile(file, options, pub){
   var f = Object.assign({}, file)
   if(pub){
-    f.path = '/public/' + pub.key + '/' + f.dataPath
+    f.path = f.dataPath ? '/public/' + pub.key + '/' + f.dataPath : '/public/' + pub.key
   }else{
-    f.path = '/projects/' + f.projectId + '/data/' + f.dataPath
+    if(f.dataPath){
+      f.path = '/projects/' + f.projectId + '/data/' + encodeURIComponent(f.dataPath)
+    }else{
+      f.path = '/projects/' + f.projectId + '/data'
+      f.name = 'Data'
+    }
   }
   f.modifiedAt = DateForm(f.modifiedTime*1000, 'mmm dd yyyy HH:MM')
   if(f.type == 'file'){
@@ -408,21 +409,24 @@ function findParent(path){
     if(ss[3] == 'users'){
       parent.type = 'project'
       parent.path = '/projects/' + ss[2]
+    }else if(ss[3] == 'data'){
+      parent.type = 'project'
+      parent.path = '/projects/' + ss[2]
     }
   }else if(ss.length == 5){
-    if(ss[4] == '-root-'){
+    if(ss[4] == ''){
       parent.type = 'project'
       parent.path = '/projects/' + ss[2]
     }else{
-      var sss = ss[4].split('--')
+      var sss = ss[4].split('%2F')
       if(sss.length == 1){
         parent.type = 'folder'
-        parent.dataPath = '-root-'
-        parent.path = '/projects/' + ss[2] + '/data/-root-'
-        parent.name = '-root-'
+        parent.dataPath = ''
+        parent.path = '/projects/' + ss[2] + '/data'
+        parent.name = 'Data'
       }else{
         parent.type = 'folder'
-        parent.dataPath = sss.slice(0, -1).join('--')
+        parent.dataPath = sss.slice(0, -1).join('%2F')
         parent.path = '/projects/' + ss[2] + '/data/' + parent.dataPath
         parent.name = sss[sss.length-2]
       }
@@ -459,8 +463,8 @@ function findPublicParent(pdp, path){
   var sss = ss[3].split('--')
   var parent = {childPath: path}
   parent.type = 'folder'
-  parent.dataPath = sss.slice(0, -1).join('--')
-  parent.path = '/public/' + ss[2] + '/' + parent.dataPath
+  parent.dataPath = sss.slice(0, -1).join('/')
+  parent.path = '/public/' + ss[2] + '/' + encodeURIComponent(parent.dataPath)
   parent.name = sss[sss.length-2]
   return parent
 }

@@ -219,7 +219,7 @@ export default {
       this.$router.push('/projects/' + this.projectId + '/history')
     },
     viewData () {
-      this.$router.push('/projects/' + this.projectId + '/data/-root-')
+      this.$router.push('/projects/' + this.projectId + '/data')
     },
     openEditProjectModal(){
       this.editProjectModal.project = this.project
