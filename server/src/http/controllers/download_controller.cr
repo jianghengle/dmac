@@ -11,6 +11,7 @@ module DMACServer
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
           data_path = get_param!(ctx, "data_path")
+          data_path = URI.unescape(data_path)
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
@@ -31,6 +32,7 @@ module DMACServer
           public_key = get_param!(ctx, "public_key")
           project_id = get_param!(ctx, "project_id")
           data_path = get_param!(ctx, "data_path")
+          data_path = URI.unescape(data_path)
 
           project = Project.get_project!(project_id)
           public = Public.get_public!(public_key)

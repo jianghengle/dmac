@@ -64,11 +64,6 @@ export default new Router({
       component: FolderFilePage
     },
     {
-      path: '/projects/:projectId/data',
-      name: 'FolderFile',
-      component: FolderFilePage
-    },
-    {
       path: '/public/:publicKey/:dataPath',
       name: 'FolderFile',
       component: FolderFilePage

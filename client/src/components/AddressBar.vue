@@ -69,31 +69,32 @@ export default {
           }
           nodes.push(commitNode)
         }else{
-          nodes.push(this.getNode('/projects/' + this.projectId + '/data/-root-'))
-          var files = this.dataPath.split('--')
-          var path = '/projects/' + this.projectId + '/data'
+          var path = '/projects/' + this.projectId + '/data/'
+          var files = this.dataPath.split('/')
           for(var i=0;i<files.length;i++){
             if(i == 0){
-              path = path + '/' + files[i]
+              path += '%2F'
+            }else if(i == 1){
+              if(!files[i]) break
+              path += encodeURIComponent(files[i])
             }else{
-              path = path + '--' + files[i]
+              path = path + encodeURIComponent('/' + files[i])
             }
-            if(files[i] != '-root-'){
-              nodes.push(this.getNode(path))
-            }
+            nodes.push(this.getNode(path))
           }
         }
       }else{
-        var path = '/public/' + this.publicKey + '/' + this.publicDataPath
+        var path = '/public/' + this.publicKey + '/' + encodeURIComponent(this.publicDataPath)
         nodes.push(this.getNode(path))
         if(this.dataPath != this.publicDataPath && this.dataPath.indexOf(this.publicDataPath) == 0){
           var vm = this
-          this.dataPath.slice(this.publicDataPath.length + 2).split('--').forEach(function(s){
-            path = path + '--' + s
+          this.dataPath.slice(this.publicDataPath.length + 1).split('/').forEach(function(s){
+            path += encodeURIComponent('/' + s)
             nodes.push(vm.getNode(path))
           })
         }
       }
+
       return nodes
     },
     

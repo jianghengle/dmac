@@ -29,7 +29,7 @@
           <icon name="paste"></icon>&nbsp;
           Paste
         </a>
-        <a class="button default-btn" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != ''" @click="publicFolder">
+        <a class="button default-btn" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="publicFolder">
           <icon name="share-alt"></icon>&nbsp;
           Public
         </a>
@@ -286,15 +286,17 @@ export default {
       }
     },
     getDownloadUrl(f) {
+      var dataPath = encodeURIComponent(f.dataPath)
+      dataPath = encodeURIComponent(dataPath)
       if(this.publicKey){
-        this.$http.get(xHTTPx + '/get_public_download_url/' + this.publicKey + "/" + f.projectId + "/" + f.dataPath).then(response => {
+        this.$http.get(xHTTPx + '/get_public_download_url/' + this.publicKey + "/" + f.projectId + "/" + dataPath).then(response => {
           var url = xHTTPx + response.body
           this.$set(this.urls, f.path, url)
         }, response => {
           console.log('failed to get url')
         })
       }else{
-        this.$http.get(xHTTPx + '/get_download_url/' + f.projectId + "/" + f.dataPath).then(response => {
+        this.$http.get(xHTTPx + '/get_download_url/' + f.projectId + "/" + dataPath).then(response => {
           var url = xHTTPx + response.body
           this.$set(this.urls, f.path, url)
         }, response => {
@@ -363,7 +365,7 @@ export default {
       this.$http.post(xHTTPx + '/make_folder_public', message).then(response => {
         this.$emit('content-changed', true)
       }, response => {
-        console.log('failed to paste')
+        console.log('failed to make public')
       })
     },
     openConfirmModal(message, context){

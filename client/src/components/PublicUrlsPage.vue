@@ -106,7 +106,7 @@ export default {
         vm.publicUrls = resp.map(function(u){
           u.createdAt = DateForm(u.createdTime*1000, 'mmm dd yyyy HH:MM')
           u.relPath = u.dataPath.replace(/--/g, '/')
-          u.url = window.location.origin + '/#/public/' + u.key + '/' + u.dataPath
+          u.url = window.location.origin + '/#/public/' + u.key + '/' + encodeURIComponent(u.dataPath)
           return u
         })
         vm.waiting = false

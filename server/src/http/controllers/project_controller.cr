@@ -65,8 +65,8 @@ module DMACServer
         begin
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
-          data_path = get_param(ctx, "data_path")
-          data_path = "" if data_path.nil?
+          data_path = get_param!(ctx, "data_path")
+          data_path = URI.unescape(data_path)
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
@@ -268,6 +268,7 @@ module DMACServer
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
           data_path = get_param!(ctx, "data_path")
+          data_path = URI.unescape(data_path)
           file = ctx.params.files["file"]
 
           project = Project.get_project!(project_id)

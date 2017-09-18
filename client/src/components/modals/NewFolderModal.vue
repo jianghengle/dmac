@@ -76,9 +76,9 @@ export default {
       if(!this.newNameValid) return
       var vm = this
       vm.waiting = true
-      var dataPath = vm.newName.trim()
+      var dataPath = '/' + vm.newName.trim()
       if(vm.dataPath != ''){
-        dataPath = vm.dataPath + '/' + dataPath
+        dataPath = vm.dataPath + dataPath
       }
       var message = {projectId: vm.projectId, dataPath:  dataPath}
       vm.$http.post(xHTTPx + '/create_folder', message).then(response => {

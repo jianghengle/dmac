@@ -32,6 +32,7 @@ module DMACServer
         begin
           public_key = get_param!(ctx, "public_key")
           data_path = get_param!(ctx, "data_path")
+          data_path = URI.unescape(data_path)
 
           public = Public.get_public!(public_key)
           raise "Wrong header" unless data_path.starts_with? public.data_path.to_s

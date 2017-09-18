@@ -100,8 +100,8 @@ export default {
   },
   methods: {
     requestFile () {
-      var dataPath = this.$route.params.dataPath
-      dataPath = dataPath ? encodeURIComponent(dataPath) : ""
+      var dataPath = encodeURIComponent(this.$route.params.dataPath)
+      dataPath = encodeURIComponent(dataPath)
       this.waiting = true
       if(this.projectId){
         this.$http.get(xHTTPx + '/get_file/' + this.projectId + "/" + dataPath).then(response => {

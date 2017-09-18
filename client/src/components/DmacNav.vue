@@ -23,7 +23,7 @@ export default {
     },
     root () {
       if(this.publicKey){
-        return '/public/' + this.publicKey + '/' + this.publicDataPath
+        return '/public/' + this.publicKey + '/' + encodeURIComponent(this.publicDataPath)
       }
       return '/projects'
     }

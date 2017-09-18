@@ -109,7 +109,9 @@ export default {
 
         var formData = new FormData()
         formData.append('file', file)
-        var url = xHTTPx + '/upload_file/' + vm.projectId + '/' + vm.dataPath
+        var dataPath = encodeURIComponent(vm.dataPath)
+        dataPath = encodeURIComponent(dataPath)
+        var url = xHTTPx + '/upload_file/' + vm.projectId + '/' + dataPath
         var promise = vm.$http.post(url, formData, {
           before: request => {
             vm.uploads[file.name].request = request

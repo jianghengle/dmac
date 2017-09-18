@@ -65,10 +65,6 @@ module DMACServer
         HttpAPI::ProjectController.get_project(env)
       end
 
-      get "/get_file/:project_id" do |env|
-        HttpAPI::ProjectController.get_file(env)
-      end
-
       get "/get_file/:project_id/:data_path" do |env|
         HttpAPI::ProjectController.get_file(env)
       end

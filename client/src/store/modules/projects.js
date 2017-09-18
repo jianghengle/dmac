@@ -57,8 +57,8 @@ export const mutations = {
       projectId: project.id,
       type: 'folder',
       name: 'Data',
-      path: '/projects/' + project.id + '/data',
-      dataPath: '',
+      path: '/projects/' + project.id + '/data/%2F',
+      dataPath: '/',
       size: 0,
       modifiedTime: 0
     })
@@ -94,7 +94,6 @@ export const mutations = {
     var pub = resp[0]
     state.publicDataPath = pub.dataPath
     var file = initFile(resp[1], null, pub)
-
     patchPublicChain(state.nodeMap, pub, file.path)
     if(file.type == 'folder'){
       var files = resp.slice(2).map(function(f){
@@ -189,7 +188,7 @@ function initProject(project, options){
     Object.assign(opts, options)
   }
   p.options = opts
-  p.children = ['/projects/'+ p.id + '/data']
+  p.children = ['/projects/'+ p.id + '/data/%2F']
   return p
 }
 
@@ -238,12 +237,10 @@ function initHistory(project) {
 function initFile(file, options, pub){
   var f = Object.assign({}, file)
   if(pub){
-    f.path = f.dataPath ? '/public/' + pub.key + '/' + f.dataPath : '/public/' + pub.key
+    f.path = '/public/' + pub.key + '/' + encodeURIComponent(f.dataPath)
   }else{
-    if(f.dataPath){
-      f.path = '/projects/' + f.projectId + '/data/' + encodeURIComponent(f.dataPath)
-    }else{
-      f.path = '/projects/' + f.projectId + '/data'
+    f.path = '/projects/' + f.projectId + '/data/' + encodeURIComponent(f.dataPath)
+    if(f.dataPath == '/'){
       f.name = 'Data'
     }
   }
@@ -409,9 +406,6 @@ function findParent(path){
     if(ss[3] == 'users'){
       parent.type = 'project'
       parent.path = '/projects/' + ss[2]
-    }else if(ss[3] == 'data'){
-      parent.type = 'project'
-      parent.path = '/projects/' + ss[2]
     }
   }else if(ss.length == 5){
     if(ss[4] == ''){
@@ -419,15 +413,20 @@ function findParent(path){
       parent.path = '/projects/' + ss[2]
     }else{
       var sss = ss[4].split('%2F')
-      if(sss.length == 1){
+      if(sss.length == 2){
+        if(sss[1] == ''){
+          parent.type = 'project'
+          parent.path = '/projects/' + ss[2]
+        }else{
+          parent.type = 'folder'
+          parent.dataPath = '/'
+          parent.path = '/projects/' + ss[2] + '/data/%2F'
+          parent.name = 'Data'
+        }
+      }else if(sss.length > 2){
         parent.type = 'folder'
-        parent.dataPath = ''
-        parent.path = '/projects/' + ss[2] + '/data'
-        parent.name = 'Data'
-      }else{
-        parent.type = 'folder'
-        parent.dataPath = sss.slice(0, -1).join('%2F')
-        parent.path = '/projects/' + ss[2] + '/data/' + parent.dataPath
+        parent.dataPath = sss.slice(0, -1).join('/')
+        parent.path = '/projects/' + ss[2] + '/data/' + encodeURIComponent(parent.dataPath)
         parent.name = sss[sss.length-2]
       }
     }
@@ -457,10 +456,11 @@ function patchPublicChain(nodeMap, pub, path){
 function findPublicParent(pdp, path){
   var ss = path.split('/')
   if(ss.length != 4) return null
+  pdp = encodeURIComponent(pdp)
   if(ss[3] == pdp) return null
   if(ss[3].indexOf(pdp) != 0) return null
 
-  var sss = ss[3].split('--')
+  var sss = ss[3].split('%2F')
   var parent = {childPath: path}
   parent.type = 'folder'
   parent.dataPath = sss.slice(0, -1).join('/')

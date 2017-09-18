@@ -61,14 +61,16 @@ export default {
   },
   methods: {
     getDownloadUrl() {
+      var dataPath = encodeURIComponent(this.file.dataPath)
+      dataPath = encodeURIComponent(dataPath)
       if(this.publicKey){
-        this.$http.get(xHTTPx + '/get_public_download_url/' + this.publicKey + "/" + this.file.projectId + "/" + this.file.dataPath).then(response => {
+        this.$http.get(xHTTPx + '/get_public_download_url/' + this.publicKey + "/" + this.file.projectId + "/" + dataPath).then(response => {
           this.url = xHTTPx + response.body
         }, response => {
           console.log('failed to get url')
         })
       }else{
-        this.$http.get(xHTTPx + '/get_download_url/' + this.file.projectId + "/" + this.file.dataPath).then(response => {
+        this.$http.get(xHTTPx + '/get_download_url/' + this.file.projectId + "/" + dataPath).then(response => {
           this.url = xHTTPx + response.body
         }, response => {
           console.log('failed to get url')

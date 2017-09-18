@@ -24,8 +24,7 @@ module DMACServer
       end
 
       def self.get_public_by_project_path(project, data_path)
-        path = project.key.to_s
-        path = path + "/" + data_path.sub("--", "/") if data_path != "-root-"
+        path = project.key.to_s + data_path
         return Repo.get_by(Public, path: path)
       end
 
@@ -34,7 +33,7 @@ module DMACServer
         public.project_id = project.id
         public.data_path = data_path
         public.path = project.key.to_s
-        public.path = public.path.to_s + "/" + data_path.sub("--", "/") if data_path != "-root-"
+        public.path = public.path.to_s + data_path
         public.key = SecureRandom.uuid.to_s
         changeset = Repo.insert(public)
         raise changeset.errors.to_s unless changeset.valid?
@@ -55,7 +54,8 @@ module DMACServer
         return result if publics.nil?
         publics = publics.as(Array)
         publics.each do |p|
-          result[p.path.to_s] = "/#/public/" + p.key.to_s + "/" + p.data_path.to_s
+          dp = URI.escape(p.data_path.to_s)
+          result[p.path.to_s] = "/#/public/" + p.key.to_s + "/" + dp
         end
         return result
       end

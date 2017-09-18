@@ -59,8 +59,8 @@ module DMACServer
 
 
       def initialize(@project, @data_path)
-        @full_path = @@root + "/" + @project.key.to_s + "/" + @data_path
-        @rel_path = @project.key.to_s + "/" + @data_path
+        @full_path = @@root + "/" + @project.key.to_s + @data_path
+        @rel_path = @project.key.to_s + @data_path
         raise "No such path" unless File.exists?(@full_path)
 
         @type = "folder"
@@ -159,8 +159,8 @@ module DMACServer
         return files if dir.type.to_s == "file"
         Dir.foreach dir.full_path do |filename|
           next if @@ignore.has_key? filename.to_s
-          dp = filename
-          dp = data_path + "/" + dp if data_path.size > 0 
+          dp = "/" + filename
+          dp = data_path + dp unless data_path == "/" 
           file = MyFile.new(project, dp)
           files << file if file.viewable?(control)
         end
@@ -168,28 +168,27 @@ module DMACServer
       end
 
       def self.create_folder(project, data_path)
-        full_path = @@root + "/" + project.key.to_s + "/" + data_path
+        full_path = @@root + "/" + project.key.to_s + data_path
         Dir.mkdir(full_path)
       end
 
       def self.create_file(project, data_path, control)
         raise "No permission" unless MyFile.check_parent(project, data_path, control)
-        full_path = @@root + "/" + project.key.to_s
-        full_path = full_path + "/" + data_path
+        full_path = @@root + "/" + project.key.to_s + data_path
         raise "Already exist" if File.exists?(full_path)
         File.write(full_path, "")
       end
 
       def self.check_parent(project, data_path, control)
         index = data_path.rindex("/")
-        parent_data_path = ""
-        parent_data_path = data_path[0, index] unless index.nil?
+        parent_data_path = "/"
+        parent_data_path = data_path[0, index] unless index.nil? || data_path == "/"
         file = MyFile.new(project, parent_data_path)
         return file.editable?(control)
       end
 
       def self.delete_folder(project, data_path)
-        full_path = @@root + "/" + project.key.to_s + "/" + data_path
+        full_path = @@root + "/" + project.key.to_s + data_path
         MyFile.delete_files(full_path)
       end
 
@@ -230,7 +229,7 @@ module DMACServer
 
         full_path = @@root + "/" + project.key.to_s
         prefix_length = full_path.size + 1
-        full_path = full_path + "/" + data_path
+        full_path = full_path + data_path
 
         filename = file.filename
         raise "No filename included in upload" if !filename.is_a?(String)
@@ -296,7 +295,7 @@ module DMACServer
         key = download.key.to_s
         project_key = download.project_key.to_s
         data_path = download.data_path.to_s
-        full_path = @@root + "/" + project_key + "/" + data_path
+        full_path = @@root + "/" + project_key + data_path
         raise "No such path" unless File.exists?(full_path)
         return full_path if File.file? full_path
         return @@tmp + "/" + key + "/" + key + ".zip"
@@ -351,7 +350,7 @@ module DMACServer
 
       def self.check_source(control, project, full_path)
         project_root = @@root + "/" + project.key.to_s
-        rel_path = full_path[(project_root.size+1)..-1]
+        rel_path = full_path[project_root.size..-1]
         data_path = rel_path
         file = MyFile.new(project, data_path)
         return file.viewable?(control)
