@@ -14,7 +14,6 @@ module DMACServer
       property readonly : Bool
       property group : String
 
-
       raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
       @@root = ENV["DMAC_ROOT"]
 
@@ -57,10 +56,9 @@ module DMACServer
       @@ignore[".git"] = true
       @@ignore[".gitignore"] = true
 
-
       def initialize(@project, @data_path)
-        @full_path = @@root + "/" + @project.key.to_s + @data_path
-        @rel_path = @project.key.to_s + @data_path
+        @full_path = @@root + "/" + @project.path.to_s + @data_path
+        @rel_path = @project.path.to_s + @data_path
         raise "No such path" unless File.exists?(@full_path)
 
         @type = "folder"
@@ -100,11 +98,9 @@ module DMACServer
             @group = ss[1]
           end
         end
-
       end
 
-
-      def to_json(read_text=false, public_url="")
+      def to_json(read_text = false, public_url = "")
         result = String.build do |str|
           str << "{"
           str << "\"projectId\":\"" << @project.id << "\","
@@ -160,7 +156,7 @@ module DMACServer
         Dir.foreach dir.full_path do |filename|
           next if @@ignore.has_key? filename.to_s
           dp = "/" + filename
-          dp = data_path + dp unless data_path == "/" 
+          dp = data_path + dp unless data_path == "/"
           file = MyFile.new(project, dp)
           files << file if file.viewable?(control)
         end
@@ -168,13 +164,13 @@ module DMACServer
       end
 
       def self.create_folder(project, data_path)
-        full_path = @@root + "/" + project.key.to_s + data_path
+        full_path = @@root + "/" + project.path.to_s + data_path
         Dir.mkdir(full_path)
       end
 
       def self.create_file(project, data_path, control)
         raise "No permission" unless MyFile.check_parent(project, data_path, control)
-        full_path = @@root + "/" + project.key.to_s + data_path
+        full_path = @@root + "/" + project.path.to_s + data_path
         raise "Already exist" if File.exists?(full_path)
         File.write(full_path, "")
       end
@@ -188,7 +184,7 @@ module DMACServer
       end
 
       def self.delete_folder(project, data_path)
-        full_path = @@root + "/" + project.key.to_s + data_path
+        full_path = @@root + "/" + project.path.to_s + data_path
         MyFile.delete_files(full_path)
       end
 
@@ -227,7 +223,7 @@ module DMACServer
         raise "Target is not a folder" unless dir.type == "folder"
         raise "No permission" unless dir.editable?(control)
 
-        full_path = @@root + "/" + project.key.to_s
+        full_path = @@root + "/" + project.path.to_s
         prefix_length = full_path.size + 1
         full_path = full_path + data_path
 
@@ -265,13 +261,13 @@ module DMACServer
         end
         raise "cannot make file name" if new_name == ""
 
-        if(upload && ((new_name.starts_with? '.') || (new_name.starts_with? '~')))
+        if (upload && ((new_name.starts_with? '.') || (new_name.starts_with? '~')))
           new_name = "_" + new_name.lchop
         end
-        if(new_name.starts_with? '-')
+        if (new_name.starts_with? '-')
           new_name = "_" + new_name.lchop
         end
-        if((new_name.ends_with? '.') || (new_name.ends_with? '-'))
+        if ((new_name.ends_with? '.') || (new_name.ends_with? '-'))
           new_name = new_name.rchop + "_"
         end
 
@@ -291,11 +287,11 @@ module DMACServer
         return path + "/" + new_name
       end
 
-      def self.get_download_path(download)
+      def self.get_download_path(project, download)
         key = download.key.to_s
-        project_key = download.project_key.to_s
+        project_path = project.path.to_s
         data_path = download.data_path.to_s
-        full_path = @@root + "/" + project_key + data_path
+        full_path = @@root + "/" + project_path + data_path
         raise "No such path" unless File.exists?(full_path)
         return full_path if File.file? full_path
         return @@tmp + "/" + key + "/" + key + ".zip"
@@ -349,7 +345,7 @@ module DMACServer
       end
 
       def self.check_source(control, project, full_path)
-        project_root = @@root + "/" + project.key.to_s
+        project_root = @@root + "/" + project.path.to_s
         rel_path = full_path[project_root.size..-1]
         data_path = rel_path
         file = MyFile.new(project, data_path)
@@ -442,8 +438,8 @@ module DMACServer
       end
 
       def self.copy_project_files(source, target)
-        source_path = @@root + "/" + source.key.to_s
-        target_path = @@root + "/" + target.key.to_s
+        source_path = @@root + "/" + source.path.to_s
+        target_path = @@root + "/" + target.path.to_s
         Dir.foreach source_path do |filename|
           next if @@ignore.has_key? filename.to_s
           path = source_path + "/" + filename
@@ -466,8 +462,6 @@ module DMACServer
           MyFile.delete_files(path)
         end
       end
-
     end
-
   end
 end

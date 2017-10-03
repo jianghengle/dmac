@@ -9,7 +9,7 @@ module DMACServer
         belongs_to :project, Project
       end
 
-      def to_json()
+      def to_json
         result = String.build do |str|
           str << "{"
           str << "\"id\":" << @id << ","
@@ -24,7 +24,7 @@ module DMACServer
       end
 
       def self.get_public_by_project_path(project, data_path)
-        path = project.key.to_s + data_path
+        path = project.path.to_s + data_path
         return Repo.get_by(Public, path: path)
       end
 
@@ -32,7 +32,7 @@ module DMACServer
         public = Public.new
         public.project_id = project.id
         public.data_path = data_path
-        public.path = project.key.to_s
+        public.path = project.path.to_s
         public.path = public.path.to_s + data_path
         public.key = SecureRandom.uuid.to_s
         changeset = Repo.insert(public)
@@ -44,7 +44,6 @@ module DMACServer
         query = Query.where(project_id: project.id)
         Repo.delete_all(Public, query)
       end
-      
 
       def self.get_publics_by_paths(paths)
         result = {} of String => String
@@ -77,7 +76,6 @@ module DMACServer
         return publics.as(Array) unless publics.nil?
         return [] of Public
       end
-
     end
   end
 end

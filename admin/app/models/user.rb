@@ -17,12 +17,12 @@ class User < ApplicationRecord
       field :auth_token
       field :first_name
       field :last_name
+      field :username
       field :role, :enum do
         enum do
           ['Admin', 'Manager', 'Subscriber']
         end
       end
-      field :reset_password_token
     end
   end
 end

@@ -6,6 +6,7 @@ module DMACServer
         field :description, String
         field :status, String
         field :key, String
+        field :path, String
       end
 
       def to_json(fields = {} of String => String)
@@ -16,6 +17,7 @@ module DMACServer
           str << "\"description\":" << @description.to_json << ","
           str << "\"status\":\"" << @status << "\","
           str << "\"key\":\"" << @key << "\","
+          str << "\"path\":\"" << @path << "\","
           fields.each do |k, v|
             str << "\"" << k << "\":\"" << v << "\","
           end
@@ -25,7 +27,6 @@ module DMACServer
         end
         result
       end
-
 
       def self.get_projects_by_ids(ids)
         query = Query.where(:id, ids)
@@ -39,15 +40,19 @@ module DMACServer
         return result
       end
 
-
       def self.get_project!(id)
         project = Repo.get(Project, id)
         return project.as(Project) unless project.nil?
         raise "Cannot find project in database"
       end
 
+      def self.get_project_by_key!(key)
+        project = Repo.get_by(Project, key: key)
+        return project.as(Project) unless project.nil?
+        raise "Cannot find project in database"
+      end
 
-      def self.create_project(name, description, email)
+      def self.create_project(name, description, user)
         project = Project.new
         project.name = name
         project.description = description
@@ -55,16 +60,16 @@ module DMACServer
         changeset = Repo.insert(project)
         raise changeset.errors.to_s unless changeset.valid?
         changeset.changes.each do |change|
-          if(change.has_key?(:id))
+          if (change.has_key?(:id))
             project.id = change[:id].as(Int32)
-            project.key =  email + "@" + change[:id].to_s
+            project.key = change[:id].to_s
+            project.path = user.username.to_s + "/" + project.key.to_s
           end
         end
         changeset = Repo.update(project)
         raise changeset.errors.to_s unless changeset.valid?
         return project
       end
-
 
       def self.update_project(project, name, description, status)
         project.name = name
@@ -79,8 +84,6 @@ module DMACServer
         changeset = Repo.delete(project)
         raise changeset.errors.to_s unless changeset.valid?
       end
-
     end
-
   end
 end

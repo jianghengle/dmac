@@ -21,7 +21,7 @@ module DMACServer
         end
       end
 
-      def to_json(read_text=false, public_url="")
+      def to_json(read_text = false, public_url = "")
         result = String.build do |str|
           str << "{"
           str << "\"projectId\":\"" << @project.id << "\","
@@ -34,7 +34,7 @@ module DMACServer
       end
 
       def self.init(project, email)
-        project_root = @@root + "/" + project.key.to_s
+        project_root = @@root + "/" + project.path.to_s
         command = "cd " + project_root + " && git init && git add ."
         command = command + " && git commit -m\"" + email + " initialized project\""
         io = IO::Memory.new
@@ -43,7 +43,7 @@ module DMACServer
       end
 
       def self.commit(project, message)
-        project_root = @@root + "/" + project.key.to_s
+        project_root = @@root + "/" + project.path.to_s
         command = "cd " + project_root + " && git add . && git commit -m\"" + message + "\""
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
@@ -51,7 +51,7 @@ module DMACServer
       end
 
       def self.get_logs(project)
-        project_root = @@root + "/" + project.key.to_s
+        project_root = @@root + "/" + project.path.to_s
         command = "cd " + project_root + " && git log"
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
@@ -70,7 +70,7 @@ module DMACServer
       end
 
       def self.get_commit(project, hash)
-        project_root = @@root + "/" + project.key.to_s
+        project_root = @@root + "/" + project.path.to_s
         command = "cd " + project_root + " && git show " + hash
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
@@ -137,7 +137,7 @@ module DMACServer
       end
 
       def self.revert_commits(project, hash, email)
-        project_root = @@root + "/" + project.key.to_s
+        project_root = @@root + "/" + project.path.to_s
 
         command = "cd " + project_root + " && git show " + hash
         io = IO::Memory.new
@@ -158,7 +158,7 @@ module DMACServer
       end
 
       def self.delete_history(project, hash, email)
-        project_root = @@root + "/" + project.key.to_s
+        project_root = @@root + "/" + project.path.to_s
 
         command = "cd " + project_root + " && git show " + hash
         io = IO::Memory.new
@@ -183,8 +183,6 @@ module DMACServer
         Process.run(command, shell: true, output: io)
         puts io.to_s
       end
-
     end
-
   end
 end

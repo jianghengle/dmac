@@ -57,12 +57,13 @@ module DMACServer
           key = get_param!(ctx, "key")
           download = Download.get_download(key)
           project_key = download.project_key.to_s
+          project = Project.get_project_by_key!(project_key)
           data_path = download.data_path.to_s
-          full_path = MyFile.get_download_path(download)
+          full_path = MyFile.get_download_path(project, download)
           filename = File.basename(data_path)
           filename = filename + ".zip" if full_path.ends_with?(key + "/" + key + ".zip")
-          ext= File.extname(full_path)
-          ctx.response.headers["Content-Disposition"] =  "attachment; filename=\"" + filename + "\""
+          ext = File.extname(full_path)
+          ctx.response.headers["Content-Disposition"] = "attachment; filename=\"" + filename + "\""
           if ext.downcase == ".pdf"
             send_file ctx, full_path, "application/pdf"
           else
@@ -75,7 +76,6 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
-
     end
   end
 end

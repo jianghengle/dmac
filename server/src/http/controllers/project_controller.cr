@@ -21,7 +21,6 @@ module DMACServer
             end
             projects = Project.get_projects_by_ids(project_ids)
 
-
             projects.each do |k, v|
               fields = {} of String => String
               fields["projectRole"] = controls[k].role.to_s if controls.has_key? k
@@ -37,7 +36,6 @@ module DMACServer
         end
       end
 
-
       def get_project(ctx)
         begin
           email = verify_token(ctx)
@@ -46,7 +44,6 @@ module DMACServer
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           owner = Control.get_project_owner(project)
-          
           fields = {} of String => String
           fields["projectUser"] = control.email.to_s
           fields["projectRole"] = control.role.to_s
@@ -59,7 +56,6 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
-
 
       def get_file(ctx)
         begin
@@ -109,7 +105,7 @@ module DMACServer
           template_id = get_param!(ctx, "templateId")
           copy_users = get_param!(ctx, "copyUsers")
 
-          project = Project.create_project(name, description, email)
+          project = Project.create_project(name, description, user)
           Control.create_control(email, project, "Owner", "")
           MyFile.create_folder(project, "")
           if template_id != ""
@@ -372,7 +368,6 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
-
     end
   end
 end

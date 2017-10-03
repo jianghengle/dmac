@@ -6,9 +6,9 @@ module DMACServer
         field :encrypted_password, String
         field :first_name, String
         field :last_name, String
+        field :username, String
         field :auth_token, String
         field :role, String
-        
         validate_required [:email]
       end
 
@@ -75,7 +75,6 @@ module DMACServer
         end
         return auth_token
       end
-
     end
   end
 end

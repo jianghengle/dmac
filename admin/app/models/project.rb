@@ -16,6 +16,7 @@ class Project < ApplicationRecord
         end
       end
       field :key
+      field :path
     end
   end
 end

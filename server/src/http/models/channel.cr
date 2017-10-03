@@ -13,7 +13,7 @@ module DMACServer
         belongs_to :project, Project
       end
 
-      def to_json()
+      def to_json
         result = String.build do |str|
           str << "{"
           str << "\"id\":" << @id << ","
@@ -37,7 +37,7 @@ module DMACServer
       def self.get_directories_by_project(project)
         raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
         root = ENV["DMAC_ROOT"]
-        project_root = root + "/" + project.key.to_s
+        project_root = root + "/" + project.path.to_s
         directories = Channel.get_directories(project_root, project_root)
         return directories
       end
@@ -61,7 +61,7 @@ module DMACServer
       def self.get_files_by_path(project, path)
         raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
         root = ENV["DMAC_ROOT"]
-        project_root = root + "/" + project.key.to_s
+        project_root = root + "/" + project.path.to_s
         full_path = project_root + "/" + path.gsub("--", "/")
         files = [] of String
         Dir.foreach full_path do |filename|
@@ -130,11 +130,11 @@ module DMACServer
         raise "cannot find channel" if channel.nil?
         channel = channel.as(Channel)
         root = ENV["DMAC_ROOT"]
-        project_root = root + "/" + project.key.to_s
+        project_root = root + "/" + project.path.to_s
         full_path = project_root + "/" + channel.path.to_s.gsub("--", '/') + channel.meta_data.to_s
         lines = File.read_lines(full_path)
         fields = [] of String
-        if(lines.size > 0)
+        if (lines.size > 0)
           line = lines[0]
           line.split('\t') do |s|
             fields << s
@@ -149,7 +149,7 @@ module DMACServer
         channel = channel.as(Channel)
 
         root = ENV["DMAC_ROOT"]
-        project_root = root + "/" + project.key.to_s
+        project_root = root + "/" + project.path.to_s
         full_path = project_root + "/" + channel.path.to_s.gsub("--", '/')
 
         filename = file.filename
@@ -165,7 +165,7 @@ module DMACServer
         meta_data_file = full_path + channel.meta_data.to_s
         Channel.save_metadata(meta_data_file, meta_data) unless channel.meta_data.to_s.empty?
 
-        return target_path[(project_root.size+1)..-1]
+        return target_path[(project_root.size + 1)..-1]
       end
 
       def self.save_metadata(meta_data_file, meta_data)
@@ -205,13 +205,13 @@ module DMACServer
         end
         raise "cannot make file name" if new_name == ""
 
-        if((new_name.starts_with? '.') || (new_name.starts_with? '~'))
+        if ((new_name.starts_with? '.') || (new_name.starts_with? '~'))
           new_name = "_" + new_name.lchop
         end
-        if(new_name.starts_with? '-')
+        if (new_name.starts_with? '-')
           new_name = "_" + new_name.lchop
         end
-        if((new_name.ends_with? '.') || (new_name.ends_with? '-'))
+        if ((new_name.ends_with? '.') || (new_name.ends_with? '-'))
           new_name = new_name.rchop + "_"
         end
 
@@ -230,7 +230,6 @@ module DMACServer
 
         return new_name
       end
-
     end
   end
 end
