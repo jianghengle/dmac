@@ -17,6 +17,7 @@ class Project < ApplicationRecord
       end
       field :key
       field :path
+      field :meta_data
     end
   end
 end

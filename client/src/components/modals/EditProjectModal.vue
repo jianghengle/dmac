@@ -12,30 +12,97 @@
           <button class="delete" @click="error=''"></button>
             {{error}}
           </div>
-          <div class="field">
-            <label class="label">Name</label>
-            <p class="control">
-              <input class="input" type="text" v-model="newName">
-            </p>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Name</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <input class="input" type="text" v-model="newName">
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label class="label">Status</label>
-            <p class="control">
-              <span class="select">
-                <select v-model="newStatus">
-                  <option>Active</option>
-                  <option>Archived</option>
-                  <option>Template</option>
-                </select>
-              </span>
-            </p>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Status</label>
+            </div>
+            <div class="field-body">
+              <div class="field is-narrow">
+                <div class="control">
+                  <div class="select">
+                    <select v-model="newStatus">
+                      <option>Active</option>
+                      <option>Archived</option>
+                      <option>Template</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label class="label">Description</label>
-            <p class="control">
-              <textarea class="textarea" v-model="newDescription"></textarea>
-            </p>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Description</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <textarea class="textarea" v-model="newDescription"></textarea>
+                </div>
+              </div>
+            </div>
           </div>
+
+          <div class="meta-fields">
+            <div class="field is-horizontal meta-field">
+              <div class="field-label is-normal">
+                <label class="label">Meta Data</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <span class="select">
+                      <select v-model="newMetaDataFile">
+                        <option v-for="option in fileOptions" v-bind:value="option.value">
+                          {{ option.name }}
+                        </option>
+                      </select>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="newMetaDataFile">
+              <div class="field is-horizontal meta-field" v-for="meta in metaData">
+                <div class="field-label is-normal">
+                  <label class="label">{{meta.name}}</label>
+                </div>
+                <div class="field-body">
+                  <div class="field">
+                    <div class="control">
+                      <div v-if="meta.options">
+                        <div class="select">
+                          <select v-model="meta.value">
+                            <option v-for="option in meta.options">{{option}}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div v-else>
+                        <input class="input" type="text" v-model="meta.value">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </section>
         <footer class="modal-card-foot">
           <a class="button is-danger"
@@ -78,6 +145,10 @@ export default {
       newName: '',
       newDescription: '',
       newStatus: '',
+      newMetaDataFile: '',
+      metaData: [],
+      oldMetaValues: [],
+      fileOptions: [],
       confirmModal: {
         opened: false,
         message: '',
@@ -91,7 +162,14 @@ export default {
       return this.project.name != this.newName
         || this.project.description != this.newDescription
         || this.project.status != this.newStatus
+        || this.project.metaData != this.newMetaDataFile
+        || JSON.stringify(this.oldMetaValues) != JSON.stringify(this.metaValues)
     },
+    metaValues () {
+      return this.metaData.map(function(m){
+        return m.value
+      })
+    }
   },
   watch: {
     opened: function (val) {
@@ -99,7 +177,18 @@ export default {
         this.newName = this.project.name
         this.newDescription = this.project.description
         this.newStatus = this.project.status
+        this.newMetaDataFile = this.project.metaDataFile
+        this.metaData = []
+        this.oldMetaValues = []
+        if(this.newMetaDataFile){
+          this.requestMetaData()
+        }
+        this.fileOptions = []
+        this.requestFiles()
       }
+    },
+    newMetaDataFile: function (val) {
+      this.requestMetaData()
     }
   },
   methods: {
@@ -110,7 +199,7 @@ export default {
       if(!this.newName.length || !this.projectChanged) return
       var vm = this
       vm.waiting = true
-      var message = {id: vm.project.id, name: vm.newName, description: vm.newDescription, status: vm.newStatus}
+      var message = {id: vm.project.id, name: vm.newName, description: vm.newDescription, status: vm.newStatus, metaDataFile: vm.newMetaDataFile, metaData: vm.metaValues.join('\t')}
       vm.$http.post(xHTTPx + '/update_project', message).then(response => {
         vm.waiting= false
         this.$emit('close-edit-project-modal', true)
@@ -153,6 +242,69 @@ export default {
       }
       this.confirmModal.context = null
     },
+    requestFiles(){
+      this.waiting= true
+      var dataPath = encodeURIComponent('/')
+      dataPath = encodeURIComponent(dataPath)
+      this.$http.get(xHTTPx + '/get_files/' + this.project.id + '/' + dataPath).then(response => {
+        this.waiting= false
+        this.fileOptions = response.body.map(function(f){
+          return { name: f, value: f }
+        })
+        this.fileOptions.unshift({name: '(None)', value: ''})
+        this.newMetaDataFile= this.project.metaData
+      }, response => {
+        this.error = 'Failed to get files!'
+        this.waiting= false
+      })
+    },
+    requestMetaData(){
+      if(!this.newMetaDataFile){
+        this.metaData = []
+        this.oldMetaValues = []
+        return
+      }
+      this.waiting= true
+      var metaDataFile = encodeURIComponent(this.newMetaDataFile)
+      this.$http.get(xHTTPx + '/get_project_meta_data/' + this.project.id + '/' + metaDataFile).then(response => {
+        this.waiting= false
+        var lines = response.body
+        var headers = []
+        if(lines.length > 0){
+          headers = lines[0].split('\t')
+        }
+        var values = []
+        if(lines.length > 1){
+          values = lines[1].split('\t')
+        }
+        this.metaData = []
+        this.oldMetaValues = []
+        for(var i=0;i<headers.length;i++){
+          var header = headers[i]
+          var optionsStart = header.indexOf('{')
+          var optionsEnd = header.indexOf('}')
+          var name = ''
+          var options = null
+          var value = ''
+          if(optionsStart == -1 || optionsEnd == -1 || optionsStart >= optionsEnd){
+            name = header
+          }else{
+            name = header.slice(0, optionsStart).trim()
+            options = header.slice(optionsStart+1, optionsEnd).split('|').map(function(s){
+              return s.trim()
+            })
+          }
+          if(i < values.length){
+            value = values[i]
+          }
+          this.metaData.push({name: name, value: value, options: options})
+          this.oldMetaValues.push(value)
+        }
+      }, response => {
+        this.error = 'Failed to get meta data!'
+        this.waiting= false
+      })
+    },
   },
 }
 </script>
@@ -168,5 +320,9 @@ export default {
   position: absolute;
   right: 0px;
   margin-right: 20px;
+}
+
+.meta-fields {
+  margin-top: 20px;
 }
 </style>

@@ -113,6 +113,7 @@ module DMACServer
           name = get_param!(ctx, "name")
           description = get_param!(ctx, "description")
           template_id = get_param!(ctx, "templateId")
+          meta_data = get_param!(ctx, "metaData")
           copy_users = get_param!(ctx, "copyUsers")
 
           MyFile.create_project_folder!(user, name)
@@ -124,6 +125,9 @@ module DMACServer
             Channel.copy_channels(template, project)
             if copy_users == "true"
               Control.copy_controls(template, project, email)
+            end
+            unless template.meta_data.nil?
+              Project.update_meta_data(project, template.meta_data.to_s, meta_data)
             end
           end
 
@@ -143,13 +147,16 @@ module DMACServer
           name = get_param!(ctx, "name")
           description = get_param!(ctx, "description")
           status = get_param!(ctx, "status")
+          meta_data_file = get_param!(ctx, "metaDataFile")
+          meta_data = get_param!(ctx, "metaData")
 
           project = Project.get_project!(id)
           control = Control.get_control!(email, project)
           role = control.role.to_s
           raise "Permission denied" unless role == "Owner" || role == "Admin"
 
-          Project.update_project(project, name, description, status)
+          Project.update_project(project, name, description, status, meta_data_file, meta_data)
+          Git.commit(project, email + " update project") unless meta_data_file.empty?
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -385,6 +392,41 @@ module DMACServer
           Git.commit(project, email + " extract " + rel_path)
 
           {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def get_metadata(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "project_id")
+          meta_data_file = get_param!(ctx, "meta_data_file")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
+
+          Project.get_metadata(project, meta_data_file)
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def get_project_metadata(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "project_id")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
+
+          Project.get_project_metadata(project)
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception

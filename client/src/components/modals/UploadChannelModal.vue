@@ -61,7 +61,7 @@
           <div class="field file-field">
             <input v-if="opened" type="file" class="file-input" multiple @change="onFileChange">
             &nbsp;
-            <span v-if="channel" class="upload-progress">
+            <span v-if="channel" class="upload-info">
               Must Select <strong>{{channel.files}}</strong> File(s)
             </span>
             <div v-if="channel">
@@ -122,17 +122,16 @@ export default {
     return {
       error: '',
       waiting: false,
-      uploads: {},
+      uploads: [],
       metaData: []
     }
   },
   computed: {
     canUpload () {
       if(!this.channel) return false
-      var filenames = Object.keys(this.uploads)
-      if(filenames.length != this.channel.files) return false
-      for(var i=0;i<filenames.length;i++){
-        var upload = this.uploads[filenames[i]]
+      if(this.uploads.length != this.channel.files) return false
+      for(var i=0;i<this.uploads.length;i++){
+        var upload = this.uploads[i]
         if(!upload.file || !upload.newName){
           return false
         }
@@ -151,7 +150,7 @@ export default {
       if(val){
         this.error = ''
         this.waiting = false
-        this.uploads = {}
+        this.uploads = []
         this.metaData = []
         if(this.channel && this.channel.metaData){
           this.requestMetaData()
@@ -161,6 +160,11 @@ export default {
   },
   methods: {
     close(){
+      this.uploads.forEach(function(upload){
+        if(!upload.done && upload.request){
+          upload.request.abort()
+        }
+      })
       this.$emit('close-upload-channel-modal', false)
     },
     requestMetaData(){
@@ -188,8 +192,8 @@ export default {
       var files = e.target.files || e.dataTransfer.files
       if (!files.length)
         return
-      var uploads = {}
-      for(var i=0;i<Math.min(files.length,this.channel.files);i++){
+      var uploads = []
+      for(var i=0;i<Math.min(files.length, this.channel.files);i++){
         var file = files[i]
         var upload = {
           file: file,
@@ -201,7 +205,7 @@ export default {
           done: false,
           request: null
         }
-        uploads[file.name] = upload
+        uploads.push(upload)
       }
       this.uploads = uploads
     },
@@ -210,11 +214,8 @@ export default {
       this.waiting = true
 
       var promises = []
-      var filenames = Object.keys(this.uploads)
       var vm = this
-      for(var i=0;i<filenames.length;i++){
-        let filename = filenames[i]
-        let upload = vm.uploads[filename]
+      this.uploads.forEach(function(upload){
         var formData = new FormData()
         formData.append('file', upload.file)
         formData.append('newName', upload.newName)
@@ -237,14 +238,13 @@ export default {
           upload.percentage = 0
           upload.request = null
         })
-
         promises.push(promise)
-      }
+      })
 
       Promise.all(promises).then((response) => {
-        if(vm.channel.metaData){
+        if(vm.channel && vm.channel.metaData){
           var url = xHTTPx + '/upload_meta_by_channel/' + vm.project.id + '/' + vm.channel.id
-          var values = this.metaData.map(function(d){
+          var values = vm.metaData.map(function(d){
             return d.value
           })
           var message = { metaData:  values.join('\t')}
@@ -309,7 +309,7 @@ export default {
   font-size: 14px;
 }
 
-.upload-progress {
+.upload-info {
   font-size: 14px;
 }
 

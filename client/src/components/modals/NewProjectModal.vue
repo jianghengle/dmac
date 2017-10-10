@@ -12,38 +12,89 @@
           <button class="delete" @click="error=''"></button>
             {{error}}
           </div>
-          <div class="field">
-            <label class="label">Name</label>
-            <p class="control">
-              <input class="input" type="text" v-model="newName">
-            </p>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Name</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <input class="input" type="text" v-model="newName">
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label class="label">Description</label>
-            <p class="control">
-              <textarea class="textarea" v-model="newDescription"></textarea>
-            </p>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Description</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <textarea class="textarea" v-model="newDescription"></textarea>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label class="label">Template</label>
-            <p class="control">
-              <span class="select">
-                <select v-model="templateId">
-                  <option v-for="option in templates" v-bind:value="option.id">
-                    {{ option.name }}
-                  </option>
-                </select>
-              </span>
-            </p>
+
+          <div class="meta-fields">
+            <div class="field is-horizontal meta-field">
+              <div class="field-label is-normal">
+                <label class="label">Template</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <span class="select">
+                      <select v-model="templateId">
+                        <option v-for="option in templates" v-bind:value="option.id">
+                          {{ option.name }}
+                        </option>
+                      </select>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field is-horizontal meta-field" v-for="meta in metaData">
+              <div class="field-label is-normal">
+                <label class="label">{{meta.name}}</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <div v-if="meta.options">
+                      <div class="select">
+                        <select v-model="meta.value">
+                          <option v-for="option in meta.options">{{option}}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div v-else>
+                      <input class="input" type="text" v-model="meta.value">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field is-horizontal meta-field" v-if="templateId">
+              <div class="field-label">
+                <label class="label">Copy Users</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <label class="checkbox">
+                      <input type="checkbox" v-model="copyUsers">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="field" v-if="templateId">
-            <p class="control">
-              <label class="checkbox">
-                <input type="checkbox" v-model="copyUsers">
-                Copy Users
-              </label>
-            </p>
-          </div>
+
         </section>
         <footer class="modal-card-foot">
           <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!newName.length" @click="create">Create</a>
@@ -64,6 +115,7 @@ export default {
       newName: '',
       newDescription: '',
       templateId: '',
+      metaData: [],
       copyUsers: ''
     }
   },
@@ -72,10 +124,19 @@ export default {
       if(val){
         this.newName = ''
         this.newDescription = ''
+        this.templateId = ''
+        this.metaData = []
         this.error = ''
         this.waiting = false
       }
     },
+    templateId: function (val) {
+      if(val){
+        this.requestMetaData()
+      }else{
+        this.metaData = []
+      }
+    }
   },
   methods: {
     close(){
@@ -87,7 +148,10 @@ export default {
       if(!this.newName.length) return
       var vm = this
       vm.waiting = true
-      var message = {name: vm.newName, description: vm.newDescription, templateId: vm.templateId, copyUsers: vm.copyUsers}
+      var metaDataValues = vm.metaData.map(function(m){
+        return m.value
+      })
+      var message = {name: vm.newName, description: vm.newDescription, templateId: vm.templateId, copyUsers: vm.copyUsers, metaData: metaDataValues.join('\t')}
       vm.$http.post(xHTTPx + '/create_project', message).then(response => {
         vm.waiting= false
         vm.newName = ''
@@ -97,7 +161,46 @@ export default {
         vm.error = 'Failed to create project! ' + JSON.stringify(response.body)
         vm.waiting= false
       })
-    }
+    },
+    requestMetaData(){
+      this.waiting= true
+      this.$http.get(xHTTPx + '/get_if_project_meta_data/' + this.templateId).then(response => {
+        this.waiting= false
+        var lines = response.body
+        var headers = []
+        if(lines.length > 0){
+          headers = lines[0].split('\t')
+        }
+        var values = []
+        if(lines.length > 1){
+          values = lines[1].split('\t')
+        }
+        this.metaData = []
+        for(var i=0;i<headers.length;i++){
+          var header = headers[i]
+          var optionsStart = header.indexOf('{')
+          var optionsEnd = header.indexOf('}')
+          var name = ''
+          var options = null
+          var value = ''
+          if(optionsStart == -1 || optionsEnd == -1 || optionsStart >= optionsEnd){
+            name = header
+          }else{
+            name = header.slice(0, optionsStart).trim()
+            options = header.slice(optionsStart+1, optionsEnd).split('|').map(function(s){
+              return s.trim()
+            })
+          }
+          if(i < values.length){
+            value = values[i]
+          }
+          this.metaData.push({name: name, value: value, options: options})
+        }
+      }, response => {
+        this.error = 'Failed to get meta data!'
+        this.waiting= false
+      })
+    },
   },
 }
 </script>
@@ -113,5 +216,9 @@ export default {
   position: absolute;
   right: 0px;
   margin-right: 20px;
+}
+
+.meta-fields {
+  margin-top: 20px;
 }
 </style>
