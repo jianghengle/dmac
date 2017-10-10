@@ -40,18 +40,33 @@
           </div>
 
           <div class="field">
-            <label class="label">Instruction</label>
+            <label class="label">Files per Upload</label>
             <p class="control">
-              <textarea class="textarea" v-model="instruction"></textarea>
+              <span class="select">
+                <select v-model="filesUpload">
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                </select>
+              </span>
             </p>
           </div>
-          
+
           <div class="field">
             <p class="control">
               <label class="checkbox">
                 <input type="checkbox" v-model="rename">
                 Rename uploaded file
               </label>
+            </p>
+          </div>
+
+          <div class="field">
+            <label class="label">Instruction</label>
+            <p class="control">
+              <textarea class="textarea" v-model="instruction"></textarea>
             </p>
           </div>
 
@@ -77,6 +92,7 @@ export default {
       fileOptions: [],
       metadataFile: '',
       instruction: '',
+      filesUpload: 1,
       rename: true,
     }
   },
@@ -114,7 +130,7 @@ export default {
         this.folderOptions = response.body.map(function(f){
           return {
             name: f,
-            path: f.replace(/\//g, '--')
+            path: f
           }
         })
       }, response => {
@@ -124,7 +140,9 @@ export default {
     },
     requestFiles(){
       this.waiting= true
-      this.$http.get(xHTTPx + '/get_files/' + this.project.id + '/' + this.targetFolder).then(response => {
+      var dataPath = encodeURIComponent(this.targetFolder)
+      dataPath = encodeURIComponent(dataPath)
+      this.$http.get(xHTTPx + '/get_files/' + this.project.id + '/' + dataPath).then(response => {
         this.waiting= false
         this.fileOptions = response.body.map(function(f){
           return { name: f, value: f }
@@ -138,7 +156,7 @@ export default {
     },
     create(){
       this.waiting= true
-      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename }
+      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.filesUpload }
       this.$http.post(xHTTPx + '/create_channel', message).then(response => {
         this.waiting= false
         this.$emit('close-new-channel-modal', true)

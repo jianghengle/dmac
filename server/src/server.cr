@@ -12,7 +12,6 @@ require "./http/controllers/*"
 require "./http/middleware/*"
 require "./http/templates/*"
 
-
 module Repo
   extend Crecto::Repo
 
@@ -21,6 +20,7 @@ module Repo
     conf.uri = ENV["PG_URL"]
   end
 end
+
 Query = Crecto::Repo::Query
 
 module DMACServer
@@ -128,7 +128,6 @@ module DMACServer
       post "/save_text_file" do |env|
         HttpAPI::ProjectController.save_text_file(env)
       end
- 
       post "/copy_folder_file" do |env|
         HttpAPI::ProjectController.copy_folder_file(env)
       end
@@ -197,12 +196,16 @@ module DMACServer
         HttpAPI::ChannelController.get_metadata(env)
       end
 
-      post "/upload_channel/:project_id/:id" do |env|
-        HttpAPI::ChannelController.upload_channel(env)
+      post "/upload_file_by_channel/:project_id/:id" do |env|
+        HttpAPI::ChannelController.upload_file_by_channel(env)
+      end
+
+      post "/upload_meta_by_channel/:project_id/:id" do |env|
+        HttpAPI::ChannelController.upload_meta_by_channel(env)
       end
 
       Kemal.run
-      end
+    end
   end
 end
 

@@ -9,6 +9,7 @@ module DMACServer
         field :path, String
         field :meta_data, String
         field :instruction, String
+        field :files, Int32
         field :rename, Bool
         belongs_to :project, Project
       end
@@ -21,6 +22,7 @@ module DMACServer
           str << "\"path\":" << @path.to_json << ","
           str << "\"metaData\":" << @meta_data.to_json << ","
           str << "\"instruction\":" << @instruction.to_json << ","
+          str << "\"files\":" << @files << ","
           str << "\"rename\":" << @rename.to_s
           str << "}"
         end
@@ -49,7 +51,7 @@ module DMACServer
             full_path = path + "/" + filename
             if File.directory? full_path
               size = project_root.size
-              directories << full_path[size + 1..-1] + "/"
+              directories << full_path[size..-1]
               ds = Channel.get_directories(full_path, project_root)
               directories.concat(ds)
             end
@@ -75,18 +77,19 @@ module DMACServer
         return files
       end
 
-      def self.create_channel(project, path, meta_data, instruction, rename)
+      def self.create_channel(project, path, meta_data, instruction, rename, files)
         channel = Channel.new
         channel.project_id = project.id
         channel.path = path
         channel.meta_data = meta_data
         channel.instruction = instruction
+        channel.files = files.to_i
         channel.rename = rename == "true"
         changeset = Repo.insert(channel)
         raise changeset.errors.to_s unless changeset.valid?
       end
 
-      def self.update_channel(id, path, meta_data, instruction, rename)
+      def self.update_channel(id, path, meta_data, instruction, rename, files)
         channel = Repo.get(Channel, id)
         raise "Cannot find channel" if channel.nil?
         channel = channel.as(Channel)
@@ -94,6 +97,7 @@ module DMACServer
         channel.meta_data = meta_data
         channel.instruction = instruction
         channel.rename = rename == "true"
+        channel.files = files.to_i
         changeset = Repo.update(channel)
         raise changeset.errors.to_s unless changeset.valid?
         return channel
@@ -120,6 +124,7 @@ module DMACServer
           channel.meta_data = c.meta_data
           channel.instruction = c.instruction
           channel.rename = c.rename
+          channel.files = c.files
           changeset = Repo.insert(channel)
           raise changeset.errors.to_s unless changeset.valid?
         end
@@ -131,7 +136,7 @@ module DMACServer
         channel = channel.as(Channel)
         root = ENV["DMAC_ROOT"]
         project_root = root + "/" + project.path.to_s
-        full_path = project_root + "/" + channel.path.to_s.gsub("--", '/') + channel.meta_data.to_s
+        full_path = project_root + "/" + channel.path.to_s + "/" + channel.meta_data.to_s
         lines = File.read_lines(full_path)
         fields = [] of String
         if (lines.size > 0)
@@ -143,92 +148,46 @@ module DMACServer
         return fields
       end
 
-      def self.upload_data(project, id, file, new_name, meta_data)
+      def self.upload_file(project, id, file, new_name)
         channel = Repo.get_by(Channel, id: id)
         raise "cannot find channel" if channel.nil?
         channel = channel.as(Channel)
 
         root = ENV["DMAC_ROOT"]
-        project_root = root + "/" + project.path.to_s
-        full_path = project_root + "/" + channel.path.to_s.gsub("--", '/')
+        full_path = root + "/" + project.path.to_s + channel.path.to_s
 
-        filename = file.filename
-        raise "No filename included in upload" if !filename.is_a?(String)
+        filename = new_name
+        raise "No filename included in upload" if new_name.empty?
 
-        filename = new_name if channel.rename
-
-        target_path = full_path + Channel.make_name(full_path, filename)
+        target_path = full_path + "/" + filename
         File.open(target_path, "w") do |f|
           IO.copy(file.tmpfile, f)
         end
 
-        meta_data_file = full_path + channel.meta_data.to_s
-        Channel.save_metadata(meta_data_file, meta_data) unless channel.meta_data.to_s.empty?
-
-        return target_path[(project_root.size + 1)..-1]
+        return channel.path.to_s + "/" + filename
       end
 
-      def self.save_metadata(meta_data_file, meta_data)
-        puts meta_data_file
-        puts meta_data
-        lines = File.read_lines(meta_data_file)
+      def self.upload_meta(project, id, meta_data)
+        channel = Repo.get_by(Channel, id: id)
+        raise "cannot find channel" if channel.nil?
+        channel = channel.as(Channel)
+        raise "no channel meta data" if channel.meta_data.to_s.empty?
+
+        root = ENV["DMAC_ROOT"]
+        project_root = root + "/" + project.path.to_s
+        meta_data_file = channel.path.to_s + "/" + channel.meta_data.to_s
+        full_path = project_root + meta_data_file
+        raise "cannot find meta data file" unless File.file?(full_path)
+
+        lines = File.read_lines(full_path)
         result = String.build do |str|
           lines.each do |line|
             str << line << "\n" unless line.strip.empty?
           end
           str << meta_data << "\n"
         end
-        puts result
-        File.write(meta_data_file, result)
-      end
-
-      def self.make_name(path, name)
-        new_name = String.build do |str|
-          name.chars.each do |c|
-            ord = c.ord
-            if ord == 46
-              str << c
-            elsif ord >= 48 && ord <= 57
-              str << c
-            elsif ord >= 65 && ord <= 90
-              str << c
-            elsif ord == 95
-              str << c
-            elsif ord >= 97 && ord <= 122
-              str << c
-            elsif ord == 126
-              str << c
-            else
-              str << "_"
-            end
-          end
-        end
-        raise "cannot make file name" if new_name == ""
-
-        if ((new_name.starts_with? '.') || (new_name.starts_with? '~'))
-          new_name = "_" + new_name.lchop
-        end
-        if (new_name.starts_with? '-')
-          new_name = "_" + new_name.lchop
-        end
-        if ((new_name.ends_with? '.') || (new_name.ends_with? '-'))
-          new_name = new_name.rchop + "_"
-        end
-
-        filenames = {} of String => Bool
-        Dir.foreach path do |filename|
-          filenames[filename.to_s] = true
-        end
-
-        i = 0
-        ext = File.extname(new_name)
-        base = File.basename(new_name, ext)
-        while filenames.has_key?(new_name)
-          i = i + 1
-          new_name = base + "_" + i.to_s + ext
-        end
-
-        return new_name
+        File.write(full_path, result)
+        return meta_data_file
       end
     end
   end

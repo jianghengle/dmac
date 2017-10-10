@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171003164920) do
+ActiveRecord::Schema.define(version: 20171010143148) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(version: 20171003164920) do
     t.boolean  "rename"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.integer  "files"
     t.index ["project_id"], name: "index_channels_on_project_id", using: :btree
   end
 

@@ -4,7 +4,7 @@
       <div class="view-title column">
         <icon :name="file.icon"></icon>&nbsp;
         {{file && file.name}}&nbsp;
-        <a :href="dataUrl" :download="file && file.name" target="_blank" class="action-icon main-link"><icon name="download"></icon></a>
+        <a :href="url" :download="file && file.name" target="_blank" class="action-icon main-link"><icon name="download"></icon></a>
       </div>
       <div class="column buttons">
         
@@ -16,7 +16,8 @@
         <div class="spinner-container" v-if="waiting">
           <icon name="spinner" class="icon is-medium fa-spin"></icon>
         </div>
-        <embed :src="dataUrl" :width="pdfWidth + 'px'" height="1000px" class="pdf-body" type="application/pdf" />
+        <!--<embed :src="dataUrl" :width="pdfWidth + 'px'" height="1000px" class="pdf-body" type="application/pdf" />-->
+        <iframe class="doc" :src="iframeSource"></iframe>
       </div>
     </div>
   </div>
@@ -33,6 +34,7 @@ export default {
       url: null,
       data: null,
       dataUrl: null,
+      iframeSource: '',
       waiting: false,
       pdfWidth: 800
     }
@@ -72,13 +74,16 @@ export default {
       }
       this.$http.get(url).then(response => {
         this.url = xHTTPx + response.body
-        this.waiting = true
+        this.iframeSource = "https://docs.google.com/gview?url=" + this.url + "&embedded=true"
+        this.waiting = false
+        /*
         this.$http.get(this.url, {responseType: 'blob'}).then(response => {
           return response.blob()
         }).then(blob => {
           this.dataUrl = URL.createObjectURL(blob)
           this.waiting = false
         })
+        */
       }, response => {
         console.log('failed to get url')
       })
@@ -113,6 +118,11 @@ export default {
 .action-icon {
   position: relative;
   top: 3px;
+}
+
+.doc {
+  width: 100%;
+  height: 1000px;
 }
 
 </style>

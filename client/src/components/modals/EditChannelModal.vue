@@ -40,18 +40,33 @@
           </div>
 
           <div class="field">
-            <label class="label">Instruction</label>
+            <label class="label">Files per Upload</label>
             <p class="control">
-              <textarea class="textarea" v-model="instruction"></textarea>
+              <span class="select">
+                <select v-model="files">
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                </select>
+              </span>
             </p>
           </div>
-          
+
           <div class="field">
             <p class="control">
               <label class="checkbox">
                 <input type="checkbox" v-model="rename">
                 Rename uploaded file
               </label>
+            </p>
+          </div>
+
+          <div class="field">
+            <label class="label">Instruction</label>
+            <p class="control">
+              <textarea class="textarea" v-model="instruction"></textarea>
             </p>
           </div>
 
@@ -78,6 +93,7 @@ export default {
       metadataFile: '',
       instruction: '',
       rename: true,
+      files: 1
     }
   },
   computed: {
@@ -86,7 +102,8 @@ export default {
         (this.targetFolder != this.channel.path
         || this.metadataFile != this.channel.metaData
         || this.instruction != this.channel.instruction
-        || this.rename != this.channel.rename)
+        || this.rename != this.channel.rename
+        || this.files != this.channel.files)
     },
   },
   watch: {
@@ -100,6 +117,7 @@ export default {
         this.metadataFile = this.channel.metaData
         this.instruction = this.channel.instruction
         this.rename = this.channel.rename
+        this.files = this.channel.files
         this.requestFolders()
         this.requestFiles()
       }
@@ -119,10 +137,9 @@ export default {
       this.$http.get(xHTTPx + '/get_directories/' + this.project.id).then(response => {
         this.waiting= false
         this.folderOptions = response.body.map(function(f){
-          var path = f.replace(/\//g, '--')
           return {
             name: f,
-            path: f.replace(/\//g, '--')
+            path: f
           }
         })
         this.targetFolder = this.channel.path
@@ -133,7 +150,9 @@ export default {
     },
     requestFiles(){
       this.waiting= true
-      this.$http.get(xHTTPx + '/get_files/' + this.project.id + '/' + this.targetFolder).then(response => {
+      var dataPath = encodeURIComponent(this.targetFolder)
+      dataPath = encodeURIComponent(dataPath)
+      this.$http.get(xHTTPx + '/get_files/' + this.project.id + '/' + dataPath).then(response => {
         this.waiting= false
         this.fileOptions = response.body.map(function(f){
           return { name: f, value: f }
@@ -147,7 +166,7 @@ export default {
     },
     update(){
       this.waiting= true
-      var message = { projectId: this.project.id, id: this.channel.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename }
+      var message = { projectId: this.project.id, id: this.channel.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.files }
       this.$http.post(xHTTPx + '/update_channel', message).then(response => {
         this.waiting= false
         this.$emit('close-edit-channel-modal', true)

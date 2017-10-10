@@ -7,6 +7,7 @@ class Channel < ApplicationRecord
       field :path
       field :meta_data
       field :instruction
+      field :files
       field :rename
     end
   end

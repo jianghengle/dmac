@@ -18,7 +18,7 @@
               <div class="field-body">
                 <div class="field">
                   <div class="control">
-                    <input class="input field-text" type="text" readonly :value="channel && channel.relPath">
+                    <input class="input field-text" type="text" readonly :value="channel && channel.path">
                   </div>
                 </div>
               </div>
@@ -58,31 +58,28 @@
               {{error}}
           </div>
 
-          <div v-if="success" class="notification is-success login-text">
-            <button class="delete" @click="success=''"></button>
-              {{success}}
-          </div>
-
           <div class="field file-field">
-            <input v-if="opened" type="file" class="file-input" @change="onFileChange">
+            <input v-if="opened" type="file" class="file-input" multiple @change="onFileChange">
             &nbsp;
-            <span class="upload-progress">Uploaded: {{percentage}}%</span>
+            <span v-if="channel" class="upload-progress">
+              Must Select <strong>{{channel.files}}</strong> File(s)
+            </span>
+            <div v-if="channel">
+              <table class="table is-narrow">
+                <tbody>
+                  <tr v-for="(v, k) in uploads">
+                    <td>{{v.filename}}</td>
+                    <td v-if="channel.rename">
+                      <input class="input" v-model="v.newName" type="text" placeholder="New Name">
+                    </td>
+                    <td>{{v.percentage}}%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div class="meta-fields">
-            <div class="field is-horizontal meta-field" v-if="channel && channel.rename">
-              <div class="field-label is-normal">
-                <label class="label">Rename</label>
-              </div>
-              <div class="field-body">
-                <div class="field">
-                  <div class="control">
-                    <input class="input" type="text" v-model="newName">
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div v-if="channel && channel.metaData">
               <div class="field is-horizontal meta-field" v-for="meta in metaData">
                 <div class="field-label is-normal">
@@ -125,18 +122,21 @@ export default {
     return {
       error: '',
       waiting: false,
-      file: null,
-      newName: '',
-      metaData: [],
-      percentage: 0,
-      success: ''
+      uploads: {},
+      metaData: []
     }
   },
   computed: {
     canUpload () {
       if(!this.channel) return false
-      if(!this.file) return false
-      if(this.channel.rename && !this.newName) return false
+      var filenames = Object.keys(this.uploads)
+      if(filenames.length != this.channel.files) return false
+      for(var i=0;i<filenames.length;i++){
+        var upload = this.uploads[filenames[i]]
+        if(!upload.file || !upload.newName){
+          return false
+        }
+      }
       if(this.channel.metaData){
         for(var i=0;i<this.metaData.length;i++){
           if(!this.metaData[i].value)
@@ -151,11 +151,8 @@ export default {
       if(val){
         this.error = ''
         this.waiting = false
-        this.file = null
-        this.newName = ''
+        this.uploads = {}
         this.metaData = []
-        this.percentage = 0
-        this.success = ''
         if(this.channel && this.channel.metaData){
           this.requestMetaData()
         }
@@ -191,34 +188,80 @@ export default {
       var files = e.target.files || e.dataTransfer.files
       if (!files.length)
         return
-      this.file = files[0]
+      var uploads = {}
+      for(var i=0;i<Math.min(files.length,this.channel.files);i++){
+        var file = files[i]
+        var upload = {
+          file: file,
+          filename: file.name,
+          newName: file.name,
+          size: file.size,
+          loaded: 0,
+          percentage: 0,
+          done: false,
+          request: null
+        }
+        uploads[file.name] = upload
+      }
+      this.uploads = uploads
     },
     upload(){
       if(!this.canUpload) return
+      this.waiting = true
 
-      var formData = new FormData()
-      formData.append('file', this.file)
-      var values = this.metaData.map(function(d){
-        return d.value
-      })
-      formData.append('metaData', values.join('\t'))
-      formData.append('newName', this.newName)
-      var url = xHTTPx + '/upload_channel/' + this.project.id + '/' + this.channel.id
-      this.percentage = 0
-
+      var promises = []
+      var filenames = Object.keys(this.uploads)
       var vm = this
-      vm.$http.post(url, formData, {
-        progress: e => {
-          vm.percentage = Math.round((e.loaded / e.total) * 100)
+      for(var i=0;i<filenames.length;i++){
+        let filename = filenames[i]
+        let upload = vm.uploads[filename]
+        var formData = new FormData()
+        formData.append('file', upload.file)
+        formData.append('newName', upload.newName)
+        var url = xHTTPx + '/upload_file_by_channel/' + vm.project.id + '/' + vm.channel.id
+        var promise = vm.$http.post(url, formData, {
+          before: request => {
+            upload.request = request
+          },
+          progress: e => {
+            upload.loaded = e.loaded
+            upload.percentage = Math.round((e.loaded / e.total) * 100)
+          }
+        }).then((response) => {
+          upload.loaded = upload.size
+          upload.percentage = 100
+          upload.done = true
+          upload.request = null
+        }, (response) => {
+          upload.loaded = 0
+          upload.percentage = 0
+          upload.request = null
+        })
+
+        promises.push(promise)
+      }
+
+      Promise.all(promises).then((response) => {
+        if(vm.channel.metaData){
+          var url = xHTTPx + '/upload_meta_by_channel/' + vm.project.id + '/' + vm.channel.id
+          var values = this.metaData.map(function(d){
+            return d.value
+          })
+          var message = { metaData:  values.join('\t')}
+          this.$http.post(url, message).then(response => {
+            this.waiting= false
+            this.$emit('close-upload-channel-modal', true)
+          }, response => {
+            this.error = 'Error in uploading meta data ...'
+            this.waiting= false
+          })
+        }else{
+          this.waiting= false
+          this.$emit('close-upload-channel-modal', true)
         }
-      }).then((response) => {
-        vm.percentage = 100
-        vm.waiting = false
-        vm.success = 'Succeed! You can continue uploading other file or exit.'
       }, (response) => {
-        vm.percentage = 0
         vm.waiting = false
-        vm.error = 'failed to upload file'
+        vm.error = 'Error in uploading file ...'
       })
     }
   },

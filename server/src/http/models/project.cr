@@ -63,7 +63,7 @@ module DMACServer
           if (change.has_key?(:id))
             project.id = change[:id].as(Int32)
             project.key = change[:id].to_s
-            project.path = user.username.to_s + "/" + project.key.to_s
+            project.path = user.username.to_s + "/" + project.name.to_s
           end
         end
         changeset = Repo.update(project)

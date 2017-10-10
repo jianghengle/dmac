@@ -22,7 +22,11 @@
     <div class="box project-box" v-for="channel in channels":key="channel.id" @click="openUploadChannelModal(channel)">
       <div class="header">
         <span class="name">
-          <a class="main-link" @click.stop="openChannelPath(channel)">{{channel.relPath}}</a>
+          {{channel.path}}
+        </span>&nbsp;
+        <span class="edit-icon main-link"
+          @click.stop="openChannelPath(channel)">
+          <icon name="sign-in"></icon>
         </span>&nbsp;
         <span class="edit-icon main-link"
           v-if="projectRole=='Owner' || projectRole=='Admin'"
@@ -155,10 +159,7 @@ export default {
       vm.waiting = true
       vm.$http.get(xHTTPx + '/get_channels/' + vm.projectId).then(response => {
         var resp = response.body
-        vm.channels = resp.map(function(u){
-          u.relPath = u.path.replace(/--/g, '/')
-          return u
-        })
+        vm.channels = resp
         vm.waiting = false
       }, response => {
         vm.error = 'Failed to get project channels!'
@@ -226,7 +227,7 @@ export default {
       this.uploadChannelModal.channel = null
     },
     openChannelPath(channel){
-      var path = '/projects/' + this.projectId + '/data/' + channel.path.slice(0, -2)
+      var path = '/projects/' + this.projectId + '/data/' + encodeURIComponent(channel.path)
       this.$router.push(path)
     }
   },
@@ -272,6 +273,7 @@ export default {
     .name {
       font-size: 18px;
       font-weight: bold;
+      color: #2e1052;
     }
 
     .edit-icon {

@@ -48,7 +48,7 @@ module DMACServer
           arr << public.to_json
           files.each_index do |i|
             f = files[i]
-            read_text = i == 0 && (f.fileType == "text" || f.fileType == "csv")
+            read_text = i == 0 && (f.file_type == "text" || f.file_type == "csv")
             arr << f.to_json(read_text)
           end
           json_array(arr)
@@ -99,7 +99,6 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
-
     end
   end
 end

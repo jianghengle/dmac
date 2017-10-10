@@ -28,7 +28,7 @@
               </span>
             </p>
           </div>
-          <div class="field" v-if="newRole=='Editor' || newRole=='Viewer'">
+          <div class="field" v-if="false">
             <label class="label">Group</label>
             <p class="control">
               <input class="input" type="text" v-model="newGroup">

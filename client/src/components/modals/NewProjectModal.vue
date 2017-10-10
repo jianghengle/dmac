@@ -94,7 +94,7 @@ export default {
         vm.newDescription = ''
         vm.$emit('close-new-project-modal', true)
       }, response => {
-        vm.error = 'Failed to create project!'
+        vm.error = 'Failed to create project! ' + JSON.stringify(response.body)
         vm.waiting= false
       })
     }

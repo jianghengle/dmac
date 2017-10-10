@@ -13,7 +13,7 @@
     <div class="box project-box" v-for="url in publicUrls":key="url.id">
       <div class="header">
         <span class="name">
-          {{url.relPath}}
+          <a class="main-link" @click="openPublicPath(url)">{{url.relPath}}</a>
         </span>
         <span class="info">{{url.createdAt}}</span>
       </div>
@@ -150,6 +150,10 @@ export default {
       }
       this.confirmModal.context = null
     },
+    openPublicPath(url){
+      var path = '/projects/' + this.projectId + '/data/' + encodeURIComponent(url.dataPath)
+      this.$router.push(path)
+    }
   },
   mounted () {
     var vm = this

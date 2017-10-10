@@ -23,7 +23,11 @@ module DMACServer
 
             projects.each do |k, v|
               fields = {} of String => String
-              fields["projectRole"] = controls[k].role.to_s if controls.has_key? k
+              control = controls[k] if controls.has_key? k
+              control = control.as(Control)
+              role = control.role.to_s
+              next unless role == "Owner" || role == "Admin" || v.status == "Active"
+              fields["projectRole"] = control.role.to_s
               obj = v.to_json(fields)
               arr.push(obj)
             end
@@ -43,6 +47,9 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
+
           owner = Control.get_project_owner(project)
           fields = {} of String => String
           fields["projectUser"] = control.email.to_s
@@ -66,6 +73,9 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
+
           files = MyFile.collect_files(control, project, data_path)
 
           paths = [] of String
@@ -81,7 +91,7 @@ module DMACServer
 
           files.each_index do |i|
             f = files[i]
-            read_text = i == 0 && (f.fileType == "text" || f.fileType == "code" || f.fileType == "csv")
+            read_text = i == 0 && (f.file_type == "text" || f.file_type == "code" || f.file_type == "csv")
             public_url = ""
             public_url = publics[f.rel_path] if publics.has_key? f.rel_path
             arr << f.to_json(read_text, public_url)
@@ -105,9 +115,9 @@ module DMACServer
           template_id = get_param!(ctx, "templateId")
           copy_users = get_param!(ctx, "copyUsers")
 
+          MyFile.create_project_folder!(user, name)
           project = Project.create_project(name, description, user)
           Control.create_control(email, project, "Owner", "")
-          MyFile.create_folder(project, "")
           if template_id != ""
             template = Project.get_project!(template_id)
             MyFile.copy_project_files(template, project)
@@ -136,7 +146,8 @@ module DMACServer
 
           project = Project.get_project!(id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Editor" || control.role.to_s == "Viewer"
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin"
 
           Project.update_project(project, name, description, status)
           {"ok": true}.to_json
@@ -154,11 +165,11 @@ module DMACServer
 
           project = Project.get_project!(id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Editor" || control.role.to_s == "Viewer"
+          raise "Permission denied" unless control.role.to_s == "Owner"
 
           Control.delete_all_by_project(project)
           Project.delete_project(project)
-          MyFile.delete_folder(project, "")
+          MyFile.delete_project_folder(project)
           Public.delete_all_by_project(project)
           Channel.delete_all_by_project(project)
           {"ok": true}.to_json
@@ -177,7 +188,8 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Viewer" || control.role.to_s == "Editor"
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin"
 
           MyFile.create_folder(project, data_path)
           {"ok": true}.to_json
@@ -196,8 +208,9 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Viewer"
-          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
+          role = control.role.to_s
+          raise "Permission denied" if role == "Viewer"
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
           MyFile.create_file(project, data_path, control)
           rel_path = data_path
@@ -219,8 +232,9 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Viewer"
-          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
+          role = control.role.to_s
+          raise "Permission denied" if role == "Viewer"
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
           MyFile.update_folder_file_name(project, data_path, name, control)
 
@@ -243,8 +257,9 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Viewer"
-          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
+          role = control.role.to_s
+          raise "Permission denied" if role == "Viewer"
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
           MyFile.delete_folder_file(project, data_path, control)
 
@@ -269,8 +284,9 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Viewer"
-          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
+          role = control.role.to_s
+          raise "Permission denied" if role == "Viewer"
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
           rel_path = MyFile.upload_file(project, data_path, file, control)
           Git.commit(project, email + " uploaded " + rel_path)
@@ -292,8 +308,9 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Viewer"
-          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
+          role = control.role.to_s
+          raise "Permission denied" if role == "Viewer"
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
           MyFile.save_text_file(project, data_path, text, control)
 
@@ -318,22 +335,28 @@ module DMACServer
 
           source_project = Project.get_project!(source_project_id)
           source_control = Control.get_control!(email, source_project)
+          source_role = source_control.role.to_s
           target_project = Project.get_project!(target_project_id)
           target_control = Control.get_control!(email, target_project)
-          raise "Permission denied" if target_control.role.to_s == "Viewer"
-          raise "Permission denied" if (target_control.role.to_s == "Editor" && target_project.status != "Active")
+          target_role = target_control.role.to_s
 
+          raise "Permission denied" unless source_role == "Owner" || source_role == "Admin" || source_project.status == "Active"
           source_files = [] of MyFile
           source_data_paths.split(",") do |dp|
             f = MyFile.new(source_project, dp)
-            if f.type == "file"
+            if source_role == "Owner" || source_role == "Admin"
               source_files << f
-            elsif target_control.role.to_s != "Editor"
+            elsif f.true_access != 2
               source_files << f
             end
           end
-          target_file = MyFile.new(target_project, target_data_path)
-          MyFile.copy_files(source_files, target_file, source_control, target_control)
+
+          raise "Permission denied" if target_role == "Viewer"
+          raise "Permission denied" unless target_role == "Owner" || target_role == "Admin" || target_project.status == "Active"
+          target_path = MyFile.new(target_project, target_data_path)
+          raise "Target is not a folder" unless target_path.type == "folder"
+
+          MyFile.copy_files(source_files, target_path, target_control)
 
           rel_path = target_data_path
           Git.commit(target_project, email + " copy something into " + rel_path)

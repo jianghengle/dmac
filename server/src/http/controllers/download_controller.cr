@@ -15,6 +15,8 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
           download = Download.create_download(project.key.to_s, data_path)
           MyFile.prepare_download(download, project, data_path, control)

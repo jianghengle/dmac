@@ -9,6 +9,7 @@ import VueResource from 'vue-resource'
 Vue.use(VueResource)
 
 import 'vue-awesome/icons/sign-out'
+import 'vue-awesome/icons/sign-in'
 import 'vue-awesome/icons/envelope'
 import 'vue-awesome/icons/key'
 import 'vue-awesome/icons/folder'

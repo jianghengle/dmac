@@ -412,7 +412,7 @@ function findParent(path){
       parent.type = 'project'
       parent.path = '/projects/' + ss[2]
     }else{
-      var sss = ss[4].split('%2F')
+      var sss = decodeURIComponent(ss[4]).split('/')
       if(sss.length == 2){
         if(sss[1] == ''){
           parent.type = 'project'
