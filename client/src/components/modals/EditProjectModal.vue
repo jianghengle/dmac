@@ -38,6 +38,7 @@
                       <option>Active</option>
                       <option>Archived</option>
                       <option>Template</option>
+                      <option>Public Template</option>
                     </select>
                   </div>
                 </div>

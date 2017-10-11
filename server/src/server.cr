@@ -57,6 +57,10 @@ module DMACServer
         HttpAPI::ProjectController.get_projects(env)
       end
 
+      get "/get_public_templates" do |env|
+        HttpAPI::ProjectController.get_public_templates(env)
+      end
+
       get "/get_project_controls/:project_id" do |env|
         HttpAPI::ControlController.get_project_controls(env)
       end

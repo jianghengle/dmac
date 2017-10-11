@@ -364,7 +364,6 @@ module DMACServer
         temp_path = @@tmp + "/" + SecureRandom.hex(32).to_s
         Dir.mkdir(temp_path)
         command = "unzip \"" + source + "\" -d " + temp_path
-        puts command
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
         return temp_path

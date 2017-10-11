@@ -49,7 +49,7 @@
                   <div class="control">
                     <span class="select">
                       <select v-model="templateId">
-                        <option v-for="option in templates" v-bind:value="option.id">
+                        <option v-for="option in allTemplates" v-bind:value="option.id">
                           {{ option.name }}
                         </option>
                       </select>
@@ -79,7 +79,7 @@
                 </div>
               </div>
             </div>
-            <div class="field is-horizontal meta-field" v-if="templateId">
+            <div class="field is-horizontal meta-field" v-if="templateId && !isPublicTemplate">
               <div class="field-label">
                 <label class="label">Copy Users</label>
               </div>
@@ -116,8 +116,22 @@ export default {
       newDescription: '',
       templateId: '',
       metaData: [],
-      copyUsers: ''
+      copyUsers: '',
+      allTemplates: []
     }
+  },
+  computed: {
+    isPublicTemplate () {
+      if(!this.templateId)
+        return false
+      for(var i=0;i<this.allTemplates.length;i++){
+        var template = this.allTemplates[i]
+        if(template.id == this.templateId){
+          return template.public
+        }
+      }
+      return false
+    },
   },
   watch: {
     opened: function (val) {
@@ -128,6 +142,7 @@ export default {
         this.metaData = []
         this.error = ''
         this.waiting = false
+        this.requestTemplates()
       }
     },
     templateId: function (val) {
@@ -201,6 +216,28 @@ export default {
         this.waiting= false
       })
     },
+    requestTemplates(){
+      this.waiting= true
+      this.$http.get(xHTTPx + '/get_public_templates').then(response => {
+        this.waiting= false
+        var templates = this.templates
+        var publicTemplates = response.body.filter(function(p){
+          for(var i=0;i<templates.length;i++){
+            if(templates[i].id == p.id){
+              return false
+            }
+          }
+          p.public = true
+          return true
+        })
+        var allTemplates = templates.concat(publicTemplates)
+        allTemplates.unshift({id: '', name: '(blank)'})
+        this.allTemplates = allTemplates
+      }, response => {
+        this.error = 'Failed to get templates!'
+        this.waiting= false
+      })
+    }
   },
 }
 </script>

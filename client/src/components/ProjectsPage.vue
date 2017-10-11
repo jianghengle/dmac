@@ -25,8 +25,7 @@
       <div class="header">
         <span class="name">
           {{project.name}}
-          <span v-if="project.status == 'Archived'">(Archived)</span>
-          <span v-if="project.status == 'Template'">(Template)</span>
+          <span class="tag" v-if="project.status != 'Active'">{{project.status}}</span>
         </span>&nbsp;
         <span class="edit-icon main-link"
           v-if="project.projectRole=='Owner' || project.projectRole=='Admin'"
@@ -99,9 +98,8 @@ export default {
     },
     templates () {
       var templates = this.projects.filter(function(p){
-        return p.status == 'Template' && (p.projectRole == 'Owner' || p.projectRole == 'Admin')
+        return (p.status == 'Template' || p.status == 'Public Template') && (p.projectRole == 'Owner' || p.projectRole == 'Admin')
       })
-      templates.unshift({id: '', name: '(blank)'})
       return templates
     },
     showAll () {

@@ -30,6 +30,15 @@ module DMACServer
         result
       end
 
+      def access_as_template(control)
+        return "" unless @status == "Template" || @status == "Public Template"
+        return "public" if control.nil?
+        control = control.as(Control)
+        role = control.role.to_s
+        return "member" if role == "Owner" || role == "Admin"
+        return "public"
+      end
+
       def self.get_projects_by_ids(ids)
         query = Query.where(:id, ids)
         projects = Repo.all(Project, query)
@@ -40,6 +49,13 @@ module DMACServer
           result[p.id.to_s] = p
         end
         return result
+      end
+
+      def self.get_public_templates
+        query = Query.where(status: "Public Template")
+        projects = Repo.all(Project, query)
+        return [] of Project if projects.nil?
+        return projects.as(Array)
       end
 
       def self.get_project!(id)
@@ -97,6 +113,15 @@ module DMACServer
       end
 
       def self.update_project(project, name, description, status, meta_data_file, meta_data)
+        if project.name.to_s != name
+          root = ENV["DMAC_ROOT"]
+          old_path = project.path.to_s
+          new_path = old_path.rchop(project.name.to_s) + name
+          old_full_path = root + "/" + old_path
+          new_full_path = root + "/" + new_path
+          File.rename(old_full_path, new_full_path)
+          project.path = new_path
+        end
         project.name = name
         project.description = description
         project.status = status

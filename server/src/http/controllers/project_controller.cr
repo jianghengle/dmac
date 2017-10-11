@@ -40,6 +40,23 @@ module DMACServer
         end
       end
 
+      def get_public_templates(ctx)
+        begin
+          email = verify_token(ctx)
+          arr = [] of String
+          projects = Project.get_public_templates
+          projects.each do |p|
+            obj = p.to_json
+            arr.push(obj)
+          end
+          json_array(arr)
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
       def get_project(ctx)
         begin
           email = verify_token(ctx)
@@ -121,13 +138,17 @@ module DMACServer
           Control.create_control(email, project, "Owner", "")
           if template_id != ""
             template = Project.get_project!(template_id)
-            MyFile.copy_project_files(template, project)
-            Channel.copy_channels(template, project)
-            if copy_users == "true"
-              Control.copy_controls(template, project, email)
-            end
-            unless template.meta_data.nil?
-              Project.update_meta_data(project, template.meta_data.to_s, meta_data)
+            templateControl = Control.get_control(email, template)
+            template_role = template.access_as_template(templateControl)
+            unless template_role.empty?
+              MyFile.copy_project_files(template, project)
+              Channel.copy_channels(template, project)
+              if copy_users == "true" && template_role == "member"
+                Control.copy_controls(template, project, email)
+              end
+              unless template.meta_data.nil?
+                Project.update_meta_data(project, template.meta_data.to_s, meta_data)
+              end
             end
           end
 
@@ -175,10 +196,10 @@ module DMACServer
           raise "Permission denied" unless control.role.to_s == "Owner"
 
           Control.delete_all_by_project(project)
-          Project.delete_project(project)
           MyFile.delete_project_folder(project)
           Public.delete_all_by_project(project)
           Channel.delete_all_by_project(project)
+          Project.delete_project(project)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -423,8 +444,8 @@ module DMACServer
           project_id = get_param!(ctx, "project_id")
 
           project = Project.get_project!(project_id)
-          control = Control.get_control!(email, project)
-          raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
+          control = Control.get_control(email, project)
+          raise "Permission denied" if project.access_as_template(control).empty?
 
           Project.get_project_metadata(project)
         rescue ex : InsufficientParameters

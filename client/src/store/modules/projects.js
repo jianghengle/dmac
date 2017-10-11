@@ -5,7 +5,7 @@ import DateForm from 'dateformat'
 export const state = {
   showNav: true,
   nodeMap: {},
-  showAll: false,
+  showAll: localStorage.getItem('showAll') == 'true',
   clipboard: {projectId: null, dataPaths: []},
   publicDataPath: ''
 }
@@ -141,6 +141,7 @@ export const mutations = {
 
   setShowAll(state, val) {
     state.showAll = val
+    localStorage.setItem('showAll', val)
   },
 
   toggleSelected(state, path) {

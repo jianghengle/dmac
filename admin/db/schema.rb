@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171010180901) do
+ActiveRecord::Schema.define(version: 20171011143828) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -57,6 +57,7 @@ ActiveRecord::Schema.define(version: 20171010180901) do
     t.string   "path"
     t.string   "meta_data"
     t.index ["key"], name: "index_projects_on_key", unique: true, using: :btree
+    t.index ["status"], name: "index_projects_on_status", using: :btree
   end
 
   create_table "publics", force: :cascade do |t|

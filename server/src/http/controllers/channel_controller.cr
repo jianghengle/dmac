@@ -52,7 +52,6 @@ module DMACServer
           project_id = get_param!(ctx, "project_id")
           path = get_param!(ctx, "path")
           path = URI.unescape(path)
-          puts path
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)

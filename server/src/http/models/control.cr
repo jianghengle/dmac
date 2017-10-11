@@ -9,7 +9,7 @@ module DMACServer
         belongs_to :project, Project
       end
 
-      def to_json()
+      def to_json
         result = String.build do |str|
           str << "{"
           str << "\"id\":" << @id << ","
@@ -47,6 +47,10 @@ module DMACServer
         return Repo.get_by(Control, project_id: project.id, role: "Owner")
       end
 
+      def self.get_control(email, project)
+        Repo.get_by(Control, email: email, project_id: project.id)
+      end
+
       def self.get_control!(email, project)
         control = Repo.get_by(Control, email: email, project_id: project.id)
         return control.as(Control) unless control.nil?
@@ -62,7 +66,7 @@ module DMACServer
         changeset = Repo.insert(control)
         raise changeset.errors.to_s unless changeset.valid?
         changeset.changes.each do |change|
-          if(change.has_key?(:id))
+          if (change.has_key?(:id))
             control.id = change[:id].as(Int32)
           end
         end
@@ -103,7 +107,6 @@ module DMACServer
           Control.create_control(c.email.to_s, target, role, c.group_name.to_s)
         end
       end
-
     end
   end
 end
