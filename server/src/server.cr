@@ -216,7 +216,9 @@ module DMACServer
         HttpAPI::ChannelController.upload_meta_by_channel(env)
       end
 
-      Kemal.run
+      port = 3000
+      port = ENV["DMAC_PORT"] if ENV.has_key?("DMAC_PORT")
+      Kemal.run port
     end
   end
 end
