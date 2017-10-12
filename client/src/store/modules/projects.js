@@ -251,7 +251,7 @@ function initFile(file, options, pub){
       unknown: 'file-o',
       image: 'file-image-o',
       pdf: 'file-pdf-o',
-      text: 'file-o',
+      text: 'file-text-o',
       code: 'file-code-o',
       csv: 'file-o',
       zip: 'file-zip-o'
