@@ -217,7 +217,7 @@ module DMACServer
       end
 
       port = 3000
-      port = ENV["DMAC_PORT"] if ENV.has_key?("DMAC_PORT")
+      port = ENV["DMAC_PORT"].to_i if ENV.has_key?("DMAC_PORT")
       Kemal.run port
     end
   end
