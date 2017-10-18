@@ -18,13 +18,13 @@ module DMACServer
             client_secret = ENV["GLOBUS_CLIENT_SECRET"].to_s
           end
 
-          server_ip = ""
-          if ENV.has_key?("SERVER_IP")
-            server_ip = ENV["SERVER_IP"].to_s
+          dmac_server = ""
+          if ENV.has_key?("DMAC_SERVER")
+            dmac_server = ENV["DMAC_SERVER"].to_s
           end
 
           auth_server_uri = "auth.globus.org/v2"
-          redirect_uri = "https://" + server_ip + "/globus_authcallback"
+          redirect_uri = "https://" + dmac_server + "/globus_authcallback"
 
           oauth2_client = OAuth2::Client.new(auth_server_uri, client_id, client_secret, redirect_uri: redirect_uri)
 
@@ -71,7 +71,6 @@ module DMACServer
         end
         return email.downcase
       end
-
     end
   end
 end
