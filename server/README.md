@@ -3,10 +3,12 @@ This is the API server for DMAC in Kemal (http://kemalcr.com) in Crystal (https:
 
 Envrionmental variables:  
 PG_URL: the database url like: postgres://username:password@localhost:5432/dmac_development  
-DMAC_ROOT: the root directory for projects
-SERVER_IP: the server's domain name or ip adress
-GLOBUS_CLIENT_ID: the app client id registered on Globus
-GLOBUS_CLIENT_SECRET: the app client secret generated on Globus
+DMAC_ROOT: the root directory for projects  
+DMAC_SERVER: the server's domain name or ip adress  
+DMAC_PORT: the server's port  
+GLOBUS_CLIENT_ID: the app client id registered on Globus   
+GLOBUS_CLIENT_SECRET: the app client secret generated on Globus   
+DMAC_PERMISSION: if using local user and file acl permission to adapt to Globus connect server. Set `local` to enable it.
 
 ## Installation
 1. install Crystal https://crystal-lang.org/docs/installation/
