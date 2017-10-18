@@ -39,8 +39,10 @@ module DMACServer
         user.role = "Subscriber"
         user.first_name = first_name
         user.last_name = last_name
+        user.username = Local.create_user(email, password)
         changeset = Repo.insert(user)
         raise changeset.errors.to_s unless changeset.valid?
+        return user
       end
 
       def self.get_user_by_email(email : String)
@@ -54,17 +56,7 @@ module DMACServer
         auth_token = ""
         if user.nil?
           password = SecureRandom.base64
-          encrypted_password = Crypto::Bcrypt::Password.create(password)
-          raise "failed to encrypted password" if encrypted_password.nil?
-          user = User.new
-          user.email = email
-          user.encrypted_password = encrypted_password.to_s
-          user.auth_token = SecureRandom.hex(32).to_s
-          user.role = "Subscriber"
-          user.first_name = ""
-          user.last_name = ""
-          changeset = Repo.insert(user)
-          raise changeset.errors.to_s unless changeset.valid?
+          user = User.create_user(email, password, "", "")
           auth_token = user.auth_token.to_s
         else
           user = user.as(User)
