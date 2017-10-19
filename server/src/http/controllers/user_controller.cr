@@ -10,8 +10,13 @@ module DMACServer
         begin
           email = get_param!(ctx, "email")
           password = get_param!(ctx, "password")
-          token = User.get_token(email, password)
-          {token: token}.to_json
+          is_email = get_param!(ctx, "isEmail")
+
+          user = User.get_user_by_password(email, password, is_email)
+          token = user.auth_token.to_s
+          email = user.email.to_s
+          username = user.username.to_s
+          {token: token, email: email, username: username}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception
@@ -36,7 +41,7 @@ module DMACServer
         begin
           token = get_param!(ctx, "token")
           user = User.get_user(token)
-          {email: user.email.to_s}.to_json
+          {email: user.email.to_s, username: user.username.to_s}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception
@@ -58,7 +63,6 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
-
     end
   end
 end

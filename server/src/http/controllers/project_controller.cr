@@ -67,12 +67,21 @@ module DMACServer
           role = control.role.to_s
           raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
-          owner = Control.get_project_owner(project)
           fields = {} of String => String
           fields["projectUser"] = control.email.to_s
           fields["projectRole"] = control.role.to_s
           fields["projectGroup"] = control.group_name.to_s
-          fields["owner"] = owner.email.to_s unless owner.nil?
+          owner = Control.get_project_owner(project)
+          unless owner.nil?
+            owner = owner.as(Control)
+            user = User.get_user_by_email(owner.email.to_s)
+            if user.nil?
+              fields["owner"] = owner.email.to_s
+            else
+              user = user.as(User)
+              fields["owner"] = user.username.to_s + " ( " + owner.email.to_s + " )"
+            end
+          end
           return project.to_json(fields)
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

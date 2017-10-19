@@ -175,12 +175,15 @@ export default {
     },
     projectRoleLabel () {
       if(!this.projectRole) return ''
+      return this.projectRole
+      /*
       var label = this.project.projectUser + ' as ' + this.projectRole
       if(this.projectRole == 'Owner' || this.projectRole == 'Admin')
         return label
       if(this.project.projectGroup)
         return label + '(' + this.project.projectGroup + ')'
       return label
+      */
     },
     textAreaHeight () {
       if(!this.project) return 1

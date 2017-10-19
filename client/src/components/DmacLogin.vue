@@ -16,7 +16,7 @@
         </div>
         <div class="field">
           <p class="control has-icons-left">
-            <input class="input login-text" type="text" placeholder="Email" v-model="email">
+            <input class="input login-text" type="text" placeholder="Username or Email" v-model="email">
             <span class="icon is-small is-left">
               <icon name="envelope"></icon>
             </span>
@@ -190,21 +190,22 @@ export default {
   methods: {
     login () {
       this.email = this.email.trim().toLowerCase()
-      if(!emailRegex.test(this.email)){
-        this.error = 'Invalid email address!'
-        return
-      }
+      var isEmail = emailRegex.test(this.email)
       this.sent = true
       var vm = this
-      var message = {email: this.email, password: this.password}
+      var message = {email: this.email, password: this.password, isEmail: isEmail}
       vm.$http.post(xHTTPx + '/get_auth_token', message).then(response => {
         var token = response.body.token
+        var email = response.body.email
+        var username = response.body.username
         Vue.http.headers.common['Authorization'] = token
         this.$store.commit('user/setToken', token)
-        this.$store.commit('user/setEmail', this.email)
+        this.$store.commit('user/setEmail', email)
+        this.$store.commit('user/setUsername', username)
         if (vm.rememberMe) {
           localStorage.setItem('token', token)
-          localStorage.setItem('email', this.email)
+          localStorage.setItem('email', email)
+          localStorage.setItem('username', username)
         }
         this.sent = false
         this.$router.push("/projects")

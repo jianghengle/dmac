@@ -12,15 +12,15 @@
   },
   "dependencies": {
     "bulma": "^0.4.2",
+    "c3": "^0.4.14",
     "dateformat": "^2.0.0",
     "dygraphs": "^1.1.1",
+    "parcoord-es": "^1.0.1",
     "vue": "^2.3.3",
     "vue-awesome": "^2.3.1",
     "vue-resource": "^1.3.3",
     "vue-router": "^2.3.1",
-    "vuex": "^2.3.1",
-    "c3": "^0.4.14",
-    "parcoord-es": "^1.0.1"
+    "vuex": "^2.3.1"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",

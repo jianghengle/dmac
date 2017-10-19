@@ -7,7 +7,9 @@
           </router-link>
         </div>
         <div class="nav-right">
-          <span class="nav-item app-item" v-if="token">Hi, {{name}}</span>
+          <span class="nav-item app-item" v-if="token" @mouseover="showEmail=true" @mouseout="showEmail=false">Hi,&nbsp;
+            <span>{{name}}</span>
+          </span>
           <router-link class="nav-item app-item" v-if="token" :to="'/help'">
             <icon name="question"></icon>&nbsp;Help
           </router-link>
@@ -26,7 +28,7 @@ export default {
   name: 'dmac-header',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      showEmail: false
     }
   },
   computed: {
@@ -38,8 +40,11 @@ export default {
       return token
     },
     name () {
+      var username = this.$store.state.user.username
       var email = this.$store.state.user.email
-      return email.split('@')[0]
+      if(this.showEmail)
+        return username + ' ( ' + email + ' )'
+      return username
     }
   },
   methods: {
@@ -70,4 +75,6 @@ export default {
 a:hover {
   color: #EEEEEE;
 }
+
+
 </style>
