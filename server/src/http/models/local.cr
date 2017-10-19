@@ -131,6 +131,44 @@ module DMACServer
           Local.run("setfacl -m \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
         end
       end
+
+      def self.set_control(project, control)
+        return unless @@enabled
+
+        email = control.email.to_s
+        user = User.get_user_by_email(email)
+        return if user.nil?
+        user = user.as(User)
+        username = user.username.to_s
+        role = control.role.to_s
+        if role == "Viewer"
+          group = "dmac-" + project.key.to_s + "-viewer"
+          Local.set_project_group(project, username, group)
+        elsif role == "Editor"
+          group = "dmac-" + project.key.to_s + "-editor"
+          Local.set_project_group(project, username, group)
+        else
+          group = "dmac-" + project.key.to_s + "-admin"
+          Local.set_project_group(project, username, group)
+        end
+      end
+
+      def self.remove_control(project, control)
+        return unless @@enabled
+
+        email = control.email.to_s
+        user = User.get_user_by_email(email)
+        return if user.nil?
+        user = user.as(User)
+        username = user.username.to_s
+
+        admin_group = "dmac-" + project.key.to_s + "-admin"
+        editor_group = "dmac-" + project.key.to_s + "-editor"
+        viewer_group = "dmac-" + project.key.to_s + "-viewer"
+        Local.run("gpasswd -d " + username + " " + admin_group)
+        Local.run("gpasswd -d " + username + " " + editor_group)
+        Local.run("gpasswd -d " + username + " " + viewer_group)
+      end
     end
   end
 end

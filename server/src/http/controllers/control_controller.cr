@@ -43,6 +43,7 @@ module DMACServer
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
           new_control = Control.create_control(newEmail, project, newRole, newGroup)
+          Local.set_control(project, new_control)
           new_control.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -64,6 +65,9 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
           new_control = Control.update_control(id, newEmail, newRole, newGroup)
+          if new_control.role.to_s != newRole
+            Local.set_control(project, new_control)
+          end
           new_control.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -82,7 +86,8 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          Control.delete_control(id)
+          control = Control.delete_control(id)
+          Local.remove_control(project, control)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -90,7 +95,6 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
-
     end
   end
 end

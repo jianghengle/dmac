@@ -96,6 +96,7 @@ module DMACServer
         control = control.as(Control)
         changeset = Repo.delete(control)
         raise changeset.errors.to_s unless changeset.valid?
+        return control
       end
 
       def self.copy_controls(source, target, email)
