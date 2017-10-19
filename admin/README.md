@@ -13,3 +13,9 @@ This is a Ruby on Rails (rails_admin https://github.com/sferik/rails_admin) appl
 8. create a user: `User.create(email: 'your@email.com', password: 'yourpassword', role: 'Admin')`
 9. `exit`
 10. `rails s -p 3001`
+
+## deployment
+Envrionmental variables:  
+DMAC_SERVER: the server's domain name or ip adress  
+DMAC_PORT: the server's port of dmac server  
+DMAC_PERMISSION: if using local user and file acl permission to adapt to Globus connect server. Set it `local` to enable it.
