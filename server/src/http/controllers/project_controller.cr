@@ -175,7 +175,9 @@ module DMACServer
           control = Control.get_control!(email, project)
           role = control.role.to_s
           raise "Permission denied" unless role == "Owner" || role == "Admin"
-
+          if project.status.to_s != status
+            Local.change_project_status(project, status)
+          end
           Project.update_project(project, name, description, status, meta_data_file, meta_data)
           Git.commit(project, email + " update project") unless meta_data_file.empty?
           {"ok": true}.to_json

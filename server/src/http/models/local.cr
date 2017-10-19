@@ -113,6 +113,24 @@ module DMACServer
         Local.run("groupdel " + editor_group)
         Local.run("groupdel " + admin_group)
       end
+
+      def self.change_project_status(project, new_status)
+        return unless @@enabled
+
+        project_root = @@dmac_root + "/" + project.path.to_s
+        editor_group = "dmac-" + project.key.to_s + "-editor"
+        viewer_group = "dmac-" + project.key.to_s + "-viewer"
+        old_status = project.status.to_s
+        if old_status == "Active"
+          if new_status != "Active"
+            Local.run("setfacl -m \"g:" + editor_group + ":\" \"" + project_root + "\"")
+            Local.run("setfacl -m \"g:" + viewer_group + ":\" \"" + project_root + "\"")
+          end
+        elsif new_status == "Active"
+          Local.run("setfacl -m \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
+          Local.run("setfacl -m \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
+        end
+      end
     end
   end
 end

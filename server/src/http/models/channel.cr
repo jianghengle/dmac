@@ -64,7 +64,7 @@ module DMACServer
         raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
         root = ENV["DMAC_ROOT"]
         project_root = root + "/" + project.path.to_s
-        full_path = project_root + "/" + path.gsub("--", "/")
+        full_path = project_root + path
         files = [] of String
         Dir.foreach full_path do |filename|
           if filename.to_s != "." && filename.to_s != ".." && filename.to_s != ".gitignore" && filename.to_s != ".DS_Store"
