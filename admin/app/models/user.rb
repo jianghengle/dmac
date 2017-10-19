@@ -25,4 +25,14 @@ class User < ApplicationRecord
       end
     end
   end
+
+  def reset_password(new_password, new_password_confirmation)
+    super(new_password, new_password_confirmation)
+    return unless new_password == new_password_confirmation
+    return unless ENV.has_key? "DMAC_PERMISSION"
+    perm = ENV["DMAC_PERMISSION"]
+    return unless perm == "local"
+    system("sudo usermod --password $(echo " + new_password + " | openssl passwd -1 -stdin) " + self[:username])
+  end
+
 end
