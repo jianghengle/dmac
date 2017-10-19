@@ -39,6 +39,66 @@ module DMACServer
 
         return new_name
       end
+
+      def self.init_project(project)
+        return unless @@enabled
+
+        admin_group = "dmac-" + project.key.to_s + "-admin"
+        editor_group = "dmac-" + project.key.to_s + "-editor"
+        viewer_group = "dmac-" + project.key.to_s + "-editor"
+        Local.run("groupadd " + admin_group)
+        Local.run("groupadd " + editor_group)
+        Local.run("groupadd " + viewer_group)
+
+        project_root = @@dmac_root + "/" + project.path.to_s
+        Local.run("setfacl -m \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -dm \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -m \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -dm \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -m \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
+        Local.run("setfacl -dm \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
+
+        controls = Control.get_controls_by_project_id(project.id)
+        controls.each do |c|
+          role = c.role.to_s
+          email = c.email.to_s
+          user = User.get_user_by_email(email)
+          next if user.nil?
+          user = user.as(User)
+          username = user.username.to_s
+          if role == "Viewer"
+            Local.set_project_group(project, username, viewer_group)
+          elsif role == "Editor"
+            Local.set_project_group(project, username, editor_group)
+          else
+            Local.set_project_group(project, username, admin_group)
+          end
+        end
+      end
+
+      def self.set_project_group(project, username, group)
+        prefix = "dmac-" + project.key.to_s + "-"
+        groups = Local.find_user_groups(username)
+        groups.each do |g|
+          next if g == group
+          if g.starts_with?(prefix)
+            Local.run("gpasswd -d " + username + " " + g)
+          end
+        end
+        Local.run("usermod -a -G " + group + " " + username)
+      end
+
+      def self.find_user_groups(username)
+        groups = [] of String
+        io = Local.run("groups " + username)
+        index = io.index(":")
+        return groups if index.nil?
+        io[(index + 1)..-1].split(" ") do |s|
+          group = s.strip
+          groups << group unless group.empty?
+        end
+        return groups
+      end
     end
   end
 end

@@ -45,10 +45,14 @@ module DMACServer
         return user
       end
 
-      def self.get_user_by_email(email : String)
+      def self.get_user_by_email!(email : String)
         user = Repo.get_by(User, email: email)
         raise "Cannot find user" if user.nil?
         return user
+      end
+
+      def self.get_user_by_email(email : String)
+        Repo.get_by(User, email: email)
       end
 
       def self.make_token(email : String)

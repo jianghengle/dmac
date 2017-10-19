@@ -9,7 +9,7 @@ module DMACServer
       def get_projects(ctx)
         begin
           email = verify_token(ctx)
-          user = User.get_user_by_email(email)
+          user = User.get_user_by_email!(email)
 
           controls = Control.get_controls_by_user(email)
           arr = [] of String
@@ -124,7 +124,7 @@ module DMACServer
       def create_project(ctx)
         begin
           email = verify_token(ctx)
-          user = User.get_user_by_email(email)
+          user = User.get_user_by_email!(email)
           raise "Permission denied" if user.role.to_s == "Subscriber"
 
           name = get_param!(ctx, "name")
@@ -151,8 +151,8 @@ module DMACServer
               end
             end
           end
-
           Git.init(project, email)
+          Local.init_project(project)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
