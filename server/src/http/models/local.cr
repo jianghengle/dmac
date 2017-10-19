@@ -37,6 +37,7 @@ module DMACServer
         Local.run("useradd -d " + @@dmac_root + " -g dmac " + new_name)
         Local.run("echo " + password + " | passwd --stdin " + new_name)
 
+        Local.makeup_controls(email, new_name)
         return new_name
       end
 
@@ -168,6 +169,26 @@ module DMACServer
         Local.run("gpasswd -d " + username + " " + admin_group)
         Local.run("gpasswd -d " + username + " " + editor_group)
         Local.run("gpasswd -d " + username + " " + viewer_group)
+      end
+
+      def self.makeup_controls(email, username)
+        controls = Control.get_controls_by_user(email)
+        project_ids = controls.keys
+        projects = Project.get_projects_by_ids(project_ids)
+        controls.each do |k, c|
+          project = projects[k]
+          role = c.role.to_s
+          if role == "Viewer"
+            group = "dmac-" + project.key.to_s + "-viewer"
+            Local.run("usermod -a -G " + group + " " + username)
+          elsif role == "Editor"
+            group = "dmac-" + project.key.to_s + "-editor"
+            Local.run("usermod -a -G " + group + " " + username)
+          else
+            group = "dmac-" + project.key.to_s + "-admin"
+            Local.run("usermod -a -G " + group + " " + username)
+          end
+        end
       end
     end
   end
