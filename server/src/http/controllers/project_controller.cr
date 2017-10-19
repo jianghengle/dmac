@@ -200,6 +200,7 @@ module DMACServer
           Public.delete_all_by_project(project)
           Channel.delete_all_by_project(project)
           Project.delete_project(project)
+          Local.delete_project(project)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

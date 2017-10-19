@@ -45,18 +45,10 @@ module DMACServer
 
         admin_group = "dmac-" + project.key.to_s + "-admin"
         editor_group = "dmac-" + project.key.to_s + "-editor"
-        viewer_group = "dmac-" + project.key.to_s + "-editor"
+        viewer_group = "dmac-" + project.key.to_s + "-viewer"
         Local.run("groupadd " + admin_group)
         Local.run("groupadd " + editor_group)
         Local.run("groupadd " + viewer_group)
-
-        project_root = @@dmac_root + "/" + project.path.to_s
-        Local.run("setfacl -m \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
-        Local.run("setfacl -dm \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
-        Local.run("setfacl -m \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
-        Local.run("setfacl -dm \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
-        Local.run("setfacl -m \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
-        Local.run("setfacl -dm \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
 
         controls = Control.get_controls_by_project_id(project.id)
         controls.each do |c|
@@ -74,6 +66,14 @@ module DMACServer
             Local.set_project_group(project, username, admin_group)
           end
         end
+
+        project_root = @@dmac_root + "/" + project.path.to_s
+        Local.run("setfacl -m \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -dm \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -m \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -dm \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -m \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
+        Local.run("setfacl -dm \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
       end
 
       def self.set_project_group(project, username, group)
@@ -98,6 +98,20 @@ module DMACServer
           groups << group unless group.empty?
         end
         return groups
+      end
+
+      def self.delete_project(project)
+        return unless @@enabled
+
+        admin_group = "dmac-" + project.key.to_s + "-admin"
+        editor_group = "dmac-" + project.key.to_s + "-editor"
+        viewer_group = "dmac-" + project.key.to_s + "-viewer"
+        Local.run("groupmems -p -g " + viewer_group)
+        Local.run("groupmems -p -g " + editor_group)
+        Local.run("groupmems -p -g " + admin_group)
+        Local.run("groupdel " + viewer_group)
+        Local.run("groupdel " + editor_group)
+        Local.run("groupdel " + admin_group)
       end
     end
   end
