@@ -34,7 +34,7 @@ Rails.application.configure do
   host = "localhost"
   host = ENV["DMAC_SERVER"] if ENV.has_key? "DMAC_SERVER"
 
-  if ENV.has_key? "DMAC_PORT" &&  ENV["DMAC_PORT"] == "443"
+  if ((ENV.has_key? "DMAC_PORT") &&  (ENV["DMAC_PORT"] == "443"))
     config.to_prepare { Devise::SessionsController.force_ssl }
     config.to_prepare { Devise::RegistrationsController.force_ssl }
     config.to_prepare { Devise::PasswordsController.force_ssl }
