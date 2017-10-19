@@ -123,8 +123,8 @@ module DMACServer
         old_status = project.status.to_s
         if old_status == "Active"
           if new_status != "Active"
-            Local.run("setfacl -m \"g:" + editor_group + ":\" \"" + project_root + "\"")
-            Local.run("setfacl -m \"g:" + viewer_group + ":\" \"" + project_root + "\"")
+            Local.run("setfacl -m \"g:" + editor_group + ":-\" \"" + project_root + "\"")
+            Local.run("setfacl -m \"g:" + viewer_group + ":-\" \"" + project_root + "\"")
           end
         elsif new_status == "Active"
           Local.run("setfacl -m \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
