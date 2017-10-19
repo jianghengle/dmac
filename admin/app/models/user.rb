@@ -23,6 +23,7 @@ class User < ApplicationRecord
           ['Admin', 'Manager', 'Subscriber']
         end
       end
+      field :reset_password_token
     end
   end
 
