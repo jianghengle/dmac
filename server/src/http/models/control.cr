@@ -57,6 +57,12 @@ module DMACServer
         raise "Project permission denied"
       end
 
+      def self.get_control_by_id!(id)
+        control = Repo.get(Control, id)
+        raise "Cannot find control" if control.nil?
+        control.as(Control)
+      end
+
       def self.create_control(email, project, role, group)
         control = Control.new
         control.project_id = project.id

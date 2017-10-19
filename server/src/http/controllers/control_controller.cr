@@ -64,8 +64,9 @@ module DMACServer
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
+          old_control = Control.get_control_by_id!(id)
           new_control = Control.update_control(id, newEmail, newRole, newGroup)
-          if new_control.role.to_s != newRole
+          if old_control.role.to_s != newRole
             Local.set_control(project, new_control)
           end
           new_control.to_json
