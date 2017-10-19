@@ -33,7 +33,16 @@ Rails.application.configure do
 
   host = "localhost"
   host = ENV["DMAC_SERVER"] if ENV.has_key? "DMAC_SERVER"
-  config.action_mailer.default_url_options = { host: host, port: 3001 }
+
+  if ENV.has_key? "DMAC_PORT" &&  ENV["DMAC_PORT"] == "443"
+    config.to_prepare { Devise::SessionsController.force_ssl }
+    config.to_prepare { Devise::RegistrationsController.force_ssl }
+    config.to_prepare { Devise::PasswordsController.force_ssl }
+    config.action_mailer.default_url_options = { protocol: 'https', host: host, port: 3001 }
+  else
+    config.action_mailer.default_url_options = { host: host, port: 3001 }
+  end
+
   config.action_mailer.perform_deliveries = false
 
   config.action_mailer.delivery_method = :smtp
