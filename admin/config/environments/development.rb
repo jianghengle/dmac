@@ -31,7 +31,7 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
-  config.action_mailer.default_url_options = { host: 'localhost', port: 3001 }
+  config.action_mailer.default_url_options = { host: '129.93.175.19', port: 3001 }
   config.action_mailer.perform_deliveries = false
 
   config.action_mailer.delivery_method = :smtp
