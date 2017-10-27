@@ -174,6 +174,7 @@ module DMACServer
 
       def self.makeup_controls(email, username)
         controls = Control.get_controls_by_user(email)
+        return if controls.empty?
         project_ids = controls.keys
         projects = Project.get_projects_by_ids(project_ids)
         controls.each do |k, c|
