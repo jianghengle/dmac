@@ -69,6 +69,7 @@ module DMACServer
         end
 
         project_root = @@dmac_root + "/" + project.path.to_s
+        Local.run("chmod o=-  \"" + project_root + "\"")
         Local.run("setfacl -m \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
         Local.run("setfacl -dm \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
         Local.run("setfacl -m \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")

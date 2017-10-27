@@ -44,17 +44,16 @@ Rails.application.configure do
   end
 
   config.action_mailer.perform_deliveries = false
-
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-      :address              => 'smtp.gmail.com',
-      :port                 => 587,
-      :domain               => 'gmail.com',
-      :user_name          => 'jianghengle@gmail.com',
-      :password           => 'pwd',
-      :authentication       => 'login',
-      :enable_starttls_auto => true
-  }
+  if ((ENV.has_key? "SMTP_USERNAME") && (ENV.has_key? "SMTP_PASSWORD"))
+    config.action_mailer.perform_deliveries = true
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+        :address              => 'hcc.unl.edu',
+        :port                 => 25,
+        :user_name          => ENV["SMTP_USERNAME"],
+        :password           => ENV["SMTP_PASSWORD"]
+    }
+  end
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

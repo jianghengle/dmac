@@ -74,15 +74,13 @@ module DMACServer
         if user.nil?
           password = SecureRandom.base64
           user = User.create_user(email, password, "", "")
-          auth_token = user.auth_token.to_s
         else
           user = user.as(User)
           user.auth_token = SecureRandom.hex(32).to_s
           changeset = Repo.update(user)
           raise changeset.errors.to_s unless changeset.valid?
-          auth_token = user.auth_token.to_s
         end
-        return auth_token
+        return user
       end
     end
   end

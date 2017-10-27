@@ -9,8 +9,11 @@
         var email = emailDiv.innerHTML;
         var tokenDiv = document.getElementById('tokenDiv');
         var token = tokenDiv.innerHTML;
+        var usernameDiv = document.getElementById('usernameDiv');
+        var username = usernameDiv.innerHTML;
         localStorage.setItem('email', email);
         localStorage.setItem('token', token);
+        localStorage.setItem('username', username);
         window.location.href = '/';
       }
       window.onload = saveToken;
@@ -19,6 +22,7 @@
   <body>
     <div id="emailDiv" style="display: none;"><%= @email %></div>
     <div id="tokenDiv" style="display: none;"><%= @token %></div>
+    <div id="usernameDiv" style="display: none;"><%= @username %></div>
   </body>
 </html>
 
