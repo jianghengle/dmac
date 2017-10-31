@@ -1,14 +1,14 @@
 <template>
   <div class="login-page">
     <div class="welcome">Welcome to DMAC system!</div>
-    <div v-if="showLogin">
+    <div v-if="showLogin" @keydown="loginKeyDown">
       <div class="main-link login-option">
         <a href="/globus_authcallback">
           Globus login
         </a>
       </div>
       <div class="login-option">
-        Or
+        or
       </div>
       <div>
         <div class="login-option">
@@ -154,7 +154,7 @@ export default {
       newFirstName: '',
       newLastName: '',
       registerError: '',
-      registerSuccess: ''
+      registerInfo: ''
     }
   },
   watch: {
@@ -242,6 +242,12 @@ export default {
         vm.registerError = 'Failed to create new account!'
         this.sent = false
       })
+    },
+    loginKeyDown(e){
+      var keyCode = e.keyCode || e.which
+      if (keyCode == 13) {
+        this.login()
+      }
     }
   }
 }

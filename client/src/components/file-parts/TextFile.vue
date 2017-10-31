@@ -142,7 +142,7 @@ export default {
       })
     },
     textAreaKeyDown(e){
-      var keyCode = e.keyCode || e.which;
+      var keyCode = e.keyCode || e.which
 
       if (keyCode == 9) {
         e.preventDefault()

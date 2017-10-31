@@ -43,7 +43,7 @@ export default {
       var username = this.$store.state.user.username
       var email = this.$store.state.user.email
       if(this.showEmail)
-        return username + ' ( ' + email + ' )'
+        return username + ' <' + email + '>'
       return username
     }
   },
