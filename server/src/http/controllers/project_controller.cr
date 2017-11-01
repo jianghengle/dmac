@@ -386,7 +386,7 @@ module DMACServer
             f = MyFile.new(source_project, dp)
             if source_role == "Owner" || source_role == "Admin"
               source_files << f
-            elsif f.true_access != 2
+            elsif f.access != 2
               source_files << f
             end
           end

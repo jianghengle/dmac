@@ -11,7 +11,6 @@ module DMACServer
       property modified_at : Time
       property file_type : String
       property access : Int32
-      property true_access : Int32
 
       raise "No root setup" unless ENV.has_key?("DMAC_ROOT")
       @@root = ENV["DMAC_ROOT"]
@@ -98,9 +97,7 @@ module DMACServer
         @name = File.basename(@full_path)
         @modified_at = File.stat(@full_path).mtime
 
-        @access = MyFile.get_access(@project, @data_path)
-        @true_access = 0
-        @true_access = get_true_access(parent)
+        @access = MyFile.get_access(@project, @full_path)
       end
 
       def to_json(read_text = false, public_url = "")
@@ -114,7 +111,6 @@ module DMACServer
           str << "\"publicUrl\":\"" << public_url << "\","
           str << "\"size\":\"" << @size << "\","
           str << "\"access\":" << @access << ","
-          str << "\"trueAccess\":" << @true_access << ","
           if read_text
             str << "\"text\":" << get_text.to_json << ","
           else
@@ -134,27 +130,10 @@ module DMACServer
         File.write(@full_path, text)
       end
 
-      def get_true_access(parent)
-        return 2 if @access == 2
-        access = 0
-        if parent.nil?
-          dp = ""
-          @data_path.split("/") do |s|
-            dp += "/" + s
-            a = MyFile.get_access(@project, dp)
-            access = Math.max(access, a)
-            break if access == 2
-          end
-        else
-          access = parent.true_access
-        end
-        return Math.max(access, @access)
-      end
-
       def viewable?(control)
         role = control.role.to_s
         return true if role == "Owner" || role == "Admin"
-        return @true_access != 2
+        return @access != 2
       end
 
       def editable?(control)
@@ -162,7 +141,7 @@ module DMACServer
         return true if role == "Owner" || role == "Admin"
         return false if role == "Viewer"
         return false if @file_type == "folder"
-        return @true_access == 0
+        return @access == 0
       end
 
       def can_add_file?(control, filename)
@@ -171,7 +150,7 @@ module DMACServer
         return true if role == "Owner" || role == "Admin"
         return false if role == "Viewer"
         return false if @data_path == "/"
-        return false if @true_access > 0
+        return false if @access > 0
         target_path = @full_path + "/" + filename
         return true unless File.exists?(target_path)
         target_data_path = @data_path + "/" + filename
@@ -179,8 +158,13 @@ module DMACServer
         return target_file.editable?(control)
       end
 
-      def self.get_access(project, data_path)
-        return 0
+      # 0: normal, 1: readonly, 2: private
+      def self.get_access(project, full_path)
+        editor_group = "dmac-" + project.key.to_s + "-editor"
+        editor_acl = Local.get_group_acl(editor_group, full_path)
+        return 0 if editor_acl == "rwx"
+        return 1 if editor_acl == "r-x"
+        return 2
       end
 
       def self.collect_files(control, project, data_path)
@@ -224,7 +208,7 @@ module DMACServer
           parent_data_path = MyFile.get_parent_data_path(data_path)
           raise "File permission denied" if parent_data_path == "/"
           parent_file = MyFile.new(project, parent_data_path)
-          raise "File permission denied" if parent_file.true_access > 0
+          raise "File permission denied" if parent_file.access > 0
         end
         File.write(full_path, "")
       end
