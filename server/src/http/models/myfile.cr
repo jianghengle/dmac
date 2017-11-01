@@ -170,6 +170,7 @@ module DMACServer
         return false unless @file_type == "folder"
         return true if role == "Owner" || role == "Admin"
         return false if role == "Viewer"
+        return false if @data_path == "/"
         return false if @true_access > 0
         target_path = @full_path + "/" + filename
         return true unless File.exists?(target_path)

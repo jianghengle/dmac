@@ -213,7 +213,7 @@ export default {
       if(this.projectRole == 'Viewer') return false
       if(this.projectRole == 'Owner' || this.projectRole == 'Admin') return true
       if(this.project.status != "Active") return false
-      if(this.folder.dataPath == '') return false
+      if(this.folder.dataPath == '/') return false
       return !this.folder.readonly
     },
     files () {
