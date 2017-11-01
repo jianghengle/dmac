@@ -196,7 +196,7 @@ module DMACServer
       def self.get_group_acl(group, full_path)
         return "rwx" unless @@enabled
 
-        io = Local.run("getfacl -ac \"" + full_path + "\"")
+        io = Local.run("getfacl -acE \"" + full_path + "\"")
         prefix = "group:" + group + ":"
         io.each_line do |l|
           if l.starts_with?(prefix)

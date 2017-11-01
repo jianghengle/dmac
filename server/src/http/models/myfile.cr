@@ -210,7 +210,7 @@ module DMACServer
           parent_file = MyFile.new(project, parent_data_path)
           raise "File permission denied" if parent_file.access > 0
         end
-        File.write(full_path, "")
+        File.write(full_path, "", 0o660)
       end
 
       def self.delete_project_folder(project)
