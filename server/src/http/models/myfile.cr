@@ -222,6 +222,7 @@ module DMACServer
         role = control.role.to_s
         if role == "Editor"
           parent_data_path = MyFile.get_parent_data_path(data_path)
+          raise "File permission denied" if parent_data_path == "/"
           parent_file = MyFile.new(project, parent_data_path)
           raise "File permission denied" if parent_file.true_access > 0
         end
