@@ -202,7 +202,7 @@ module DMACServer
       def self.get_parent_data_path(data_path)
         index = data_path.rindex("/")
         parent_data_path = "/"
-        parent_data_path = data_path[0, index] unless index.nil? || data_path == "/"
+        parent_data_path = data_path[0, index] unless index.nil? || index == 0
         return parent_data_path
       end
 
