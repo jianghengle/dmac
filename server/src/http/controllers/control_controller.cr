@@ -65,7 +65,7 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
           old_control = Control.get_control_by_id!(id)
-          new_control = Control.update_control(id, newEmail, newRole, newGroup)
+          new_control = Control.update_control(project, id, newEmail, newRole, newGroup)
           if old_control.role.to_s != newRole
             Local.set_control(project, new_control)
           end
@@ -87,7 +87,7 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          control = Control.delete_control(id)
+          control = Control.delete_control(project, id)
           Local.remove_control(project, control)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters

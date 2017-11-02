@@ -70,7 +70,6 @@ module DMACServer
 
         project_root = @@dmac_root + "/" + project.path.to_s
         Local.run("chmod o=-  \"" + project_root + "\"")
-        Local.run("setfacl -d -m u::- \"" + project_root + "\"")
         Local.run("setfacl -d -m g::- \"" + project_root + "\"")
         Local.run("setfacl -m \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
         Local.run("setfacl -dm \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
@@ -206,6 +205,13 @@ module DMACServer
           end
         end
         return "---"
+      end
+
+      def self.reown_project_files(project)
+        return unless @@enabled
+
+        project_root = @@dmac_root + "/" + project.path.to_s
+        Local.run("chown -R root:root \"" + project_root + "\"")
       end
     end
   end
