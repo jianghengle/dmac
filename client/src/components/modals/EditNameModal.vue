@@ -28,6 +28,7 @@
                 </select>
               </span>
             </p>
+            <p class="help is-info">{{permissionTip}}</p>
           </div>
         </section>
         <footer class="modal-card-foot">
@@ -64,13 +65,12 @@ export default {
         context: null
       },
       permissions: ['Normal', 'Read', 'Hidden'],
-      newPermission: 'Normal'
+      newPermission: 'Normal',
+      nameTip: "Name must be less or equal than 255 charactors and not start or end with '.'",
+      permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Read - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)"
     }
   },
   computed: {
-    nameTip () {
-      return "Name must be less or equal than 255 charactors and not start or end with '.'"
-    },
     nameMap () {
       if(!this.files) return {}
       var nm = {}
