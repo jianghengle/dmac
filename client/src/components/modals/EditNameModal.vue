@@ -19,6 +19,18 @@
             </p>
             <p class="help is-info">{{nameTip}}</p>
           </div>
+          <div class="field">
+            <label class="label">Permission</label>
+            <p class="control">
+              <span class="select">
+                <select v-model="newPermission">
+                  <option>Normal</option>
+                  <option>Readonly</option>
+                  <option>Private</option>
+                </select>
+              </span>
+            </p>
+          </div>
         </section>
         <footer class="modal-card-foot">
           <a class="button is-danger" :class="{'is-loading': waiting}" :disabled="changed" @click="deleteFile">Delete</a>
@@ -52,7 +64,9 @@ export default {
         opened: false,
         message: '',
         context: null
-      }
+      },
+      permissions: ['Normal', 'Readonly', 'Private'],
+      newPermission: 'Normal'
     }
   },
   computed: {
@@ -75,8 +89,14 @@ export default {
       if(this.nameMap[newName]) return false
       return true
     },
+    oldPermission () {
+      return this.file && this.permissions[this.file.access]
+    },
     changed () {
-      return this.file && this.file.name != this.newName.trim()
+      if(!this.file) return false
+      var nameChanged = this.file.name != this.newName.trim()
+      var permissionChanged = this.newPermission != this.oldPermission
+      return nameChanged || permissionChanged
     }
   },
   watch: {
@@ -84,6 +104,7 @@ export default {
       if(val && this.file){
         this.newName = this.file.name
         this.error = ''
+        this.newPermission = this.permissions[this.file.access]
       }
     },
   },
@@ -95,7 +116,8 @@ export default {
       if(!this.newNameValid) return
       var vm = this
       vm.waiting = true
-      var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath, newName: vm.newName.trim()}
+      var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath, newName: vm.newName.trim(),
+        newPermission: vm.newPermission, oldPermission: vm.oldPermission}
       vm.$http.post(xHTTPx + '/update_folder_file_name', message).then(response => {
         var resp = response.body
         vm.waiting= false

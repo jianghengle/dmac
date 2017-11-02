@@ -213,6 +213,26 @@ module DMACServer
         project_root = @@dmac_root + "/" + project.path.to_s
         Local.run("chown -R root:root \"" + project_root + "\"")
       end
+
+      def self.set_file_permission(project, full_path, permission)
+        return unless @@enabled
+
+        Local.run("chown root:root \"" + full_path + "\"")
+
+        editor_group = "dmac-" + project.key.to_s + "-editor"
+        viewer_group = "dmac-" + project.key.to_s + "-viewer"
+
+        if permission == "Normal"
+          Local.run("setfacl -R -m \"g:" + editor_group + ":rwx\" \"" + full_path + "\"")
+          Local.run("setfacl -R -m \"g:" + viewer_group + ":rx\" \"" + full_path + "\"")
+        elsif permission == "Readonly"
+          Local.run("setfacl -R -m \"g:" + editor_group + ":rx\" \"" + full_path + "\"")
+          Local.run("setfacl -R -m \"g:" + viewer_group + ":rx\" \"" + full_path + "\"")
+        elsif permission == "Private"
+          Local.run("setfacl -R -m \"g:" + editor_group + ":-\" \"" + full_path + "\"")
+          Local.run("setfacl -R -m \"g:" + viewer_group + ":-\" \"" + full_path + "\"")
+        end
+      end
     end
   end
 end

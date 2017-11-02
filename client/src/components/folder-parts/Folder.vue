@@ -3,6 +3,8 @@
     <div class="columns">
       <div class="view-title column">
         <icon name="folder-open-o"></icon>&nbsp;
+        <span class="tag is-warning folder-tag" v-if="folder && folder.access==1">Readonly</span>
+        <span class="tag is-danger folder-tag" v-if="folder && folder.access==2">Private</span>
         {{folder && folder.name}}
         <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
           <icon class="action-icon" name="share-alt"></icon>
@@ -80,6 +82,8 @@
               </span>
             </td>
             <td>
+              <span class="tag is-warning" v-if="f.access==1">Readonly</span>
+              <span class="tag is-danger" v-if="f.access==2">Private</span>
               {{f.name}}
               <span v-if="f.publicUrl">*</span>
             </td>
@@ -464,5 +468,10 @@ export default {
 .tooltip:hover .tooltiptext {
   visibility: visible;
   opacity: 0.9;
+}
+
+.folder-tag {
+  position: relative;
+  top: -3px;
 }
 </style>

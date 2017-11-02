@@ -269,6 +269,8 @@ module DMACServer
           project_id = get_param!(ctx, "projectId")
           data_path = get_param!(ctx, "dataPath")
           name = get_param!(ctx, "newName")
+          old_permission = get_param!(ctx, "oldPermission")
+          new_permission = get_param!(ctx, "newPermission")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
@@ -276,7 +278,8 @@ module DMACServer
           raise "Permission denied" if role == "Viewer"
           raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
-          MyFile.update_folder_file_name(project, data_path, name, control)
+          new_full_path = MyFile.update_folder_file_name(project, data_path, name, control)
+          Local.set_file_permission(project, new_full_path, new_permission) if old_permission != new_permission
 
           rel_path = data_path
           Git.commit(project, email + " renamed " + rel_path + " to " + name)

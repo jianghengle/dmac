@@ -240,6 +240,7 @@ module DMACServer
         dirname = File.dirname(full_path)
         new_full_path = dirname.to_s + "/" + name
         File.rename(full_path, new_full_path)
+        return new_full_path
       end
 
       def self.delete_folder_file(project, data_path, control)
