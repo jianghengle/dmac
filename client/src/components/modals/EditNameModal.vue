@@ -19,7 +19,7 @@
             </p>
             <p class="help is-info">{{nameTip}}</p>
           </div>
-          <div class="field">
+          <div class="field" v-if="role=='Owner' || role=='Admin'">
             <label class="label">Permission</label>
             <p class="control">
               <span class="select">
