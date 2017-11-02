@@ -260,7 +260,7 @@ module DMACServer
         raise "No file permission" unless dir.can_add_file?(control, filename)
 
         target_path = full_path + "/" + filename
-        File.open(target_path, "w") do |f|
+        File.open(target_path, "w", 0o660) do |f|
           IO.copy(file.tmpfile, f)
         end
 
@@ -299,7 +299,7 @@ module DMACServer
         return unless MyFile.check_copy(source_full_path, target_path, target_control)
         filename = File.basename(source_full_path)
         new_full_path = target_path.full_path + "/" + filename
-        File.open(new_full_path, "w") do |tf|
+        File.open(new_full_path, "w", 0o660) do |tf|
           File.open(source_full_path) do |sf|
             IO.copy(sf, tf)
           end
@@ -371,7 +371,7 @@ module DMACServer
         name = File.basename(source)
         target_path = target + "/" + name
         return if ((File.exists? target_path) && (File.directory? target_path))
-        File.open(target_path, "w") do |tf|
+        File.open(target_path, "w", 0o660) do |tf|
           File.open(source) do |sf|
             IO.copy(sf, tf)
           end
