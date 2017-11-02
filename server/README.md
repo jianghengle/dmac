@@ -8,7 +8,13 @@ DMAC_SERVER: the server's domain name or ip adress
 DMAC_PORT: the server's port  
 GLOBUS_CLIENT_ID: the app client id registered on Globus   
 GLOBUS_CLIENT_SECRET: the app client secret generated on Globus   
-DMAC_PERMISSION: if using local user and file acl permission to adapt to Globus connect server. Set `local` to enable it.
+DMAC_PERMISSION: if using local user and file acl permission to adapt to Globus connect server. Set `local` to enable it.  
+
+When working with Globus connect server:
+- set 002 as umask
+- add `perms 660` in /etc/gridftp.conf
+
+Add user directory with correct ownership and permissions when adding a manager.
 
 ## Installation
 1. install Crystal https://crystal-lang.org/docs/installation/
