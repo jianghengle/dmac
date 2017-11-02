@@ -158,7 +158,7 @@ module DMACServer
         return target_file.editable?(control)
       end
 
-      # 0: normal, 1: readonly, 2: private
+      # 0: normal, 1: readonly, 2: hidden
       def self.get_access(project, full_path)
         editor_group = "dmac-" + project.key.to_s + "-editor"
         editor_acl = Local.get_group_acl(editor_group, full_path)

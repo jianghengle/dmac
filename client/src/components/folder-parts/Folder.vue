@@ -3,8 +3,8 @@
     <div class="columns">
       <div class="view-title column">
         <icon name="folder-open-o"></icon>&nbsp;
-        <span class="tag is-warning folder-tag" v-if="folder && folder.access==1">Readonly</span>
-        <span class="tag is-danger folder-tag" v-if="folder && folder.access==2">Private</span>
+        <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">Read</span>
+        <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">Hidden</span>
         {{folder && folder.name}}
         <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
           <icon class="action-icon" name="share-alt"></icon>
@@ -82,8 +82,8 @@
               </span>
             </td>
             <td>
-              <span class="tag is-warning" v-if="f.access==1">Readonly</span>
-              <span class="tag is-danger" v-if="f.access==2">Private</span>
+              <span class="tag is-warning" v-if="f.access==1">Read</span>
+              <span class="tag is-danger" v-if="f.access==2">Hidden</span>
               {{f.name}}
               <span v-if="f.publicUrl">*</span>
             </td>
@@ -95,7 +95,7 @@
             </td>
             <td class="text-cell">{{f.modifiedAt}}</td>
             <td class="text-cell">
-              <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' &&f.type=='file' && !f.readonly) : true )"
+              <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && f.type=='file' && f.access==0) : true )"
                 @click.stop="openEditNameModal(f)"
                 class="action-icon main-link">
                 <icon name="edit"></icon>
@@ -218,7 +218,7 @@ export default {
       if(this.projectRole == 'Owner' || this.projectRole == 'Admin') return true
       if(this.project.status != "Active") return false
       if(this.folder.dataPath == '/') return false
-      return !this.folder.readonly
+      return this.folder.access == 0
     },
     files () {
       if(this.folder){

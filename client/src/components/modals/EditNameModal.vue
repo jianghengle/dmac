@@ -24,9 +24,7 @@
             <p class="control">
               <span class="select">
                 <select v-model="newPermission">
-                  <option>Normal</option>
-                  <option>Readonly</option>
-                  <option>Private</option>
+                  <option v-for="opt in permissions">{{opt}}</option>
                 </select>
               </span>
             </p>
@@ -34,7 +32,7 @@
         </section>
         <footer class="modal-card-foot">
           <a class="button is-danger" :class="{'is-loading': waiting}" :disabled="changed" @click="deleteFile">Delete</a>
-          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!newNameValid" @click="updateName">Update</a>
+          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!changed" @click="updateName">Update</a>
           <a class="button button-right" @click="close">Cancel</a> 
         </footer>
       </div>
@@ -65,7 +63,7 @@ export default {
         message: '',
         context: null
       },
-      permissions: ['Normal', 'Readonly', 'Private'],
+      permissions: ['Normal', 'Read', 'Hidden'],
       newPermission: 'Normal'
     }
   },
@@ -113,7 +111,7 @@ export default {
       this.$emit('close-edit-name-modal', false)
     },
     updateName(){
-      if(!this.newNameValid) return
+      if(!this.changed) return
       var vm = this
       vm.waiting = true
       var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath, newName: vm.newName.trim(),
