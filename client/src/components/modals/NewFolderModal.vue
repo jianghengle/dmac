@@ -15,9 +15,20 @@
           <div class="field">
             <label class="label">Name</label>
             <p class="control">
-              <input class="input" type="text" v-model="newName">
+              <input v-if="opened" class="input" type="text" v-model="newName"  v-focus @keyup.enter="create">
             </p>
             <p class="help is-info">{{nameTip}}</p>
+          </div>
+          <div class="field" v-if="role=='Owner' || role=='Admin'">
+            <label class="label">Permission</label>
+            <p class="control">
+              <span class="select">
+                <select v-model="newPermission">
+                  <option v-for="opt in permissions">{{opt}}</option>
+                </select>
+              </span>
+            </p>
+            <p class="help is-info">{{permissionTip}}</p>
           </div>
         </section>
         <footer class="modal-card-foot">
@@ -36,13 +47,14 @@ export default {
     return {
       error: '',
       waiting: false,
-      newName: ''
+      newName: '',
+      nameTip: "Name must be less or equal than 255 charactors and do not start or end with '.'",
+      permissions: ['Normal', 'Read', 'Hidden'],
+      newPermission: 'Normal',
+      permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Read - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)"
     }
   },
   computed: {
-    nameTip () {
-      return "Name must be less or equal than 255 charactors and do not start or end with '.'"
-    },
     nameMap () {
       if(!this.files) return {}
       var nm = {}
@@ -80,7 +92,7 @@ export default {
       if(vm.dataPath != ''){
         dataPath = vm.dataPath + dataPath
       }
-      var message = {projectId: vm.projectId, dataPath:  dataPath}
+      var message = {projectId: vm.projectId, dataPath:  dataPath, permission: vm.newPermission}
       vm.$http.post(xHTTPx + '/create_folder', message).then(response => {
         vm.waiting= false
         vm.$emit('close-new-folder-modal', true)

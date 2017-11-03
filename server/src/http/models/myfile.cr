@@ -193,6 +193,7 @@ module DMACServer
       def self.create_folder(project, data_path)
         full_path = @@root + "/" + project.path.to_s + data_path
         Dir.mkdir(full_path)
+        return full_path
       end
 
       def self.create_project_folder!(user, project_name)
@@ -211,6 +212,7 @@ module DMACServer
           raise "File permission denied" if parent_file.access > 0
         end
         File.write(full_path, "", 0o660)
+        return full_path
       end
 
       def self.delete_project_folder(project)

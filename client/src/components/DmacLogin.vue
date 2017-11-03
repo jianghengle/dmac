@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <div class="welcome">Welcome to DMAC system!</div>
-    <div v-if="showLogin" @keydown="loginKeyDown">
+    <div v-if="showLogin">
       <div class="main-link login-option">
         <a href="/globus_authcallback">
           Globus login
@@ -16,7 +16,7 @@
         </div>
         <div class="field">
           <p class="control has-icons-left">
-            <input class="input login-text" type="text" placeholder="Username or Email" v-model="email">
+            <input class="input login-text" type="text" placeholder="Username or Email" v-model="email" @keyup.enter="login" v-focus>
             <span class="icon is-small is-left">
               <icon name="envelope"></icon>
             </span>
@@ -25,7 +25,7 @@
 
         <div class="field">
           <p class="control has-icons-left">
-            <input class="input login-text" type="password" placeholder="Password" v-model="password">
+            <input class="input login-text" type="password" placeholder="Password" v-model="password" @keyup.enter="login">
             <span class="icon is-small is-left">
               <icon name="key"></icon>
             </span>
@@ -242,12 +242,6 @@ export default {
         vm.registerError = 'Failed to create new account!'
         this.sent = false
       })
-    },
-    loginKeyDown(e){
-      var keyCode = e.keyCode || e.which
-      if (keyCode == 13) {
-        this.login()
-      }
     }
   }
 }

@@ -20,7 +20,7 @@
             <div class="field-body">
               <div class="field">
                 <div class="control">
-                  <input class="input" type="text" v-model="newName">
+                  <input v-if="opened" class="input" type="text" v-model="newName" v-focus>
                 </div>
               </div>
             </div>

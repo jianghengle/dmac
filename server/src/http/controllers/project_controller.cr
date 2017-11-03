@@ -225,13 +225,15 @@ module DMACServer
           email = verify_token(ctx)
           project_id = get_param!(ctx, "projectId")
           data_path = get_param!(ctx, "dataPath")
+          permission = get_param!(ctx, "permission")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           role = control.role.to_s
           raise "Permission denied" unless role == "Owner" || role == "Admin"
 
-          MyFile.create_folder(project, data_path)
+          full_path = MyFile.create_folder(project, data_path)
+          Local.set_file_permission(project, full_path, permission) if permission != "Normal"
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -245,6 +247,7 @@ module DMACServer
           email = verify_token(ctx)
           project_id = get_param!(ctx, "projectId")
           data_path = get_param!(ctx, "dataPath")
+          permission = get_param!(ctx, "permission")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
@@ -252,9 +255,9 @@ module DMACServer
           raise "Permission denied" if role == "Viewer"
           raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
-          MyFile.create_file(project, data_path, control)
-          rel_path = data_path
-          Git.commit(project, email + " created file " + rel_path)
+          full_path = MyFile.create_file(project, data_path, control)
+          Local.set_file_permission(project, full_path, permission) if permission != "Normal"
+          Git.commit(project, email + " created file " + data_path)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

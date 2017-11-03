@@ -15,7 +15,7 @@
           <div class="field">
             <label class="label">Email</label>
             <p class="control">
-              <input class="input" type="text" v-model="newEmail">
+              <input v-if="opened" class="input" type="text" v-model="newEmail" v-focus>
             </p>
           </div>
           <div class="field">
