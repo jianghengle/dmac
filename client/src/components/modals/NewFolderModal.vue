@@ -49,9 +49,9 @@ export default {
       waiting: false,
       newName: '',
       nameTip: "Name must be less or equal than 255 charactors and do not start or end with '.'",
-      permissions: ['Normal', 'Read', 'Hidden'],
+      permissions: ['Normal', 'Readonly', 'Hidden'],
       newPermission: 'Normal',
-      permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Read - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)"
+      permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Readonly - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)"
     }
   },
   computed: {

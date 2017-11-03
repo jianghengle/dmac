@@ -3,8 +3,8 @@
     <div class="columns">
       <div class="view-title column">
         <icon name="folder-open-o"></icon>&nbsp;
-        <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">Read</span>
-        <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">Hidden</span>
+        <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">R</span>
+        <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">H</span>
         {{folder && folder.name}}
         <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
           <icon class="action-icon" name="share-alt"></icon>
@@ -82,8 +82,8 @@
               </span>
             </td>
             <td>
-              <span class="tag is-warning" v-if="f.access==1">Read</span>
-              <span class="tag is-danger" v-if="f.access==2">Hidden</span>
+              <span class="tag is-warning" v-if="f.access==1">R</span>
+              <span class="tag is-danger" v-if="f.access==2">H</span>
               {{f.name}}
               <span v-if="f.publicUrl">*</span>
             </td>

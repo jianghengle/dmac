@@ -64,10 +64,10 @@ export default {
         message: '',
         context: null
       },
-      permissions: ['Normal', 'Read', 'Hidden'],
+      permissions: ['Normal', 'Readonly', 'Hidden'],
       newPermission: 'Normal',
       nameTip: "Name must be less or equal than 255 charactors and not start or end with '.'",
-      permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Read - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)"
+      permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Readonly - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)"
     }
   },
   computed: {

@@ -225,7 +225,7 @@ module DMACServer
         if permission == "Normal"
           Local.run("setfacl -R -m \"g:" + editor_group + ":rwx\" \"" + full_path + "\"")
           Local.run("setfacl -R -m \"g:" + viewer_group + ":rx\" \"" + full_path + "\"")
-        elsif permission == "Read"
+        elsif permission == "Readonly"
           Local.run("setfacl -R -m \"g:" + editor_group + ":rx\" \"" + full_path + "\"")
           Local.run("setfacl -R -m \"g:" + viewer_group + ":rx\" \"" + full_path + "\"")
         elsif permission == "Hidden"
