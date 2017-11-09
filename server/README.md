@@ -13,8 +13,12 @@ DMAC_PERMISSION: if using local user and file acl permission to adapt to Globus 
 When working with Globus connect server:
 - set 002 as umask
 - add `perms 660` in /etc/gridftp.conf
+- set correct hostname in OS and globus config
 
-Add user directory with correct ownership and permissions when adding a manager.
+when adding a manager:
+- Add user directory
+- make the directory with correct ownership and permissions if working with Globus
+- Change user's home directory to the new directory if working with Globus
 
 ## Installation
 1. install Crystal https://crystal-lang.org/docs/installation/
