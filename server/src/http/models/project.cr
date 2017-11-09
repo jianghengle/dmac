@@ -31,12 +31,18 @@ module DMACServer
       end
 
       def access_as_template(control)
-        return "" unless @status == "Template" || @status == "Public Template"
-        return "public" if control.nil?
+        return "" unless (@status == "Template" || @status == "Public Template")
+        if @status == "Public Template"
+          return "public" if control.nil?
+          control = control.as(Control)
+          role = control.role.to_s
+          return "member" if role == "Owner" || role == "Admin"
+        end
+        return "" if control.nil?
         control = control.as(Control)
         role = control.role.to_s
         return "member" if role == "Owner" || role == "Admin"
-        return "public"
+        return ""
       end
 
       def self.get_projects_by_ids(ids)

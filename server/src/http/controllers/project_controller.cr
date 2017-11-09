@@ -79,7 +79,7 @@ module DMACServer
               fields["owner"] = owner.email.to_s
             else
               user = user.as(User)
-              fields["owner"] = user.username.to_s + " ( " + owner.email.to_s + " )"
+              fields["owner"] = user.username.to_s + " <" + owner.email.to_s + ">"
             end
           end
           return project.to_json(fields)
@@ -144,6 +144,7 @@ module DMACServer
 
           MyFile.create_project_folder!(user, name)
           project = Project.create_project(name, description, user)
+          Local.init_project(project)
           Control.create_control(email, project, "Owner", "")
           if template_id != ""
             template = Project.get_project!(template_id)
@@ -160,8 +161,8 @@ module DMACServer
               end
             end
           end
+          Local.init_project_controls(project)
           Git.init(project, email)
-          Local.init_project(project)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

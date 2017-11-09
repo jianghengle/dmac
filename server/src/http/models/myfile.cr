@@ -72,7 +72,7 @@ module DMACServer
       @@ignore[".git"] = true
       @@ignore[".gitignore"] = true
 
-      def initialize(@project, @data_path, parent = nil)
+      def initialize(@project, @data_path)
         @full_path = @@root + "/" + @project.path.to_s + @data_path
         @rel_path = @project.path.to_s + @data_path
         raise "No such path" unless File.exists?(@full_path)
@@ -154,7 +154,7 @@ module DMACServer
         target_path = @full_path + "/" + filename
         return true unless File.exists?(target_path)
         target_data_path = @data_path + "/" + filename
-        target_file = MyFile.new(@project, target_data_path, self)
+        target_file = MyFile.new(@project, target_data_path)
         return target_file.editable?(control)
       end
 
@@ -177,7 +177,7 @@ module DMACServer
           next if @@ignore.has_key? filename.to_s
           dp = "/" + filename
           dp = data_path + dp unless data_path == "/"
-          file = MyFile.new(project, dp, dir)
+          file = MyFile.new(project, dp)
           files << file if file.viewable?(control)
         end
         return files
@@ -315,7 +315,7 @@ module DMACServer
         new_target_full_path = target_path.full_path + "/" + folder_name
         Dir.mkdir(new_target_full_path) unless File.exists? new_target_full_path
         new_target_data_path = target_path.data_path + "/" + folder_name
-        new_target_path = MyFile.new(target_path.project, new_target_data_path, target_path)
+        new_target_path = MyFile.new(target_path.project, new_target_data_path)
         new_folders[new_target_path.full_path] = true
 
         Dir.foreach source_full_path do |filename|
@@ -337,7 +337,7 @@ module DMACServer
         return true unless File.exists? new_full_path
 
         new_data_path = target_path.data_path + "/" + filename
-        new_file = MyFile.new(target_path.project, new_data_path, target_path)
+        new_file = MyFile.new(target_path.project, new_data_path)
         return new_file.editable? target_control
       end
 
@@ -421,7 +421,7 @@ module DMACServer
         Dir.foreach file.full_path do |filename|
           next if @@ignore.has_key? filename.to_s
           new_data_path = file.data_path + "/" + filename
-          new_file = MyFile.new(file.project, new_data_path, file)
+          new_file = MyFile.new(file.project, new_data_path)
           if new_file.type == "file"
             MyFile.copy_file_to_outside(new_file, control, new_full_path)
           elsif !new_folders.has_key?(new_file.full_path)
@@ -445,11 +445,51 @@ module DMACServer
         target_path = @@root + "/" + target.path.to_s
         Dir.foreach source_path do |filename|
           next if @@ignore.has_key? filename.to_s
-          path = source_path + "/" + filename
-          if File.file? path
-            MyFile.copy_file_from_outside(path, target_path)
+          source_data_path = "/" + filename
+          source_file = MyFile.new(source, source_data_path)
+          target_data_path = "/"
+          target_folder = MyFile.new(target, target_data_path)
+          if File.file? source_file.full_path
+            MyFile.copy_file_from_template(source_file, target_folder)
           else
-            MyFile.copy_folder_from_outside(path, target_path)
+            MyFile.copy_folder_from_template(source_file, target_folder)
+          end
+        end
+      end
+
+      def self.copy_file_from_template(source_file, target_folder)
+        name = File.basename(source_file.full_path)
+        target_path = target_folder.full_path + "/" + name
+        return if ((File.exists? target_path) && (File.directory? target_path))
+        File.open(target_path, "w", 0o660) do |tf|
+          File.open(source_file.full_path) do |sf|
+            IO.copy(sf, tf)
+          end
+        end
+        target_data_path = target_folder.data_path + "/" + name
+        target_data_path = "/" + name if target_folder.data_path == "/"
+        target_file = MyFile.new(target_folder.project, target_data_path)
+        Local.keep_file_permission(source_file, target_file)
+      end
+
+      def self.copy_folder_from_template(source_folder, target_folder)
+        name = File.basename(source_folder.full_path)
+        new_target_path = target_folder.full_path + "/" + name
+        return if ((File.exists? new_target_path) && (File.file? new_target_path))
+        Dir.mkdir(new_target_path) unless File.exists? new_target_path
+        new_target_data_path = target_folder.data_path + "/" + name
+        new_target_data_path = "/" + name if target_folder.data_path == "/"
+        new_target_folder = MyFile.new(target_folder.project, new_target_data_path)
+        Local.keep_file_permission(source_folder, new_target_folder)
+        Dir.foreach source_folder.full_path do |filename|
+          next if @@ignore.has_key? filename.to_s
+          new_source_data_path = source_folder.data_path + "/" + filename
+          new_source_data_path = "/" + filename if source_folder.data_path == "/"
+          new_source = MyFile.new(source_folder.project, new_source_data_path)
+          if File.file? new_source.full_path
+            MyFile.copy_file_from_template(new_source, new_target_folder)
+          else
+            MyFile.copy_folder_from_template(new_source, new_target_folder)
           end
         end
       end

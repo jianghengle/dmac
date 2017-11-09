@@ -51,6 +51,24 @@ module DMACServer
         Local.run("groupadd " + editor_group)
         Local.run("groupadd " + viewer_group)
 
+        project_root = @@dmac_root + "/" + project.path.to_s
+        Local.run("chmod o=-  \"" + project_root + "\"")
+        Local.run("setfacl -d -m g::- \"" + project_root + "\"")
+        Local.run("setfacl -m \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -dm \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -m \"g:" + editor_group + ":rx\" \"" + project_root + "\"")
+        Local.run("setfacl -dm \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
+        Local.run("setfacl -m \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
+        Local.run("setfacl -dm \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
+      end
+
+      def self.init_project_controls(project)
+        return unless @@enabled
+
+        admin_group = "dmac-" + project.key.to_s + "-admin"
+        editor_group = "dmac-" + project.key.to_s + "-editor"
+        viewer_group = "dmac-" + project.key.to_s + "-viewer"
+
         controls = Control.get_controls_by_project_id(project.id)
         controls.each do |c|
           role = c.role.to_s
@@ -67,16 +85,6 @@ module DMACServer
             Local.set_project_group(project, username, admin_group)
           end
         end
-
-        project_root = @@dmac_root + "/" + project.path.to_s
-        Local.run("chmod o=-  \"" + project_root + "\"")
-        Local.run("setfacl -d -m g::- \"" + project_root + "\"")
-        Local.run("setfacl -m \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
-        Local.run("setfacl -dm \"g:" + admin_group + ":rwx\" \"" + project_root + "\"")
-        Local.run("setfacl -m \"g:" + editor_group + ":rx\" \"" + project_root + "\"")
-        Local.run("setfacl -dm \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
-        Local.run("setfacl -m \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
-        Local.run("setfacl -dm \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
       end
 
       def self.set_project_group(project, username, group)
@@ -231,6 +239,18 @@ module DMACServer
         elsif permission == "Hidden"
           Local.run("setfacl -R -m \"g:" + editor_group + ":-\" \"" + full_path + "\"")
           Local.run("setfacl -R -m \"g:" + viewer_group + ":-\" \"" + full_path + "\"")
+        end
+      end
+
+      def self.keep_file_permission(source_file, target_file)
+        return unless @@enabled
+
+        project = target_file.project
+        full_path = target_file.full_path
+        if source_file.access == 1
+          Local.set_file_permission(project, full_path, "Readonly")
+        elsif source_file.access == 0
+          Local.set_file_permission(project, full_path, "Hidden")
         end
       end
     end
