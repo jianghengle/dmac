@@ -249,7 +249,7 @@ module DMACServer
         full_path = target_file.full_path
         if source_file.access == 1
           Local.set_file_permission(project, full_path, "Readonly")
-        elsif source_file.access == 0
+        elsif source_file.access == 2
           Local.set_file_permission(project, full_path, "Hidden")
         end
       end

@@ -82,7 +82,7 @@
               </span>
             </td>
             <td>
-              <span v-if="folder.access < f.access">
+              <span v-if="folder.dataPath=='/' || folder.access < f.access">
                 <span class="tag is-warning" v-if="f.access==1">R</span>
                 <span class="tag is-danger" v-if="f.access==2">H</span>
               </span>
