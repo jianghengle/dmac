@@ -97,7 +97,7 @@
 
         </section>
         <footer class="modal-card-foot">
-          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!newName.length" @click="create">Create</a>
+          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!canCreate" @click="create">Create</a>
           <a class="button button-right" @click="close">Cancel</a> 
         </footer>
       </div>
@@ -132,6 +132,15 @@ export default {
       }
       return false
     },
+    canCreate () {
+      if(!this.newName) return false
+      for(var i=0;i<this.metaData.length;i++){
+        var m = this.metaData[i]
+        if(!m.value)
+          return false
+      }
+      return true
+    }
   },
   watch: {
     opened: function (val) {
@@ -160,7 +169,7 @@ export default {
       this.$emit('close-new-project-modal', false)
     },
     create(){
-      if(!this.newName.length) return
+      if(!this.canCreate) return
       var vm = this
       vm.waiting = true
       var metaDataValues = vm.metaData.map(function(m){
