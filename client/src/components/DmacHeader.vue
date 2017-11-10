@@ -50,7 +50,11 @@ export default {
   methods: {
     logout () {
       delete Vue.http.headers.common['Authorization']
-      return this.$store.commit('user/reset')
+      var loginFrom = this.$store.state.user.loginFrom
+      this.$store.commit('user/reset')
+      if(loginFrom == 'Globus'){
+        window.location.href = 'https://auth.globus.org/v2/web/logout?redirect_uri=' + xHTTPx + '&redirect_name=DMAC' 
+      }
     }
   },
 }

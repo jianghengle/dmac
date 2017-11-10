@@ -3,7 +3,8 @@
 export const state = {
   email: localStorage.getItem('email'),
   token: localStorage.getItem('token'),
-  username: localStorage.getItem('username')
+  username: localStorage.getItem('username'),
+  loginFrom: localStorage.getItem('loginFrom')
 }
 
 // mutations
@@ -25,9 +26,11 @@ export const mutations = {
     state.email = null
     state.token = null
     state.username = null
+    state.loginFrom = null
     localStorage.removeItem('email')
     localStorage.removeItem('token')
     localStorage.removeItem('username')
+    localStorage.removeItem('loginFrom')
   }
 }
 
