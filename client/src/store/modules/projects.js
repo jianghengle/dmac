@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import DateForm from 'dateformat'
 
+var showOption = localStorage.getItem('showOption')
+
 // initial state
 export const state = {
   showNav: true,
   nodeMap: {},
-  showAll: localStorage.getItem('showAll') == 'true',
+  showOption: showOption ? showOption : 'Active',
   clipboard: {projectId: null, dataPaths: []},
   publicDataPath: ''
 }
@@ -139,9 +141,9 @@ export const mutations = {
     sortChildren(node, state.nodeMap)
   },
 
-  setShowAll(state, val) {
-    state.showAll = val
-    localStorage.setItem('showAll', val)
+  setShowOption(state, val) {
+    state.showOption = val
+    localStorage.setItem('showOption', val)
   },
 
   toggleSelected(state, path) {

@@ -2,30 +2,58 @@
   <div class="projects-page">
   	<address-bar></address-bar>
     <div class="view-title">
-      <icon name="database"></icon>
-      Projects
-      <span class="options">
-        <label class="checkbox" @click="toggleShowAll">
-          <input type="checkbox" v-model="showAllInput">
-          Show All
-        </label>
-        &nbsp;
-        <a class="button main-btn" v-if="!isSubscriber" @click="openNewProjectModal">
-          <icon name="plus"></icon>&nbsp;New Project
-        </a>
-      </span>
+      <div class="columns">
+        <div class="column">
+          <icon name="database"></icon>
+          Projects
+        </div>
+        <div class="column  projects-filter">
+          <div class="field is-horizontal">
+            <div class="field-label is-normal filter-label">
+              <label class="label">Show</label>
+            </div>
+            <div class="field-body">
+              <div class="field is-narrow">
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select v-model="showOption">
+                      <option>Active</option>
+                      <option>Archived</option>
+                      <option>Template</option>
+                      <option>Public Template</option>
+                      <option>All</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <a class="button main-btn project-button" v-if="!isSubscriber" @click="openNewProjectModal">
+            <icon name="plus"></icon>&nbsp;New Project
+          </a>
+        </div>
+      </div>
     </div>
 
     <div v-if="error" class="notification is-danger login-text">
       <button class="delete" @click="error=''"></button>
       {{error}}
     </div>
-    <div class="box project-box" :class="{'inactive': project.status!='Active'}" v-for="project in projects":key="project.id"
-      v-if="project.status=='Active' || showAll" @click="viewProject(project)">
+    <div class="box project-box" v-for="project in projects":key="project.id" @click="viewProject(project)"
+      v-show="showOption=='All' || showOption==project.status">
       <div class="header">
         <span class="name">
+          <span class="tag" :class="{
+            'is-success': project.status=='Active',
+            'is-dark': project.status=='Archived',
+            'is-warning': project.status=='Template',
+            'is-danger': project.status=='Public Template'
+          }">
+            {{project.status}}
+          </span>
           {{project.name}}
-          <span class="tag" v-if="project.status != 'Active'">{{project.status}}</span>
         </span>&nbsp;
         <span class="edit-icon main-link"
           v-if="project.projectRole=='Owner' || project.projectRole=='Admin'"
@@ -80,7 +108,7 @@ export default {
         opened: false,
         project: null
       },
-      showAllInput: false,
+      showOption: 'Active',
       isSubscriber: true
     }
   },
@@ -101,17 +129,14 @@ export default {
         return (p.status == 'Template' || p.status == 'Public Template') && (p.projectRole == 'Owner' || p.projectRole == 'Admin')
       })
       return templates
-    },
-    showAll () {
-      return this.$store.state.projects.showAll
     }
   },
   watch: {
-    showAll: function (val) {
-      this.showAllInput = val
+    showOption: function (val) {
+      this.$store.commit('projects/setShowOption', this.showOption)
     },
     projects: function(val) {
-      this.initShowAll()
+      this.initShowOption()
     }
   },
   methods: {
@@ -150,10 +175,7 @@ export default {
         this.requestProjects()
       }
     },
-    toggleShowAll(){
-      this.$store.commit('projects/setShowAll', this.showAllInput)
-    },
-    initShowAll(){
+    initShowOption(){
       if(this.projects && this.projects.length){
         var noActive = true
         for(var i=0;i<this.projects.length;i++){
@@ -163,8 +185,7 @@ export default {
           }
         }
         if(noActive){
-          console.log('commit')
-          this.$store.commit('projects/setShowAll', true)
+          this.$store.commit('projects/setShowOption', 'All')
         }
       }
     }
@@ -174,8 +195,8 @@ export default {
     vm.$nextTick(function(){
       vm.requestProjects()
     })
-    this.showAllInput = this.showAll
-    this.initShowAll()
+    this.showOption = this.$store.state.projects.showOption
+    this.initShowOption()
   },
 }
 </script>
@@ -186,7 +207,17 @@ export default {
   padding: 10px;
 }
 
-.options {
+.projects-filter {
+  text-align: center;
+  font-size: 16px;
+  font-weight: normal;
+
+  .filter-label {
+    margin-right: 0.5rem;
+  }
+}
+
+.project-button {
   float: right;
   font-size: 16px;
   font-weight: normal;

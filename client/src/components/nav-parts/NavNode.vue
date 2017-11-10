@@ -76,8 +76,8 @@ export default {
     children () {
       return this.node && this.node.children
     },
-    showAll () {
-      return this.$store.state.projects.showAll
+    showOption () {
+      return this.$store.state.projects.showOption
     },
     publicKey () {
       return this.$route.params.publicKey
@@ -101,9 +101,8 @@ export default {
       var type = node && node.type
       if(type == 'projects') return true
       if(type == 'project'){
-        if(this.showAll) return true
-        if(node.status == 'Active') return true
-        return false
+        if(this.showOption == 'All') return true
+        return node.status == this.showOption
       }
 
       var role = this.nodeProjectRole
