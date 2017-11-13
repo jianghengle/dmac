@@ -17,41 +17,35 @@
       </div>
     </div>
 
-    <nav class="nav">
-      <div class="nav-left">
-        <div class="nav-item">
-          <div class="field is-grouped">
-            <p class="control">
-              <a class="button main-btn"  @click="viewData">
-                <icon name="folder-open"></icon>&nbsp;
-                <span>Data Explorer</span>
-              </a>
-            </p>
+    <nav class="navbar">
+      <div class="navbar-menu">
+        <div class="navbar-start">
+          <div class="navbar-item">
+            <a class="button main-btn"  @click="viewData">
+              <icon name="folder-open"></icon>&nbsp;
+              <span>Data Explorer</span>
+            </a>
           </div>
         </div>
-      </div>
 
-      <div class="nav-right">
-        <div class="nav-item">
-          <div class="field is-grouped">
-            <p class="control">
-              <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewHistory">
-                <icon name="history"></icon>&nbsp;
-                <span>History</span>
-              </a>
-            </p>
-            <p class="control">
-              <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
-                <icon name="share-alt"></icon>&nbsp;
-                <span>Public Urls</span>
-              </a>
-            </p>
-            <p class="control">
-              <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
-                <icon name="user"></icon>&nbsp;
-                <span>Users</span>
-              </a>
-            </p>
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewHistory">
+              <icon name="history"></icon>&nbsp;
+              <span>History</span>
+            </a>
+          </div>
+          <div class="navbar-item">
+            <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
+              <icon name="share-alt"></icon>&nbsp;
+              <span>Public Urls</span>
+            </a>
+          </div>
+          <div class="navbar-item">
+            <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
+              <icon name="user"></icon>&nbsp;
+              <span>Users</span>
+            </a>
           </div>
         </div>
       </div>
@@ -59,7 +53,7 @@
 
     <div class="project-info" v-if="project">
       <div class="info-label">Project Information</div>
-      <table class="table is-bordered">
+      <table class="table is-hoverable is-fullwidth is-bordered">
         <tbody>
           <tr>
             <th class="info-name">Owner</th>

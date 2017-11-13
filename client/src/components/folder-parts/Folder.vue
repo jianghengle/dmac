@@ -1,45 +1,54 @@
 <template>
   <div>
-    <div class="columns">
-      <div class="view-title column">
-        <icon name="folder-open-o"></icon>&nbsp;
-        <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">R</span>
-        <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">H</span>
-        {{folder && folder.name}}
-        <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
-          <icon class="action-icon" name="share-alt"></icon>
-        </a>
+    <nav class="navbar is-transparent" role="navigation" aria-label="dropdown navigation">
+      <div class="navbar-menu">
+        <div class="navbar-start">
+          <div class="view-title">
+            <icon name="folder-open-o"></icon>&nbsp;
+            <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">Readonly</span>
+            <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">Hidden</span>
+            {{folder && folder.name}}
+            <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
+              <icon class="action-icon" name="share-alt"></icon>
+            </a>
+          </div>
+        </div>
+        <div class="navbar-end">
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link actions-label">
+              Actions
+            </a>
+
+            <div class="navbar-dropdown is-right is-boxed">
+              <a class="navbar-item action-item" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFolderModal">
+                <icon name="plus"></icon>&nbsp;&nbsp;New Folder
+              </a>
+              <a class="navbar-item action-item" v-if="canEditFolder" @click="openNewFileModal">
+                <icon name="plus"></icon>&nbsp;&nbsp;New File
+              </a>
+              <a class="navbar-item action-item" v-if="canEditFolder" @click="openFileUploadModal">
+                <icon name="upload"></icon>&nbsp;&nbsp;Upload File
+              </a>
+              <hr class="navbar-divider" v-if="canEditFolder">
+              <a class="navbar-item action-item" v-if="projectRole" @click="copySelection">
+                <icon name="copy"></icon>&nbsp;&nbsp;Copy Selected
+              </a>
+              <a class="navbar-item action-item" v-if="canEditFolder && canPaste" @click="pasteSelection">
+                <icon name="paste"></icon>&nbsp;&nbsp;Paste Here
+              </a>
+              <hr class="navbar-divider" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'">
+              <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="publicFolder">
+                <icon name="share-alt"></icon>&nbsp;&nbsp;Publish
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="column buttons">
-        <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFolderModal">
-          <icon name="plus"></icon>&nbsp;
-          Folder
-        </a>
-        <a class="button default-btn" v-if="canEditFolder" @click="openNewFileModal">
-          <icon name="plus"></icon>&nbsp;
-          File
-        </a>
-        <a class="button default-btn" v-if="canEditFolder" @click="openFileUploadModal">
-          <icon name="upload"></icon>&nbsp;
-          File
-        </a>
-        <a class="button default-btn" v-if="projectRole" @click="copySelection">
-          <icon name="copy"></icon>&nbsp;
-          Copy
-        </a>
-        <a class="button default-btn" v-if="canEditFolder" :disabled="!canPaste" @click="pasteSelection">
-          <icon name="paste"></icon>&nbsp;
-          Paste
-        </a>
-        <a class="button default-btn" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="publicFolder">
-          <icon name="share-alt"></icon>&nbsp;
-          Public
-        </a>
-      </div>
-    </div>
+    </nav>
+
 
     <div class="file-content">
-      <table class="table is-narrow">
+      <table class="table is-narrow is-fullwidth is-hoverable">
         <thead>
           <tr>
             <th class="number-cell is-clickable" @click="toggleAll">{{files.length}}</th>
@@ -83,8 +92,8 @@
             </td>
             <td>
               <span v-if="folder.dataPath=='/' || folder.access < f.access">
-                <span class="tag is-warning" v-if="f.access==1">R</span>
-                <span class="tag is-danger" v-if="f.access==2">H</span>
+                <span class="tag is-warning" v-if="f.access==1">Readonly</span>
+                <span class="tag is-danger" v-if="f.access==2">Hidden</span>
               </span>
               {{f.name}}
               <span v-if="f.publicUrl">*</span>
@@ -475,5 +484,19 @@ export default {
 .folder-tag {
   position: relative;
   top: -3px;
+}
+
+.actions-label {
+  color: #2e1052;
+  font-weight: bold;
+}
+
+.action-item {
+  font-weight: bold;
+}
+
+.action-item:hover {
+  color: #2e1052!important;
+  font-weight: bold;
 }
 </style>

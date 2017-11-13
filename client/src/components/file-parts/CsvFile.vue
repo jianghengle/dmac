@@ -71,14 +71,37 @@
 
       <div class="column" v-show="showCharts"
         :class="{'half-width': showTable && showCharts, 'full-width': showTable && !showCharts}">
-        <div class="add-chart-buttons">
-          <a class="button" @click="addChart('Simple')"><icon name="plus"></icon>&nbsp;Simple</a>
-          <a class="button" @click="addChart('XY')"><icon name="plus"></icon>&nbsp;XY</a>
-          <a class="button" @click="addChart('Parallel Coordinates')"><icon name="plus"></icon>&nbsp;Parallel Coordinates</a>
-          <a class="button" @click="addChart('Histogram')"><icon name="plus"></icon>&nbsp;Histogram</a>
-          <a class="button" @click="addChart('Histograms')"><icon name="plus"></icon>&nbsp;Histograms</a>
-          <a class="button" @click="addChart('Correlations')"><icon name="plus"></icon>&nbsp;Correlations</a>
-        </div>
+        <nav class="navbar is-transparent" role="navigation" aria-label="dropdown navigation">
+          <div class="navbar-menu">
+            <div class="navbar-start">
+              <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">
+                  New Chart
+                </a>
+                <div class="navbar-dropdown is-boxed">
+                  <a class="navbar-item" @click="addChart('Simple')">
+                    Simple Chart
+                  </a>
+                  <a class="navbar-item" @click="addChart('XY')">
+                    XY Chart
+                  </a>
+                  <a class="navbar-item" @click="addChart('Parallel Coordinates')">
+                    Parallel Coordinates
+                  </a>
+                  <a class="navbar-item" @click="addChart('Histogram')">
+                    Histogram
+                  </a>
+                  <a class="navbar-item" @click="addChart('Histograms')">
+                    Histograms
+                  </a>
+                  <a class="navbar-item" @click="addChart('Correlations')">
+                    Correlation Matrix
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
         <div v-for="c in charts" :key="c.id">
           <simple-chart
             v-if="c.type == 'Simple'"

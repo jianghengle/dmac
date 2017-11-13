@@ -1,22 +1,34 @@
 <template>
   <div>
-    <nav class="nav header">
-        <div class="nav-left">
-          <router-link class="nav-item app-name" :to="'/'">
-            Data Management and Analysis Core
-          </router-link>
+    <nav class="navbar header">
+      <div class="navbar-brand">
+        <router-link class="nav-item app-name" :to="'/'">
+          Data Management and Analysis Core
+        </router-link>
+      </div>
+
+      <div class="navbar-menu">
+        <div class="navbar-start">
         </div>
-        <div class="nav-right">
-          <span class="nav-item app-item" v-if="token" @mouseover="showEmail=true" @mouseout="showEmail=false">Hi,&nbsp;
-            <span>{{name}}</span>
-          </span>
-          <router-link class="nav-item app-item" v-if="token" :to="'/help'">
-            <icon name="question"></icon>&nbsp;Help
-          </router-link>
-          <a class="nav-item app-item" v-if="token" @click="logout">
-            <icon name="sign-out"></icon>&nbsp;Logout
-          </a>
+
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <span class="app-item" v-if="token" @mouseover="showEmail=true" @mouseout="showEmail=false">Hi,&nbsp;
+              <span>{{name}}</span>
+            </span>
+          </div>
+          <div class="navbar-item">
+            <router-link class="app-item" v-if="token" :to="'/help'">
+              <span class="nav-icon"><icon name="question"></icon></span>Help
+            </router-link>
+          </div>
+          <div class="navbar-item">
+            <a class="app-item" v-if="token" @click="logout">
+              <span class="nav-icon"><icon name="sign-out"></icon></span>Logout
+            </a>
+          </div>
         </div>
+      </div>
     </nav>
   </div>
 </template>
@@ -70,6 +82,14 @@ export default {
   color: #FFFFFF;
   font-weight: bold;
   font-size: 18px;
+  margin: auto;
+  padding-left: 20px;
+}
+
+.nav-icon {
+  position: relative;
+  top: 3px;
+  right: 3px;
 }
 
 .app-item {

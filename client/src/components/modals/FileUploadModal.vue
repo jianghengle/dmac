@@ -14,7 +14,7 @@
         </div>
         <input v-if="opened" type="file" class="files-input" multiple @change="onFileChange">
         <div v-if="Object.keys(uploads).length">
-          <table class="table is-narrow">
+          <table class="table is-narrow is-fullwidth">
             <thead>
               <tr>
                 <th>File Name</th>

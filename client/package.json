@@ -11,7 +11,7 @@
     "lint": "eslint --ext .js,.vue src"
   },
   "dependencies": {
-    "bulma": "^0.4.2",
+    "bulma": "^0.6.1",
     "c3": "^0.4.14",
     "dateformat": "^2.0.0",
     "dygraphs": "^1.1.1",
