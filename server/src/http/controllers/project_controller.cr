@@ -82,7 +82,7 @@ module DMACServer
               fields["owner"] = user.username.to_s + " <" + owner.email.to_s + ">"
             end
           end
-          return project.to_json(fields)
+          project.to_json(fields)
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception

@@ -45,11 +45,6 @@ export const mutations = {
       Vue.set(state.nodeMap, urls.path, urls)
     }
 
-    var channels = initChannels(project)
-    if(!state.nodeMap[channels.path]){
-      Vue.set(state.nodeMap, channels.path, channels)
-    }
-
     var history = initHistory(project)
     if(!state.nodeMap[history.path]){
       Vue.set(state.nodeMap, history.path, history)
@@ -68,7 +63,7 @@ export const mutations = {
       Vue.set(state.nodeMap, root.path, root)
     }
 
-    var children = [history.path, urls.path, users.path, channels.path, root.path]
+    var children = [history.path, urls.path, users.path, root.path]
     updateNode(state, project, children)
   },
 
@@ -212,16 +207,6 @@ function initPublicUrls(project) {
     type: 'urls',
     path: '/projects/'+ project.id + '/urls',
     name: 'Urls',
-    options: {open: false}
-  }
-}
-
-function initChannels(project) {
-  return {
-    projectId: project.id,
-    type: 'channels',
-    path: '/projects/'+ project.id + '/channels',
-    name: 'Channels',
     options: {open: false}
   }
 }

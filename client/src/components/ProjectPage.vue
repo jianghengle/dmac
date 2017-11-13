@@ -27,12 +27,6 @@
                 <span>Data Explorer</span>
               </a>
             </p>
-            <p class="control">
-              <a class="button default-btn" v-if="projectRole!='Viewer'" @click="viewChannels">
-                <icon name="upload"></icon>&nbsp;
-                <span>Channels</span>
-              </a>
-            </p>
           </div>
         </div>
       </div>
@@ -63,72 +57,72 @@
       </div>
     </nav>
 
-    <div class="details">
-      <div class="field is-horizontal project-field">
-        <div class="field-label is-normal">
-          <label class="label">Owner:</label>
+    <div class="project-info" v-if="project">
+      <div class="info-label">Project Information</div>
+      <table class="table is-bordered">
+        <tbody>
+          <tr>
+            <th class="info-name">Owner</th>
+            <td>{{project.owner}}</td>
+          </tr>
+          <tr>
+            <th class="info-name">Created Date</th>
+            <td>{{project.createdDate}}</td>
+          </tr>
+          <tr>
+            <th class="info-name">Status</th>
+            <td>{{project.status}}</td>
+          </tr>
+          <tr>
+            <th class="info-name">Description</th>
+            <td>
+              <div class="control">
+                <textarea class="textarea field-text" :style="{height: textAreaHeight}" readonly>{{project.description}}</textarea>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th class="info-name">Your Role</th>
+            <td>{{projectRoleLabel}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="channels" v-if="project">
+      <div class="channels-header">
+        <span class="channel-label">Project Channels</span>
+        <span class="channel-button">
+          <a class="button default-btn" @click="openNewChannelModal" v-if="projectRole=='Owner'|| projectRole=='Admin'">
+            <icon name="plus"></icon>&nbsp;
+            <span>Channel</span>
+          </a>
+        </span>
+      </div>
+      <div class="box channel-box" v-for="channel in channels":key="channel.id" @click="openUploadChannelModal(channel)">
+        <div class="header">
+          <span class="name">
+            {{channel.path}}
+          </span>&nbsp;
+          <span class="edit-icon main-link"
+            @click.stop="openChannelPath(channel)">
+            <icon name="sign-in"></icon>
+          </span>&nbsp;
+          <span class="edit-icon main-link"
+            v-if="projectRole=='Owner' || projectRole=='Admin'"
+            @click.stop="openEditChannelModal(channel)">
+            <icon name="edit"></icon>
+          </span>
+          <span class="info">
+            <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
+          </span>
         </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <input class="input field-text" type="text" readonly :value="project && project.owner">
-            </div>
-          </div>
-        </div>
+        <div class="description">{{channel.instruction}}</div>
       </div>
 
-      <div class="field is-horizontal project-field">
-        <div class="field-label is-normal">
-          <label class="label">Created Date:</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <input class="input field-text" type="text" readonly :value="project && project.createdDate">
-            </div>
-          </div>
-        </div>
+      <div v-if="channels.length == 0">
+        No channel setup in this project yet.
       </div>
-
-      <div class="field is-horizontal project-field">
-        <div class="field-label is-normal">
-          <label class="label">Status:</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <input class="input field-text" type="text" readonly :value="project && project.status">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field is-horizontal project-field">
-        <div class="field-label is-normal">
-          <label class="label">Description:</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <textarea class="textarea field-text" :style="{height: textAreaHeight}" readonly>{{project && project.description}}</textarea>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field is-horizontal project-field">
-        <div class="field-label is-normal">
-          <label class="label">Your Project Role:</label>
-        </div>
-        <div class="field-body">
-          <div class="field">
-            <div class="control">
-              <input class="input field-text" type="text" readonly :value="projectRoleLabel">
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
 
     <edit-project-modal
@@ -136,6 +130,32 @@
       :project="editProjectModal.project"
       @close-edit-project-modal="closeEditProjectModal">
     </edit-project-modal>
+
+    <confirm-modal
+      :opened="confirmModal.opened"
+      :message="confirmModal.message"
+      @close-confirm-modal="closeConfirmModal">
+    </confirm-modal>
+
+    <new-channel-modal
+      :opened="newChannelModal.opened"
+      :project="project"
+      @close-new-channel-modal="closeNewChannelModal">
+    </new-channel-modal>
+
+    <edit-channel-modal
+      :opened="editChannelModal.opened"
+      :project="project"
+      :channel="editChannelModal.channel"
+      @close-edit-channel-modal="closeEditChannelModal">
+    </edit-channel-modal>
+
+    <upload-channel-modal
+      :opened="uploadChannelModal.opened"
+      :channel="uploadChannelModal.channel"
+      :project="project"
+      @close-upload-channel-modal="closeUploadChannelModal">
+    </upload-channel-modal>
     
   </div>
 </template>
@@ -143,12 +163,20 @@
 <script>
 import AddressBar from './AddressBar'
 import EditProjectModal from './modals/EditProjectModal'
+import ConfirmModal from './modals/ConfirmModal'
+import NewChannelModal from './modals/NewChannelModal'
+import EditChannelModal from './modals/EditChannelModal'
+import UploadChannelModal from './modals/uploadChannelModal'
 
 export default {
   name: 'project-page',
   components: {
     AddressBar,
-    EditProjectModal
+    EditProjectModal,
+    ConfirmModal,
+    NewChannelModal,
+    EditChannelModal,
+    UploadChannelModal
   },
   data () {
     return {
@@ -158,6 +186,23 @@ export default {
         opened: false,
         project: null
       },
+      channels: [],
+      confirmModal: {
+        opened: false,
+        message: '',
+        context: null
+      },
+      newChannelModal: {
+        opened: false
+      },
+      editChannelModal: {
+        opened: false,
+        channel: null
+      },
+      uploadChannelModal: {
+        opened: false,
+        channel: null
+      }
     }
   },
   computed: {
@@ -176,14 +221,6 @@ export default {
     projectRoleLabel () {
       if(!this.projectRole) return ''
       return this.projectRole
-      /*
-      var label = this.project.projectUser + ' as ' + this.projectRole
-      if(this.projectRole == 'Owner' || this.projectRole == 'Admin')
-        return label
-      if(this.project.projectGroup)
-        return label + '(' + this.project.projectGroup + ')'
-      return label
-      */
     },
     textAreaHeight () {
       if(!this.project) return 1
@@ -194,6 +231,7 @@ export default {
   watch: {
     projectId: function (val) {
       this.requestProject()
+      this.requestChannels()
     },
   },
   methods: {
@@ -238,11 +276,88 @@ export default {
         }
       }
     },
+    requestChannels () {
+      var vm = this
+      vm.waiting = true
+      vm.$http.get(xHTTPx + '/get_channels/' + vm.projectId).then(response => {
+        var resp = response.body
+        vm.channels = resp
+        vm.waiting = false
+      }, response => {
+        vm.error = 'Failed to get project channels!'
+        vm.waiting = false
+      })
+    },
+    openNewChannelModal(){
+      this.newChannelModal.opened = true
+    },
+    closeNewChannelModal(result){
+      this.newChannelModal.opened = false
+      if(result){
+        this.requestChannels()
+      }
+    },
+    openEditChannelModal(channel){
+      this.editChannelModal.channel = channel
+      this.editChannelModal.opened = true
+    },
+    closeEditChannelModal(result){
+      this.editChannelModal.opened = false
+      if(result){
+        this.requestChannels()
+      }
+    },
+    openUploadChannelModal(channel){
+      this.uploadChannelModal.channel = channel
+      this.uploadChannelModal.opened = true
+    },
+    closeUploadChannelModal(result){
+      this.uploadChannelModal.opened = false
+      this.uploadChannelModal.channel = null
+    },
+    openConfirmModal(message, context){
+      this.confirmModal.message = message
+      this.confirmModal.context = context
+      this.confirmModal.opened = true
+    },
+    closeConfirmModal(result){
+      this.confirmModal.message = ''
+      this.confirmModal.opened = false
+      if(result && this.confirmModal.context){
+        var context = this.confirmModal.context
+        if(context.callback){
+            context.callback.apply(this, context.args)
+        }
+      }
+      this.confirmModal.context = null
+    },
+    deleteChannel(channel){
+      var message = 'Are you sure to delete this channel?'
+      var context = {callback: this.deleteChannelConfirmed, args: [channel]}
+      this.openConfirmModal(message, context)
+    },
+    deleteChannelConfirmed(channel){
+      var message = {
+        'projectId': this.projectId,
+        'id': channel.id
+      }
+      this.$http.post(xHTTPx + '/delete_channel', message).then(response => {
+        this.requestChannels()
+      }, response => {
+        this.waiting = false
+        console.log('failed to delete channel')
+      })
+    },
+    openChannelPath(channel){
+      var path = '/projects/' + this.projectId + '/data/' + encodeURIComponent(channel.path)
+      this.$router.push(path)
+    }
   },
   mounted () {
     var vm = this
     vm.$nextTick(function(){
       vm.requestProject()
+      vm.requestChannels()
     })
   }
 }
@@ -275,21 +390,91 @@ export default {
   font-weight: bold;
 }
 
-.details {
+.project-info {
   margin-top: 20px;
+
+  .info-label {
+    color: #2e1052;
+    padding: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+
+  .info-name {
+    text-align: right;
+  }
+
+  .field-text {
+    border-style: none;
+    box-shadow: none;
+    resize: none;
+    min-height: 40px;
+    position: relative;
+    top: -2px;
+  }
 }
 
-.project-field {
-  margin-bottom: 0px;
+.channels {
+  margin-top: 20px;
+
+  .channels-header{
+    padding: 5px;
+
+    .channel-label {
+      color: #2e1052;
+      font-size: 18px;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .channel-button {
+      float: right;
+      position: relative;
+      top: -10px;
+    }
+  }
+
+  .channel-box {
+    margin-top: 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    cursor: pointer;
+
+    .header {
+      .name {
+        font-size: 18px;
+        font-weight: bold;
+        color: #2e1052;
+      }
+
+      .edit-icon {
+        font-size: 14px;
+        position: relative;
+        top: 3px;
+      }
+
+      .info {
+        font-size: 14px;
+        float: right;
+        padding-top: 5px;
+      }
+    }
+
+    .action {
+      font-size: 14px;
+      text-align: right;
+    }
+
+  }
+
+  .channel-box:hover{
+    background-color: #f2f2f2;
+  }
 }
 
-.field-text {
-  border-style: none;
-  box-shadow: none;
-  resize: none;
-  min-height: 40px;
-  position: relative;
-  top: -2px;
-}
+
+
 
 </style>

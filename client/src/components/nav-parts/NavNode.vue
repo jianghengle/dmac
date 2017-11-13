@@ -12,7 +12,6 @@
         </span>
         <icon v-if="node.type=='users'" name="user-o"></icon>
         <icon v-if="node.type=='urls'" name="share-alt"></icon>
-        <icon v-if="node.type=='channels'" name="upload"></icon>
         <icon v-if="node.type=='history'" name="history"></icon>
       </span>
       <span class="node-name is-clickable main-link"
