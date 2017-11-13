@@ -26,6 +26,9 @@
               <a class="navbar-item action-item" v-if="canEditFolder" @click="openNewFileModal">
                 <icon name="plus"></icon>&nbsp;&nbsp;New File
               </a>
+              <a class="navbar-item action-item" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewMetaModal">
+                <icon name="plus"></icon>&nbsp;&nbsp;Meta Data File
+              </a>
               <a class="navbar-item action-item" v-if="canEditFolder" @click="openFileUploadModal">
                 <icon name="upload"></icon>&nbsp;&nbsp;Upload File
               </a>
@@ -143,6 +146,15 @@
       @close-new-file-modal="closeNewFileModal">
     </new-file-modal>
 
+    <new-meta-modal
+      :opened="newMetaModal.opened"
+      :role="projectRole"
+      :files="files"
+      :project-id="projectId"
+      :data-path="folder && folder.dataPath"
+      @close-new-meta-modal="closeNewMetaModal">
+    </new-meta-modal>
+
     <file-upload-modal
       :opened="fileUploadModal.opened"
       :project-id="projectId"
@@ -169,6 +181,7 @@
 <script>
 import NewFolderModal from '../modals/NewFolderModal'
 import NewFileModal from '../modals/NewFileModal'
+import NewMetaModal from '../modals/NewMetaModal'
 import FileUploadModal from '../modals/FileUploadModal'
 import EditNameModal from '../modals/EditNameModal'
 import ConfirmModal from '../modals/ConfirmModal'
@@ -179,6 +192,7 @@ export default {
   components: {
     NewFolderModal,
     NewFileModal,
+    NewMetaModal,
     FileUploadModal,
     EditNameModal,
     ConfirmModal
@@ -189,6 +203,9 @@ export default {
         opened: false
       },
       newFileModal: {
+        opened: false
+      },
+      newMetaModal: {
         opened: false
       },
       fileUploadModal: {
@@ -274,6 +291,15 @@ export default {
     },
     closeNewFileModal(result){
       this.newFileModal.opened = false
+      if(result){
+        this.$emit('content-changed', true)
+      }
+    },
+    openNewMetaModal(){
+      this.newMetaModal.opened = true
+    },
+    closeNewMetaModal(result){
+      this.newMetaModal.opened = false
       if(result){
         this.$emit('content-changed', true)
       }
@@ -493,10 +519,11 @@ export default {
 
 .action-item {
   font-weight: bold;
+  color: #2e1052;
 }
 
 .action-item:hover {
-  color: #2e1052!important;
+  color: #866ba6!important;
   font-weight: bold;
 }
 </style>

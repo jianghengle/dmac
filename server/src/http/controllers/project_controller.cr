@@ -250,13 +250,16 @@ module DMACServer
           data_path = get_param!(ctx, "dataPath")
           permission = get_param!(ctx, "permission")
 
+          content = get_param(ctx, "content")
+          content = "" if content.nil?
+
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           role = control.role.to_s
           raise "Permission denied" if role == "Viewer"
           raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
-          full_path = MyFile.create_file(project, data_path, control)
+          full_path = MyFile.create_file(project, data_path, control, content)
           Local.set_file_permission(project, full_path, permission) if permission != "Normal"
           Git.commit(project, email + " created file " + data_path)
           {"ok": true}.to_json

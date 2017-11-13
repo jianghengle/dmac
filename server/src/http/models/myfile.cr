@@ -201,7 +201,7 @@ module DMACServer
         Dir.mkdir(full_path)
       end
 
-      def self.create_file(project, data_path, control)
+      def self.create_file(project, data_path, control, content)
         full_path = @@root + "/" + project.path.to_s + data_path
         raise "Already exist" if File.exists?(full_path)
         role = control.role.to_s
@@ -211,7 +211,7 @@ module DMACServer
           parent_file = MyFile.new(project, parent_data_path)
           raise "File permission denied" if parent_file.access > 0
         end
-        File.write(full_path, "", 0o660)
+        File.write(full_path, content, 0o660)
         return full_path
       end
 
