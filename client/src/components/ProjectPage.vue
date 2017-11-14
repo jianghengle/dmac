@@ -53,37 +53,37 @@
 
     <div class="project-info" v-if="project">
       <div class="info-label">Project Information</div>
-      <table class="table is-hoverable is-fullwidth is-bordered">
+      <table class="table is-hoverable is-fullwidth">
         <tbody>
           <tr>
-            <th class="info-name">Owner</th>
-            <td>{{project.owner}}</td>
+            <th class="info-name info-cell">Owner:</th>
+            <td class="info-cell">{{project.owner}}</td>
           </tr>
           <tr>
-            <th class="info-name">Created Date</th>
-            <td>{{project.createdDate}}</td>
+            <th class="info-name info-cell">Created Date:</th>
+            <td class="info-cell">{{project.createdDate}}</td>
           </tr>
           <tr>
-            <th class="info-name">Status</th>
-            <td>{{project.status}}</td>
+            <th class="info-name info-cell">Status:</th>
+            <td class="info-cell">{{project.status}}</td>
           </tr>
           <tr>
-            <th class="info-name">Description</th>
-            <td>
+            <th class="info-name info-cell">Description:</th>
+            <td class="info-cell">
               <div class="control">
                 <textarea class="textarea field-text" :style="{height: textAreaHeight}" readonly>{{project.description}}</textarea>
               </div>
             </td>
           </tr>
           <tr>
-            <th class="info-name">Your Role</th>
-            <td>{{projectRoleLabel}}</td>
+            <th class="info-name info-cell">Your Role:</th>
+            <td class="info-cell">{{projectRoleLabel}}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="channels" v-if="project">
+    <div class="channels" v-if="project && projectRole && projectRole!='Viewer'">
       <div class="channels-header">
         <span class="channel-label">Project Channels</span>
         <span class="channel-button">
@@ -397,6 +397,10 @@ export default {
 
   .info-name {
     text-align: right;
+  }
+
+  .info-cell {
+    border: none;
   }
 
   .field-text {
