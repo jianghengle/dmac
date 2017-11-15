@@ -28,7 +28,7 @@
     </div>
  
     <div>
-      <table class="table">
+      <table class="table is-fullwidth is-hoverable">
         <thead>
           <tr>
             <th class="number-cell">#</th>

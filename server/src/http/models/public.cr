@@ -76,6 +76,21 @@ module DMACServer
         return publics.as(Array) unless publics.nil?
         return [] of Public
       end
+
+      def self.copy_publics(template, project)
+        query = Query.where(project_id: template.id)
+        publics = Repo.all(Public, query)
+        publics.as(Array) unless publics.nil?
+        publics.each do |p|
+          public = Public.new
+          public.project_id = project.id
+          public.data_path = p.data_path
+          public.key = SecureRandom.uuid.to_s
+          public.path = project.path.to_s + p.data_path.to_s
+          changeset = Repo.insert(public)
+          raise changeset.errors.to_s unless changeset.valid?
+        end
+      end
     end
   end
 end

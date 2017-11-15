@@ -59,7 +59,7 @@
           </div>
 
           <div class="field file-field">
-            <input v-if="opened" type="file" class="file-input" multiple @change="onFileChange">
+            <input v-if="opened" type="file" class="upload-file-input" multiple @change="onFileChange">
             &nbsp;
             <span v-if="channel" class="upload-info">
               Must Select <strong>{{channel.files}}</strong> File(s)
@@ -305,7 +305,7 @@ export default {
   margin: 20px;
 }
 
-.file-input {
+.upload-file-input {
   font-size: 14px;
 }
 

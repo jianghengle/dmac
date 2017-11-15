@@ -53,7 +53,7 @@
 
     <div class="project-info" v-if="project">
       <div class="info-label">Project Information</div>
-      <table class="table is-hoverable is-fullwidth">
+      <table class="table">
         <tbody>
           <tr>
             <th class="info-name info-cell">Owner:</th>
@@ -392,7 +392,6 @@ export default {
     padding: 5px;
     font-size: 18px;
     font-weight: bold;
-    text-decoration: underline;
   }
 
   .info-name {
@@ -423,7 +422,6 @@ export default {
       color: #2e1052;
       font-size: 18px;
       font-weight: bold;
-      text-decoration: underline;
     }
 
     .channel-button {

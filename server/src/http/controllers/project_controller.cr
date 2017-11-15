@@ -153,6 +153,7 @@ module DMACServer
             unless template_role.empty?
               MyFile.copy_project_files(template, project)
               Channel.copy_channels(template, project)
+              Public.copy_publics(template, project)
               if copy_users == "true" && template_role == "member"
                 Control.copy_controls(template, project, email)
               end
