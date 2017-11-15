@@ -38,7 +38,7 @@
           <div class="navbar-item">
             <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
               <icon name="share-alt"></icon>&nbsp;
-              <span>Public Urls</span>
+              <span>Public URLs</span>
             </a>
           </div>
           <div class="navbar-item">

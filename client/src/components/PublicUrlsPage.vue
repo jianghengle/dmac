@@ -3,7 +3,7 @@
   	<address-bar></address-bar>
     <div class="view-title">
       <icon name="share-alt"></icon>
-      Project Public Urls
+      Project Public URLs
     </div>
 
     <div v-if="error" class="notification is-danger login-text">
@@ -116,7 +116,7 @@ export default {
       })
     },
     deleteUrl(url){
-      var message = 'Are you sure to delete this public url?'
+      var message = 'Are you sure to delete this public URL?'
       var context = {callback: this.deleteUrlConfirmed, args: [url]}
       this.openConfirmModal(message, context)
     },
