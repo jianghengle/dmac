@@ -1,7 +1,7 @@
 <template>
   <div>
     <nav class="navbar is-transparent" role="navigation" aria-label="dropdown navigation">
-      <div class="navbar-menu">
+      <div class="navbar-menu is-active">
         <div class="navbar-start">
           <div class="view-title">
             <icon name="folder-open-o"></icon>&nbsp;

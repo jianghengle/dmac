@@ -18,7 +18,7 @@
     </div>
 
     <nav class="navbar">
-      <div class="navbar-menu">
+      <div class="navbar-menu is-active">
         <div class="navbar-start">
           <div class="navbar-item">
             <a class="button main-btn"  @click="viewData">

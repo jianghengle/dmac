@@ -35,7 +35,7 @@ module DMACServer
 
       def self.init(project, email)
         project_root = @@root + "/" + project.path.to_s
-        command = "cd " + project_root + " && git init && git add ."
+        command = "cd \"" + project_root + "\" && git init && git add ."
         command = command + " && git commit -m\"" + email + " initialized project\""
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
@@ -44,7 +44,7 @@ module DMACServer
 
       def self.commit(project, message)
         project_root = @@root + "/" + project.path.to_s
-        command = "cd " + project_root + " && git add . && git commit -m\"" + message + "\""
+        command = "cd \"" + project_root + "\" && git add . && git commit -m\"" + message + "\""
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
         io.to_s
@@ -52,7 +52,7 @@ module DMACServer
 
       def self.get_logs(project)
         project_root = @@root + "/" + project.path.to_s
-        command = "cd " + project_root + " && git log"
+        command = "cd \"" + project_root + "\" && git log"
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
 
@@ -71,7 +71,7 @@ module DMACServer
 
       def self.get_commit(project, hash)
         project_root = @@root + "/" + project.path.to_s
-        command = "cd " + project_root + " && git show " + hash
+        command = "cd \"" + project_root + "\" && git show " + hash
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
         date = ""
@@ -139,7 +139,7 @@ module DMACServer
       def self.revert_commits(project, hash, email)
         project_root = @@root + "/" + project.path.to_s
 
-        command = "cd " + project_root + " && git show " + hash
+        command = "cd \"" + project_root + "\" && git show " + hash
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
         date = ""
@@ -150,7 +150,7 @@ module DMACServer
           end
         end
 
-        command = "cd " + project_root
+        command = "cd \"" + project_root + "\""
         command = command + " && git revert --no-commit " + hash + "..HEAD"
         command = command + " && git commit -m\"" + email + " rollbacked to " + date + "\""
         io = IO::Memory.new
@@ -160,7 +160,7 @@ module DMACServer
       def self.delete_history(project, hash, email)
         project_root = @@root + "/" + project.path.to_s
 
-        command = "cd " + project_root + " && git show " + hash
+        command = "cd \"" + project_root + "\" && git show " + hash
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
         date = ""
@@ -171,7 +171,7 @@ module DMACServer
           end
         end
 
-        command = "cd " + project_root
+        command = "cd \"" + project_root + "\""
         command = command + " && git checkout --orphan temp " + hash
         command = command + " && git commit -m\"" + email + " truncated history to " + date + "\""
         command = command + " && git rebase --onto temp " + hash + " master"

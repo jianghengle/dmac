@@ -7,7 +7,7 @@
         </router-link>
       </div>
 
-      <div class="navbar-menu">
+      <div class="navbar-menu is-active menu">
         <div class="navbar-start">
         </div>
 
@@ -76,6 +76,10 @@ export default {
 .header {
   background-color: #2e1052;
   border-radius: 3px;
+
+  .menu {
+    background-color: #2e1052;
+  }
 }
 
 .app-name {

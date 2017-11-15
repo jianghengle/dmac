@@ -72,29 +72,29 @@
       <div class="column" v-show="showCharts"
         :class="{'half-width': showTable && showCharts, 'full-width': showTable && !showCharts}">
         <nav class="navbar is-transparent" role="navigation" aria-label="dropdown navigation">
-          <div class="navbar-menu">
+          <div class="navbar-menu is-active">
             <div class="navbar-start">
               <div class="navbar-item has-dropdown is-hoverable">
-                <a class="navbar-link">
+                <a class="navbar-link new-chart-button">
                   New Chart
                 </a>
                 <div class="navbar-dropdown is-boxed">
-                  <a class="navbar-item" @click="addChart('Simple')">
+                  <a class="navbar-item new-chart-button" @click="addChart('Simple')">
                     Simple Chart
                   </a>
-                  <a class="navbar-item" @click="addChart('XY')">
+                  <a class="navbar-item new-chart-button" @click="addChart('XY')">
                     XY Chart
                   </a>
-                  <a class="navbar-item" @click="addChart('Parallel Coordinates')">
+                  <a class="navbar-item new-chart-button" @click="addChart('Parallel Coordinates')">
                     Parallel Coordinates
                   </a>
-                  <a class="navbar-item" @click="addChart('Histogram')">
+                  <a class="navbar-item new-chart-button" @click="addChart('Histogram')">
                     Histogram
                   </a>
-                  <a class="navbar-item" @click="addChart('Histograms')">
+                  <a class="navbar-item new-chart-button" @click="addChart('Histograms')">
                     Histograms
                   </a>
-                  <a class="navbar-item" @click="addChart('Correlations')">
+                  <a class="navbar-item new-chart-button" @click="addChart('Correlations')">
                     Correlation Matrix
                   </a>
                 </div>
@@ -413,8 +413,9 @@ export default {
   top: 5px;
 }
 
-.add-chart-buttons {
-  padding-left: 20px;
+.new-chart-button {
+  color: #2e1052;
 }
+
 
 </style>
