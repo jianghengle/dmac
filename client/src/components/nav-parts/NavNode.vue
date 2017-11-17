@@ -138,28 +138,11 @@ export default {
     },
     closeNode () {
       var nodePath = this.node.path
-      if(this.node.dataPath == '-root-'){
-        nodePath = nodePath.slice(0, -7)
-      }
       var routePath = this.routePath
-      if(this.routeDataPath == '-root-'){
-        routePath = routePath.slice(0, -7)
-      }
       if(nodePath == routePath){
         this.$store.commit('projects/closeNode', this.node.path)
-      }else{
-        var canClose = false
-        var np = nodePath.replace(/\-\-/g, '/').split('/')
-        var cp = routePath.replace(/\-\-/g, '/').split('/')
-        for(var i=0;i<np.length;i++){
-          if(i >= cp.length || np[i] != cp[i]){
-            canClose = true
-            break
-          }
-        }
-        if(canClose){
-          this.$store.commit('projects/closeNode', this.node.path)
-        } 
+      }else if(routePath.indexOf(nodePath) < 0){
+        this.$store.commit('projects/closeNode', this.node.path)
       }
     },
     requestData () {
@@ -184,8 +167,10 @@ export default {
     requestFile () {
       var vm = this
       vm.waiting = true
+      var dataPath = encodeURIComponent(vm.node.dataPath)
+      dataPath = encodeURIComponent(dataPath)
       if(!this.publicKey){
-        vm.$http.get(xHTTPx + '/get_file/' + vm.node.projectId + "/" + vm.node.dataPath).then(response => {
+        vm.$http.get(xHTTPx + '/get_file/' + vm.node.projectId + "/" + dataPath).then(response => {
           var resp = response.body
           this.$store.commit('projects/setFile', resp)
           vm.waiting = false
@@ -193,7 +178,7 @@ export default {
           vm.waiting = false
         })
       }else{
-        vm.$http.get(xHTTPx + '/get_public_file/' + vm.publicKey + "/" + vm.node.dataPath).then(response => {
+        vm.$http.get(xHTTPx + '/get_public_file/' + vm.publicKey + "/" + dataPath).then(response => {
           var resp = response.body
           vm.$store.commit('projects/setPublicFile', resp)
           vm.waiting = false

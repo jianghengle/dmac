@@ -40,7 +40,7 @@ module DMACServer
           project_id = public.project_id
           project = Project.get_project!(project_id)
           control = Control.new
-          control.role = "Viewer"
+          control.role = "Admin"
           control.group_name = ""
           files = MyFile.collect_files(control, project, data_path)
 
