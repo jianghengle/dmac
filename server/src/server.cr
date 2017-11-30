@@ -216,6 +216,22 @@ module DMACServer
         HttpAPI::ChannelController.upload_meta_by_channel(env)
       end
 
+      post "/search_project_files" do |env|
+        HttpAPI::ProjectController.search_files(env)
+      end
+
+      post "/search_in_project_file" do |env|
+        HttpAPI::ProjectController.search_in_file(env)
+      end
+
+      post "/search_public_files" do |env|
+        HttpAPI::PublicController.search_files(env)
+      end
+
+      post "/search_in_public_file" do |env|
+        HttpAPI::PublicController.search_in_file(env)
+      end
+
       port = 3000
       port = ENV["DMAC_PORT"].to_i if ENV.has_key?("DMAC_PORT")
       Kemal.run port

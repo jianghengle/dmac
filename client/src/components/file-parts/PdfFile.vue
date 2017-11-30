@@ -2,7 +2,9 @@
   <div>
     <div class="columns">
       <div class="view-title column">
-        <icon :name="file.icon"></icon>&nbsp;
+        <span class="main-link search-button" @click="openSearch">
+          <icon name="search"></icon>
+        </span>&nbsp;
         {{file && file.name}}&nbsp;
         <a :href="url" :download="file && file.name" target="_blank" class="action-icon main-link"><icon name="download"></icon></a>
       </div>
@@ -87,6 +89,10 @@ export default {
       }, response => {
         console.log('failed to get url')
       })
+    },
+    openSearch(){
+      var searchPath = this.$route.path.replace('/data/', '/search/')
+      this.$router.push(searchPath)
     }
   },
   mounted () {

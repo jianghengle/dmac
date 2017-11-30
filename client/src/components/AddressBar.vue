@@ -84,7 +84,7 @@ export default {
           }
         }
       }else{
-        var path = '/public/' + this.publicKey + '/' + encodeURIComponent(this.publicDataPath)
+        var path = '/public/' + this.publicKey + '/data/' + encodeURIComponent(this.publicDataPath)
         nodes.push(this.getNode(path))
         if(this.dataPath != this.publicDataPath && this.dataPath.indexOf(this.publicDataPath) == 0){
           var vm = this
@@ -124,6 +124,10 @@ export default {
   position: relative;
   top: 3px;
   color: #2e1052;
+}
+
+.nav-icon:hover {
+  color: #866ba6;
 }
 
 </style>

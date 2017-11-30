@@ -67,6 +67,9 @@ export default {
       if(this.node.type == 'history'){
         return this.routePath.indexOf(this.node.path) == 0
       }
+      if(this.$route.name == 'ProjectSearch' || this.$route.name == 'PublicSearch'){
+        return this.node.path.replace('/data/', '/search/') == this.routePath
+      }
       return this.routePath == this.node.path
     },
     open () {

@@ -477,6 +477,53 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
+
+      def search_files(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+          pattern = get_param!(ctx, "pattern")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
+
+          files = MyFile.search_files(control, project, data_path, pattern)
+
+          arr = [] of String
+          files.each do |f|
+            arr << f.to_json
+          end
+          json_array(arr)
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def search_in_file(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+          pattern = get_param!(ctx, "pattern")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
+
+          lines = MyFile.search_in_file(control, project, data_path, pattern)
+          lines.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
     end
   end
 end

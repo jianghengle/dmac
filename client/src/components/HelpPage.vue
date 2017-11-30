@@ -2,9 +2,9 @@
 
   <div class="help-page">
     <div>
-      <a class="button default-btn back-btn" @click="$router.go(-1)">
+      <a class="button back-btn" @click="$router.go(-1)">
         <icon name="arrow-left"></icon>&nbsp;
-        Go Back
+        Back
       </a>
     </div>
 

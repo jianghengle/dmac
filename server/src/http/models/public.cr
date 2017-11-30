@@ -54,7 +54,7 @@ module DMACServer
         publics = publics.as(Array)
         publics.each do |p|
           dp = URI.escape(p.data_path.to_s)
-          result[p.path.to_s] = "/#/public/" + p.key.to_s + "/" + dp
+          result[p.path.to_s] = "/#/public/" + p.key.to_s + "/data/" + dp
         end
         return result
       end

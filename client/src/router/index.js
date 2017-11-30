@@ -8,6 +8,7 @@ import FolderFilePage from '@/components/FolderFilePage'
 import HistoryPage from '@/components/HistoryPage'
 import CommitPage from '@/components/CommitPage'
 import HelpPage from '@/components/HelpPage'
+import SearchPage from '@/components/SearchPage'
 
 Vue.use(Router)
 
@@ -54,13 +55,23 @@ export default new Router({
     },
     {
       path: '/projects/:projectId/data/:dataPath',
-      name: 'FolderFile',
+      name: 'ProjectFolderFile',
       component: FolderFilePage
     },
     {
-      path: '/public/:publicKey/:dataPath',
-      name: 'FolderFile',
+      path: '/projects/:projectId/search/:dataPath',
+      name: 'ProjectSearch',
+      component: SearchPage
+    },
+    {
+      path: '/public/:publicKey/data/:dataPath',
+      name: 'PublicFolderFile',
       component: FolderFilePage
+    },
+    {
+      path: '/public/:publicKey/search/:dataPath',
+      name: 'PublicSearch',
+      component: SearchPage
     }
   ]
 })

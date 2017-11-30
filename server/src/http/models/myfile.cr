@@ -183,6 +183,45 @@ module DMACServer
         return files
       end
 
+      def self.search_files(control, project, data_path, pattern)
+        files = [] of MyFile
+        dir = MyFile.new(project, data_path)
+        raise "You do not have permission" unless dir.viewable?(control)
+
+        return files if dir.type.to_s == "file"
+
+        dir_path = dir.full_path
+        dir_path = dir_path.rchop if dir_path.ends_with? "/"
+        project_path = @@root + "/" + project.path.to_s
+        command = "find \"" + dir_path + "\" -iname  \"" + pattern + "\" -not -path \"" + project_path + "/.git*\""
+        io = IO::Memory.new
+        Process.run(command, shell: true, output: io)
+        io.to_s.each_line do |l|
+          next if l == dir_path
+          dp = l[project_path.size..-1]
+          file = MyFile.new(project, dp)
+          files << file if file.viewable?(control)
+        end
+        return files
+      end
+
+      def self.search_in_file(control, project, data_path, pattern)
+        lines = [] of String
+        file = MyFile.new(project, data_path)
+        raise "You do not have permission" unless file.viewable?(control)
+
+        return lines if file.type.to_s == "folder"
+
+        file_path = file.full_path
+        command = "grep -i \"" + pattern + "\" \"" + file_path + "\" -n"
+        io = IO::Memory.new
+        Process.run(command, shell: true, output: io)
+        io.to_s.each_line do |l|
+          lines << l
+        end
+        return lines
+      end
+
       def self.get_parent_data_path(data_path)
         index = data_path.rindex("/")
         parent_data_path = "/"

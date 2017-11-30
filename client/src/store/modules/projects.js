@@ -225,7 +225,7 @@ function initHistory(project) {
 function initFile(file, options, pub){
   var f = Object.assign({}, file)
   if(pub){
-    f.path = '/public/' + pub.key + '/' + encodeURIComponent(f.dataPath)
+    f.path = '/public/' + pub.key + '/data/' + encodeURIComponent(f.dataPath)
   }else{
     f.path = '/projects/' + f.projectId + '/data/' + encodeURIComponent(f.dataPath)
     if(f.dataPath == '/'){
@@ -443,16 +443,17 @@ function patchPublicChain(nodeMap, pub, path){
 
 function findPublicParent(pdp, path){
   var ss = path.split('/')
-  if(ss.length != 4) return null
+  if(ss.length != 5) return null
   pdp = encodeURIComponent(pdp)
-  if(ss[3] == pdp) return null
-  if(ss[3].indexOf(pdp) != 0) return null
 
-  var sss = ss[3].split('%2F')
+  if(ss[4] == pdp) return null
+  if(ss[4].indexOf(pdp) != 0) return null
+
+  var sss = decodeURIComponent(ss[4]).split('/')
   var parent = {childPath: path}
   parent.type = 'folder'
   parent.dataPath = sss.slice(0, -1).join('/')
-  parent.path = '/public/' + ss[2] + '/' + encodeURIComponent(parent.dataPath)
+  parent.path = '/public/' + ss[2] + '/data/' + encodeURIComponent(parent.dataPath)
   parent.name = sss[sss.length-2]
   return parent
 }

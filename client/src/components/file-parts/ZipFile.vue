@@ -2,7 +2,9 @@
   <div>
     <div class="columns">
       <div class="view-title column">
-        <icon :name="file.icon"></icon>&nbsp;
+        <span class="main-link search-button" @click="openSearch">
+          <icon name="search"></icon>
+        </span>&nbsp;
         {{file && file.name}}
       </div>
       <div class="column buttons">
@@ -145,6 +147,10 @@ export default {
       }
       this.confirmModal.context = null
     },
+    openSearch(){
+      var searchPath = this.$route.path.replace('/data/', '/search/')
+      this.$router.push(searchPath)
+    }
   }
 }
 </script>

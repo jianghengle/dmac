@@ -99,6 +99,59 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
+
+      def search_files(ctx)
+        begin
+          public_key = get_param!(ctx, "publicKey")
+          data_path = get_param!(ctx, "dataPath")
+          pattern = get_param!(ctx, "pattern")
+
+          public = Public.get_public!(public_key)
+          raise "Wrong header" unless data_path.starts_with? public.data_path.to_s
+
+          project_id = public.project_id
+          project = Project.get_project!(project_id)
+          control = Control.new
+          control.role = "Admin"
+          control.group_name = ""
+
+          files = MyFile.search_files(control, project, data_path, pattern)
+
+          arr = [] of String
+          files.each do |f|
+            arr << f.to_json
+          end
+          json_array(arr)
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def search_in_file(ctx)
+        begin
+          public_key = get_param!(ctx, "publicKey")
+          data_path = get_param!(ctx, "dataPath")
+          pattern = get_param!(ctx, "pattern")
+
+          public = Public.get_public!(public_key)
+          raise "Wrong header" unless data_path.starts_with? public.data_path.to_s
+
+          project_id = public.project_id
+          project = Project.get_project!(project_id)
+          control = Control.new
+          control.role = "Admin"
+          control.group_name = ""
+
+          lines = MyFile.search_in_file(control, project, data_path, pattern)
+          lines.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
     end
   end
 end

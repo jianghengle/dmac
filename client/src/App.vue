@@ -84,6 +84,10 @@ body {
   text-decoration: underline;
 }
 
+.search-button {
+  cursor: pointer;
+}
+
 .view-title {
   font-size: 24px;
   font-weight: bold;

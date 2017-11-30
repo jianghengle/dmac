@@ -4,7 +4,9 @@
       <div class="navbar-menu is-active">
         <div class="navbar-start">
           <div class="view-title">
-            <icon name="folder-open-o"></icon>&nbsp;
+            <span class="main-link search-button" @click="openSearch">
+              <icon name="search"></icon>
+            </span>&nbsp;
             <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">Readonly</span>
             <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">Hidden</span>
             {{folder && folder.name}}
@@ -425,6 +427,10 @@ export default {
       }
       this.confirmModal.context = null
     },
+    openSearch(){
+      var searchPath = this.$route.path.replace('/data/', '/search/')
+      this.$router.push(searchPath)
+    }
   },
   mounted () {
     this.reloadSelection()
@@ -436,10 +442,6 @@ export default {
 
 .empty-label {
   text-align: center;
-}
-
-.buttons {
-  text-align: right;
 }
 
 .file-content {

@@ -103,7 +103,7 @@ export default {
       var dataPath = encodeURIComponent(this.$route.params.dataPath)
       dataPath = encodeURIComponent(dataPath)
       this.waiting = true
-      if(this.projectId){
+      if(!this.publicKey){
         this.$http.get(xHTTPx + '/get_file/' + this.projectId + "/" + dataPath).then(response => {
           var resp = response.body
           this.$store.commit('projects/setFile', resp)
@@ -113,7 +113,7 @@ export default {
           this.error = 'Failed to get file!'
           this.waiting = false
         })
-      }else if(this.publicKey){
+      }else{
         this.$http.get(xHTTPx + '/get_public_file/' + this.publicKey + "/" + dataPath).then(response => {
           var resp = response.body
           this.$store.commit('projects/setPublicFile', resp)

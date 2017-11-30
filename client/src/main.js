@@ -45,6 +45,7 @@ import 'vue-awesome/icons/remove'
 import 'vue-awesome/icons/question'
 import 'vue-awesome/icons/arrow-left'
 import 'vue-awesome/icons/arrow-right'
+import 'vue-awesome/icons/search'
 import Icon from 'vue-awesome/components/Icon'
 Vue.component('icon', Icon)
 
