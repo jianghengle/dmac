@@ -9,6 +9,11 @@ class Channel < ApplicationRecord
       field :instruction
       field :files
       field :rename
+      field :status, :enum do
+        enum do
+          ['Open', 'Closed']
+        end
+      end
     end
   end
 end

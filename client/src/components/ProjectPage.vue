@@ -56,7 +56,7 @@
             <icon name="edit"></icon>
           </span>
         </div>
-        <table class="table">
+        <table class="table is-striped is-hoverable">
           <tbody>
             <tr>
               <th class="info-name info-cell">Name</th>
@@ -110,6 +110,10 @@
         <div class="box channel-box" v-for="channel in channels":key="channel.id" @click="openUploadChannelModal(channel)">
           <div class="header">
             <span class="name">
+              <span class="tag" :class="{
+                'is-success': channel.status!='Closed',
+                'is-danger': channel.status=='Closed'
+              }">{{channel.status=='Closed' ? 'Closed' : 'Open'}}</span>
               {{channel.path}}
             </span>&nbsp;
             <span class="edit-icon main-link"
@@ -129,7 +133,7 @@
         </div>
 
         <div v-if="channels.length == 0">
-          No channel setup in this project yet.
+          No channel available in this project yet.
         </div>
       </div>
     </div>
@@ -455,10 +459,6 @@ export default {
 
   .info-name {
     text-align: right;
-  }
-
-  .info-cell {
-    border: none;
   }
 
   .field-text {

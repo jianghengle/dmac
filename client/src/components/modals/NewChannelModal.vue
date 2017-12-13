@@ -14,6 +14,18 @@
           </div>
 
           <div class="field">
+            <label class="label">Status</label>
+            <p class="control">
+              <span class="select">
+                <select v-model="status">
+                  <option>Open</option>
+                  <option>Closed</option>
+                </select>
+              </span>
+            </p>
+          </div>
+
+          <div class="field">
             <label class="label">Target Folder</label>
             <p class="control">
               <span class="select">
@@ -94,6 +106,7 @@ export default {
       instruction: '',
       filesUpload: 1,
       rename: true,
+      status: 'Open'
     }
   },
   computed: {
@@ -156,7 +169,7 @@ export default {
     },
     create(){
       this.waiting= true
-      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.filesUpload }
+      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.filesUpload, status: this.status }
       this.$http.post(xHTTPx + '/create_channel', message).then(response => {
         this.waiting= false
         this.$emit('close-new-channel-modal', true)

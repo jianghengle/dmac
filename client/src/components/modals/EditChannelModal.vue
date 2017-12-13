@@ -14,6 +14,18 @@
           </div>
 
           <div class="field">
+            <label class="label">Status</label>
+            <p class="control">
+              <span class="select">
+                <select v-model="status">
+                  <option>Open</option>
+                  <option>Closed</option>
+                </select>
+              </span>
+            </p>
+          </div>
+
+          <div class="field">
             <label class="label">Target Folder</label>
             <p class="control">
               <span class="select">
@@ -93,7 +105,8 @@ export default {
       metadataFile: '',
       instruction: '',
       rename: true,
-      files: 1
+      files: 1,
+      status: 'Open'
     }
   },
   computed: {
@@ -103,7 +116,8 @@ export default {
         || this.metadataFile != this.channel.metaData
         || this.instruction != this.channel.instruction
         || this.rename != this.channel.rename
-        || this.files != this.channel.files)
+        || this.files != this.channel.files
+        || this.status != this.channel.status)
     },
   },
   watch: {
@@ -118,6 +132,7 @@ export default {
         this.instruction = this.channel.instruction
         this.rename = this.channel.rename
         this.files = this.channel.files
+        this.status = this.channel.status
         this.requestFolders()
         this.requestFiles()
       }
@@ -166,7 +181,7 @@ export default {
     },
     update(){
       this.waiting= true
-      var message = { projectId: this.project.id, id: this.channel.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.files }
+      var message = { projectId: this.project.id, id: this.channel.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.files, status: this.status }
       this.$http.post(xHTTPx + '/update_channel', message).then(response => {
         this.waiting= false
         this.$emit('close-edit-channel-modal', true)

@@ -13,12 +13,13 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Viewer"
+          role = control.role.to_s
+          raise "Permission denied" if role == "Viewer"
 
           channels = Channel.get_channels_by_project(project)
           arr = [] of String
-          channels.each do |p|
-            arr << p.to_json
+          channels.each do |c|
+            arr << c.to_json unless (role == "Editor" && c.status.to_s == "Closed")
           end
           json_array(arr)
         rescue ex : InsufficientParameters
@@ -75,12 +76,13 @@ module DMACServer
           instruction = get_param!(ctx, "instruction")
           files = get_param!(ctx, "files")
           rename = get_param!(ctx, "rename")
+          status = get_param!(ctx, "status")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          Channel.create_channel(project, path, meta_data, instruction, rename, files)
+          Channel.create_channel(project, path, meta_data, instruction, rename, files, status)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -99,12 +101,13 @@ module DMACServer
           instruction = get_param!(ctx, "instruction")
           files = get_param!(ctx, "files")
           rename = get_param!(ctx, "rename")
+          status = get_param!(ctx, "status")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          Channel.update_channel(id, path, meta_data, instruction, rename, files)
+          Channel.update_channel(id, path, meta_data, instruction, rename, files, status)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

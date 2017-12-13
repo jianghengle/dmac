@@ -53,7 +53,7 @@
           </div>
 
 
-          <div v-if="error" class="notification is-danger login-text">
+          <div v-if="error" class="notification is-danger">
             <button class="delete" @click="error=''"></button>
               {{error}}
           </div>
@@ -237,6 +237,7 @@ export default {
           upload.loaded = 0
           upload.percentage = 0
           upload.request = null
+          return Promise.reject(JSON.stringify(response.body))
         })
         promises.push(promise)
       })
@@ -261,7 +262,7 @@ export default {
         }
       }, (response) => {
         vm.waiting = false
-        vm.error = 'Error in uploading file ...'
+        vm.error = 'Error in uploading file: ' + response
       })
     }
   },
