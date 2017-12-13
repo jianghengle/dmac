@@ -49,14 +49,14 @@
 
       <div class="column project-info" v-if="project">
         <div class="info-label">
-          <span>Information</span>&nbsp;
+          <span>Basic Info</span>&nbsp;
           <span class="edit-icon main-link"
             v-if="projectRole=='Owner' || projectRole=='Admin'"
             @click="openEditProjectModal(project)">
             <icon name="edit"></icon>
           </span>
         </div>
-        <table class="table is-striped is-hoverable">
+        <table class="table is-striped is-hoverable is-fullwidth">
           <tbody>
             <tr>
               <th class="info-name info-cell">Name</th>
@@ -86,8 +86,16 @@
               <th class="info-name info-cell">Your Role</th>
               <td class="info-cell">{{projectRoleLabel}}</td>
             </tr>
-            <tr v-if="projectRole=='Owner' || projectRole=='Admin'">
-              <th class="info-name info-cell">Meta Data</th>
+          </tbody>
+        </table>
+
+        <div class="info-label" v-if="projectRole=='Owner' || projectRole=='Admin'">
+          <span>Meta Data</span>
+        </div>
+        <table class="table is-striped is-hoverable is-fullwidth">
+          <tbody>
+            <tr>
+              <th class="info-name info-cell">Meta Data File</th>
               <td class="info-cell">{{metaDataFile || '(None)'}}</td>
             </tr>
             <tr v-if="metaDataFile" v-for="meta in metaData">
@@ -247,7 +255,6 @@ export default {
     projectId: function (val) {
       this.requestProject()
       this.requestChannels()
-      this.requestMetaData()
     },
   },
   methods: {
@@ -258,6 +265,9 @@ export default {
         var resp = response.body
         this.$store.commit('projects/setProject', resp)
         vm.waiting = false
+        vm.$nextTick(function(){
+          vm.requestMetaData()
+        })
       }, response => {
         vm.error = 'Failed to get project!'
         vm.waiting = false
@@ -289,7 +299,6 @@ export default {
           this.$router.push('/projects')
         }else{
           this.requestProject()
-          this.requestMetaData()
         }
       }
     },
@@ -414,7 +423,6 @@ export default {
     vm.$nextTick(function(){
       vm.requestProject()
       vm.requestChannels()
-      vm.requestMetaData()
     })
   }
 }
@@ -449,6 +457,7 @@ export default {
 
 .project-info {
   margin-top: 20px;
+  margin-right: 10px;
 
   .info-label {
     color: #2e1052;
