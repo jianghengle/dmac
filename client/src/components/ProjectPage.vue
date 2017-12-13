@@ -7,13 +7,7 @@
         <span class="project-icon">
           <icon name="folder-open"></icon>
         </span>&nbsp;
-        {{project && project.name}}&nbsp;
-        <span class="edit-icon main-link"
-          v-if="projectRole=='Owner' || projectRole=='Admin'"
-          @click="openEditProjectModal(project)">
-          <icon name="edit"></icon>
-        </span>
-
+        {{project && project.name}}
       </div>
     </div>
 
@@ -51,71 +45,92 @@
       </div>
     </nav>
 
-    <div class="project-info" v-if="project">
-      <div class="info-label">Project Information</div>
-      <table class="table">
-        <tbody>
-          <tr>
-            <th class="info-name info-cell">Owner:</th>
-            <td class="info-cell">{{project.owner}}</td>
-          </tr>
-          <tr>
-            <th class="info-name info-cell">Created Date:</th>
-            <td class="info-cell">{{project.createdDate}}</td>
-          </tr>
-          <tr>
-            <th class="info-name info-cell">Status:</th>
-            <td class="info-cell">{{project.status}}</td>
-          </tr>
-          <tr>
-            <th class="info-name info-cell">Description:</th>
-            <td class="info-cell">
-              <div class="control">
-                <textarea class="textarea field-text" :style="{height: textAreaHeight}" readonly>{{project.description}}</textarea>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th class="info-name info-cell">Your Role:</th>
-            <td class="info-cell">{{projectRoleLabel}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="columns">
 
-    <div class="channels" v-if="project && projectRole && projectRole!='Viewer'">
-      <div class="channels-header">
-        <span class="channel-label">Project Channels</span>
-        <span class="channel-button">
-          <a class="button default-btn" @click="openNewChannelModal" v-if="projectRole=='Owner'|| projectRole=='Admin'">
-            <icon name="plus"></icon>&nbsp;
-            <span>Channel</span>
-          </a>
-        </span>
-      </div>
-      <div class="box channel-box" v-for="channel in channels":key="channel.id" @click="openUploadChannelModal(channel)">
-        <div class="header">
-          <span class="name">
-            {{channel.path}}
-          </span>&nbsp;
-          <span class="edit-icon main-link"
-            @click.stop="openChannelPath(channel)">
-            <icon name="sign-in"></icon>
-          </span>&nbsp;
+      <div class="column project-info" v-if="project">
+        <div class="info-label">
+          <span>Information</span>&nbsp;
           <span class="edit-icon main-link"
             v-if="projectRole=='Owner' || projectRole=='Admin'"
-            @click.stop="openEditChannelModal(channel)">
+            @click="openEditProjectModal(project)">
             <icon name="edit"></icon>
           </span>
-          <span class="info">
-            <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
-          </span>
         </div>
-        <div class="description">{{channel.instruction}}</div>
+        <table class="table">
+          <tbody>
+            <tr>
+              <th class="info-name info-cell">Name</th>
+              <td class="info-cell">{{project.name}}</td>
+            </tr>
+            <tr>
+              <th class="info-name info-cell">Owner</th>
+              <td class="info-cell">{{project.owner}}</td>
+            </tr>
+            <tr>
+              <th class="info-name info-cell">Created Date:</th>
+              <td class="info-cell">{{project.createdDate}}</td>
+            </tr>
+            <tr>
+              <th class="info-name info-cell">Status</th>
+              <td class="info-cell">{{project.status}}</td>
+            </tr>
+            <tr>
+              <th class="info-name info-cell">Description</th>
+              <td class="info-cell">
+                <div class="control">
+                  <textarea class="textarea field-text" :style="{height: textAreaHeight}" readonly>{{project.description}}</textarea>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th class="info-name info-cell">Your Role</th>
+              <td class="info-cell">{{projectRoleLabel}}</td>
+            </tr>
+            <tr v-if="projectRole=='Owner' || projectRole=='Admin'">
+              <th class="info-name info-cell">Meta Data</th>
+              <td class="info-cell">{{metaDataFile || '(None)'}}</td>
+            </tr>
+            <tr v-if="metaDataFile" v-for="meta in metaData">
+              <th class="info-name info-cell">{{meta.name}}</th>
+              <td class="info-cell">{{meta.value}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div v-if="channels.length == 0">
-        No channel setup in this project yet.
+      <div class="column channels" v-if="project && projectRole && projectRole!='Viewer'">
+        <div class="channels-header">
+          <span class="channel-label">Channels</span>&nbsp;
+          <span class="edit-icon main-link"
+            v-if="projectRole=='Owner' || projectRole=='Admin'"
+            @click="openNewChannelModal">
+            <icon name="plus"></icon>
+          </span>
+        </div>
+        <div class="box channel-box" v-for="channel in channels":key="channel.id" @click="openUploadChannelModal(channel)">
+          <div class="header">
+            <span class="name">
+              {{channel.path}}
+            </span>&nbsp;
+            <span class="edit-icon main-link"
+              @click.stop="openChannelPath(channel)">
+              <icon name="sign-in"></icon>
+            </span>&nbsp;
+            <span class="edit-icon main-link"
+              v-if="projectRole=='Owner' || projectRole=='Admin'"
+              @click.stop="openEditChannelModal(channel)">
+              <icon name="edit"></icon>
+            </span>
+            <span class="info">
+              <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
+            </span>
+          </div>
+          <div class="description">{{channel.instruction}}</div>
+        </div>
+
+        <div v-if="channels.length == 0">
+          No channel setup in this project yet.
+        </div>
       </div>
     </div>
 
@@ -196,7 +211,9 @@ export default {
       uploadChannelModal: {
         opened: false,
         channel: null
-      }
+      },
+      metaDataFile: '',
+      metaData: [],
     }
   },
   computed: {
@@ -226,6 +243,7 @@ export default {
     projectId: function (val) {
       this.requestProject()
       this.requestChannels()
+      this.requestMetaData()
     },
   },
   methods: {
@@ -267,6 +285,7 @@ export default {
           this.$router.push('/projects')
         }else{
           this.requestProject()
+          this.requestMetaData()
         }
       }
     },
@@ -280,6 +299,45 @@ export default {
       }, response => {
         vm.error = 'Failed to get project channels!'
         vm.waiting = false
+      })
+    },
+    requestMetaData(){
+      this.metaDataFile = ''
+      this.metaData = []
+      this.waiting= true
+      var dataPath = encodeURIComponent('/')
+      dataPath = encodeURIComponent(dataPath)
+      this.$http.get(xHTTPx + '/get_meta_by_data_path/' + this.project.id + '/' + dataPath).then(response => {
+        this.waiting= false
+        var lines = response.body
+        var headers = []
+        if(lines.length > 0){
+          headers = lines[0].split('\t')
+        }
+        var values = []
+        if(lines.length > 1){
+          values = lines[1].split('\t')
+        }
+        for(var i=0;i<headers.length;i++){
+          var header = headers[i]
+          var optionsStart = header.indexOf('{')
+          var optionsEnd = header.indexOf('}')
+          var name = ''
+          var value = ''
+          if(optionsStart == -1 || optionsEnd == -1 || optionsStart >= optionsEnd){
+            name = header
+          }else{
+            name = header.slice(0, optionsStart).trim()
+          }
+          if(i < values.length){
+            value = values[i]
+          }
+          this.metaData.push({name: name, value: value})
+        }
+        this.metaDataFile = 'meta.txt'
+      }, response => {
+        this.metaDataFile = ''
+        this.waiting= false
       })
     },
     openNewChannelModal(){
@@ -352,6 +410,7 @@ export default {
     vm.$nextTick(function(){
       vm.requestProject()
       vm.requestChannels()
+      vm.requestMetaData()
     })
   }
 }
@@ -414,6 +473,7 @@ export default {
 
 .channels {
   margin-top: 20px;
+  margin-right: 10px;
 
   .channels-header{
     padding: 5px;
@@ -422,12 +482,6 @@ export default {
       color: #2e1052;
       font-size: 18px;
       font-weight: bold;
-    }
-
-    .channel-button {
-      float: right;
-      position: relative;
-      top: -10px;
     }
   }
 

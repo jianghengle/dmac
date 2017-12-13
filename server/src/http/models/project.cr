@@ -7,7 +7,6 @@ module DMACServer
         field :status, String
         field :key, String
         field :path, String
-        field :meta_data, String
       end
 
       def to_json(fields = {} of String => String)
@@ -19,7 +18,6 @@ module DMACServer
           str << "\"status\":\"" << @status << "\","
           str << "\"key\":\"" << @key << "\","
           str << "\"path\":\"" << @path << "\","
-          str << "\"metaData\":\"" << @meta_data << "\","
           fields.each do |k, v|
             str << "\"" << k << "\":\"" << v << "\","
           end
@@ -70,23 +68,11 @@ module DMACServer
         raise "Cannot find project in database"
       end
 
-      def self.get_metadata(project, meta_data_file)
+      def self.get_meta(project, data_path)
         root = ENV["DMAC_ROOT"]
         project_root = root + "/" + project.path.to_s
-        full_path = project_root + "/" + meta_data_file
+        full_path = project_root + data_path + "/meta.txt"
         raise "cannot find meta data file" unless File.file? full_path
-
-        lines = File.read_lines(full_path)
-        return lines[0..1].to_json
-      end
-
-      def self.get_project_metadata(project)
-        empty = [] of String
-        return empty.to_json if project.meta_data.nil?
-        root = ENV["DMAC_ROOT"]
-        project_root = root + "/" + project.path.to_s
-        full_path = project_root + "/" + project.meta_data.to_s
-        return empty.to_json unless File.file? full_path
 
         lines = File.read_lines(full_path)
         return lines[0..1].to_json
@@ -103,7 +89,6 @@ module DMACServer
         project.name = name
         project.description = description
         project.status = "Active"
-        project.meta_data = ""
         changeset = Repo.insert(project)
         raise changeset.errors.to_s unless changeset.valid?
         changeset.changes.each do |change|
@@ -131,7 +116,6 @@ module DMACServer
         project.name = name
         project.description = description
         project.status = status
-        project.meta_data = meta_data_file
         changeset = Repo.update(project)
         raise changeset.errors.to_s unless changeset.valid?
         unless meta_data_file.empty?
@@ -150,15 +134,11 @@ module DMACServer
         return project
       end
 
-      def self.update_meta_data(project, meta_data_file, meta_data)
-        return if meta_data_file.empty?
-        project.meta_data = meta_data_file
-        changeset = Repo.update(project)
-        raise changeset.errors.to_s unless changeset.valid?
+      def self.update_meta_data(project, meta_data)
         root = ENV["DMAC_ROOT"]
         project_root = root + "/" + project.path.to_s
-        full_path = project_root + "/" + meta_data_file
-        raise "cannot find meta data file" unless File.file? full_path
+        full_path = project_root + "/meta.txt"
+        return unless File.file? full_path
 
         lines = File.read_lines(full_path)
         result = String.build do |str|

@@ -69,12 +69,12 @@ module DMACServer
         HttpAPI::ProjectController.get_project(env)
       end
 
-      get "/get_project_meta_data/:project_id/:meta_data_file" do |env|
-        HttpAPI::ProjectController.get_metadata(env)
+      get "/get_meta_by_data_path/:project_id/:data_path" do |env|
+        HttpAPI::ProjectController.get_meta_by_data_path(env)
       end
 
-      get "/get_if_project_meta_data/:project_id" do |env|
-        HttpAPI::ProjectController.get_project_metadata(env)
+      get "/get_meta_by_template/:project_id" do |env|
+        HttpAPI::ProjectController.get_meta_by_template(env)
       end
 
       get "/get_file/:project_id/:data_path" do |env|
@@ -204,8 +204,8 @@ module DMACServer
         HttpAPI::ChannelController.delete_channel(env)
       end
 
-      get "/get_metadata/:project_id/:id" do |env|
-        HttpAPI::ChannelController.get_metadata(env)
+      get "/get_meta_by_channel/:project_id/:id" do |env|
+        HttpAPI::ChannelController.get_meta_by_channel(env)
       end
 
       post "/upload_file_by_channel/:project_id/:id" do |env|

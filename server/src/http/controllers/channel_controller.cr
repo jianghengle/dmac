@@ -132,7 +132,7 @@ module DMACServer
         end
       end
 
-      def get_metadata(ctx)
+      def get_meta_by_channel(ctx)
         begin
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
@@ -142,8 +142,8 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
 
-          metadata = Channel.get_metadata(project, id)
-          metadata.to_json
+          meta = Channel.get_meta(project, id)
+          meta.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception

@@ -67,19 +67,13 @@
               <div class="field-body">
                 <div class="field">
                   <div class="control">
-                    <span class="select">
-                      <select v-model="newMetaDataFile">
-                        <option v-for="option in fileOptions" v-bind:value="option.value">
-                          {{ option.name }}
-                        </option>
-                      </select>
-                    </span>
+                    <input class="input" type="text" :value="metaDataFile || '(None)'" readonly>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div v-if="newMetaDataFile">
+            <div v-if="metaDataFile">
               <div class="field is-horizontal meta-field" v-for="meta in metaData">
                 <div class="field-label is-normal">
                   <label class="label">{{meta.name}}</label>
@@ -146,7 +140,7 @@ export default {
       newName: '',
       newDescription: '',
       newStatus: '',
-      newMetaDataFile: '',
+      metaDataFile: '',
       metaData: [],
       oldMetaValues: [],
       fileOptions: [],
@@ -163,7 +157,6 @@ export default {
       return this.project.name != this.newName
         || this.project.description != this.newDescription
         || this.project.status != this.newStatus
-        || this.project.metaData != this.newMetaDataFile
         || JSON.stringify(this.oldMetaValues) != JSON.stringify(this.metaValues)
     },
     metaValues () {
@@ -178,18 +171,11 @@ export default {
         this.newName = this.project.name
         this.newDescription = this.project.description
         this.newStatus = this.project.status
-        this.newMetaDataFile = this.project.metaDataFile
+        this.metaDataFile = ''
         this.metaData = []
         this.oldMetaValues = []
-        if(this.newMetaDataFile){
-          this.requestMetaData()
-        }
-        this.fileOptions = []
-        this.requestFiles()
+        this.requestMetaData()
       }
-    },
-    newMetaDataFile: function (val) {
-      this.requestMetaData()
     }
   },
   methods: {
@@ -200,7 +186,7 @@ export default {
       if(!this.newName.length || !this.projectChanged) return
       var vm = this
       vm.waiting = true
-      var message = {id: vm.project.id, name: vm.newName, description: vm.newDescription, status: vm.newStatus, metaDataFile: vm.newMetaDataFile, metaData: vm.metaValues.join('\t')}
+      var message = {id: vm.project.id, name: vm.newName, description: vm.newDescription, status: vm.newStatus, metaDataFile: vm.metaDataFile, metaData: vm.metaValues.join('\t')}
       vm.$http.post(xHTTPx + '/update_project', message).then(response => {
         vm.waiting= false
         this.$emit('close-edit-project-modal', true)
@@ -243,31 +229,14 @@ export default {
       }
       this.confirmModal.context = null
     },
-    requestFiles(){
+    requestMetaData(){
+      this.metaDataFile = ''
+      this.metaData = []
+      this.oldMetaValues = []
       this.waiting= true
       var dataPath = encodeURIComponent('/')
       dataPath = encodeURIComponent(dataPath)
-      this.$http.get(xHTTPx + '/get_files/' + this.project.id + '/' + dataPath).then(response => {
-        this.waiting= false
-        this.fileOptions = response.body.map(function(f){
-          return { name: f, value: f }
-        })
-        this.fileOptions.unshift({name: '(None)', value: ''})
-        this.newMetaDataFile= this.project.metaData
-      }, response => {
-        this.error = 'Failed to get files!'
-        this.waiting= false
-      })
-    },
-    requestMetaData(){
-      if(!this.newMetaDataFile){
-        this.metaData = []
-        this.oldMetaValues = []
-        return
-      }
-      this.waiting= true
-      var metaDataFile = encodeURIComponent(this.newMetaDataFile)
-      this.$http.get(xHTTPx + '/get_project_meta_data/' + this.project.id + '/' + metaDataFile).then(response => {
+      this.$http.get(xHTTPx + '/get_meta_by_data_path/' + this.project.id + '/' + dataPath).then(response => {
         this.waiting= false
         var lines = response.body
         var headers = []
@@ -278,8 +247,6 @@ export default {
         if(lines.length > 1){
           values = lines[1].split('\t')
         }
-        this.metaData = []
-        this.oldMetaValues = []
         for(var i=0;i<headers.length;i++){
           var header = headers[i]
           var optionsStart = header.indexOf('{')
@@ -301,8 +268,9 @@ export default {
           this.metaData.push({name: name, value: value, options: options})
           this.oldMetaValues.push(value)
         }
+        this.metaDataFile = 'meta.txt'
       }, response => {
-        this.error = 'Failed to get meta data!'
+        this.metaDataFile = ''
         this.waiting= false
       })
     },

@@ -130,7 +130,7 @@ module DMACServer
         end
       end
 
-      def self.get_metadata(project, id)
+      def self.get_meta(project, id)
         channel = Repo.get_by(Channel, id: id)
         raise "cannot find channel" if channel.nil?
         channel = channel.as(Channel)

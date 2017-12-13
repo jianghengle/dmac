@@ -169,7 +169,7 @@ export default {
     },
     requestMetaData(){
       this.waiting= true
-      this.$http.get(xHTTPx + '/get_metadata/' + this.project.id + '/' + this.channel.id).then(response => {
+      this.$http.get(xHTTPx + '/get_meta_by_channel/' + this.project.id + '/' + this.channel.id).then(response => {
         this.waiting= false
         this.metaData = response.body.map(function(m){
           var optionsStart = m.indexOf('{')

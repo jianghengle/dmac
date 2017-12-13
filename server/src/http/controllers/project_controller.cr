@@ -157,9 +157,7 @@ module DMACServer
               if copy_users == "true" && template_role == "member"
                 Control.copy_controls(template, project, email)
               end
-              unless template.meta_data.nil?
-                Project.update_meta_data(project, template.meta_data.to_s, meta_data)
-              end
+              Project.update_meta_data(project, meta_data)
             end
           end
           Local.init_project_controls(project)
@@ -443,17 +441,18 @@ module DMACServer
         end
       end
 
-      def get_metadata(ctx)
+      def get_meta_by_data_path(ctx)
         begin
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
-          meta_data_file = get_param!(ctx, "meta_data_file")
+          data_path = get_param!(ctx, "data_path")
+          data_path = URI.unescape(data_path)
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          Project.get_metadata(project, meta_data_file)
+          Project.get_meta(project, data_path)
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception
@@ -461,7 +460,7 @@ module DMACServer
         end
       end
 
-      def get_project_metadata(ctx)
+      def get_meta_by_template(ctx)
         begin
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
@@ -470,7 +469,7 @@ module DMACServer
           control = Control.get_control(email, project)
           raise "Permission denied" if project.access_as_template(control).empty?
 
-          Project.get_project_metadata(project)
+          Project.get_meta(project, "")
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception

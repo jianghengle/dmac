@@ -188,7 +188,7 @@ export default {
     },
     requestMetaData(){
       this.waiting= true
-      this.$http.get(xHTTPx + '/get_if_project_meta_data/' + this.templateId).then(response => {
+      this.$http.get(xHTTPx + '/get_meta_by_template/' + this.templateId).then(response => {
         this.waiting= false
         var lines = response.body
         var headers = []
@@ -221,7 +221,6 @@ export default {
           this.metaData.push({name: name, value: value, options: options})
         }
       }, response => {
-        this.error = 'Failed to get meta data!'
         this.waiting= false
       })
     },
