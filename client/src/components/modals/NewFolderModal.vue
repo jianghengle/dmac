@@ -165,7 +165,7 @@ export default {
       var vm = this
       vm.waiting = true
       var dataPath = '/' + vm.newName.trim()
-      if(vm.dataPath != ''){
+      if(vm.dataPath != '/'){
         dataPath = vm.dataPath + dataPath
       }
       var metaDataValues = vm.metaData.map(function(m){

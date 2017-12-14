@@ -34,12 +34,15 @@
               <a class="navbar-item action-item" v-if="canEditFolder" @click="openFileUploadModal">
                 <icon name="upload"></icon>&nbsp;&nbsp;Upload File
               </a>
+              <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && selectedDataPaths.length" @click="deleteSelection">
+                <icon name="upload"></icon>&nbsp;&nbsp;Delete Selected ({{selectedDataPaths.length}})
+              </a>
               <hr class="navbar-divider" v-if="canEditFolder">
               <a class="navbar-item action-item" v-if="projectRole" @click="copySelection">
-                <icon name="copy"></icon>&nbsp;&nbsp;Copy Selected
+                <icon name="copy"></icon>&nbsp;&nbsp;Copy Selected ({{selectedDataPaths.length}})
               </a>
               <a class="navbar-item action-item" v-if="canEditFolder && canPaste" @click="pasteSelection">
-                <icon name="paste"></icon>&nbsp;&nbsp;Paste Here
+                <icon name="paste"></icon>&nbsp;&nbsp;Paste ({{clipboardSize}}) Here
               </a>
               <hr class="navbar-divider" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'">
               <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="publicFolder">
@@ -280,8 +283,21 @@ export default {
     clipboard () {
       return this.$store.state.projects.clipboard
     },
+    clipboardSize () {
+      return this.clipboard.dataPaths.length
+    },
     canPaste () {
-      return this.clipboard.projectId && this.clipboard.dataPaths.length
+      return this.clipboard.projectId && this.clipboardSize
+    },
+    selectedDataPaths () {
+      var dataPaths =[]
+      for(var i=0;i<this.files.length;i++){
+        var f = this.files[i]
+        if(f.options.selected){
+          dataPaths.push(f.dataPath)
+        }
+      }
+      return dataPaths
     },
     publicKey () {
       return this.$route.params.publicKey
@@ -399,15 +415,8 @@ export default {
         this.toggleSelected(f)
       }
     },
-    copySelection(f){
-      var dataPaths =[]
-      for(var i=0;i<this.files.length;i++){
-        var f = this.files[i]
-        if(f.options.selected){
-          dataPaths.push(f.dataPath)
-        }
-      }
-      this.$store.commit('projects/copySelection', {projectId: this.projectId, dataPaths: dataPaths})
+    copySelection(){
+      this.$store.commit('projects/copySelection', {projectId: this.projectId, dataPaths: this.selectedDataPaths})
     },
     pasteSelection(){
       if(!this.canPaste) return
@@ -461,7 +470,23 @@ export default {
     openSearch(){
       var searchPath = this.$route.path.replace('/data/', '/search/')
       this.$router.push(searchPath)
-    }
+    },
+    deleteSelection(){
+      var message = 'Are you sure to delete the selected ' + this.selectedDataPaths.length + ' item(s)?'
+      var context = {callback: this.deleteSelectionConfirmed, args: []}
+      this.openConfirmModal(message, context)
+    },
+    deleteSelectionConfirmed(){
+      var message = {
+        'projectId': this.projectId,
+        'dataPaths': this.selectedDataPaths.join(',')
+      }
+      this.$http.post(xHTTPx + '/delete_multiple', message).then(response => {
+        this.$emit('content-changed', true)
+      }, response => {
+        console.log('failed to delete files')
+      })
+    },
   },
   mounted () {
     this.reloadSelection()

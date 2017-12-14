@@ -371,6 +371,30 @@ module DMACServer
         end
       end
 
+      def delete_multiple(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_paths = get_param!(ctx, "dataPaths")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin"
+
+          data_paths.split(",") do |dp|
+            MyFile.delete_folder_file(project, dp, control)
+          end
+
+          Git.commit(project, email + " deleted multiple items")
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
       def upload_file(ctx)
         begin
           email = verify_token(ctx)

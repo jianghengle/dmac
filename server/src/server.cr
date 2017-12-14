@@ -125,6 +125,10 @@ module DMACServer
         HttpAPI::ProjectController.delete_folder_file(env)
       end
 
+      post "/delete_multiple" do |env|
+        HttpAPI::ProjectController.delete_multiple(env)
+      end
+
       post "/upload_file/:project_id/:data_path" do |env|
         HttpAPI::ProjectController.upload_file(env)
       end
