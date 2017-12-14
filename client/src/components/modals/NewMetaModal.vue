@@ -103,7 +103,7 @@ export default {
   watch: {
     opened: function (val) {
       if(val){
-        this.newName = ''
+        this.newName = 'meta.txt'
         this.error = ''
         this.fields = []
       }

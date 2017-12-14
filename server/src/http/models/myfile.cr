@@ -533,6 +533,30 @@ module DMACServer
         end
       end
 
+      def self.copy_directory_files(project, source_data_path, target_data_path, meta_data)
+        source_path = @@root + "/" + project.path.to_s + source_data_path
+        target_folder = MyFile.new(project, target_data_path)
+        Dir.foreach source_path do |filename|
+          next if @@ignore.has_key? filename.to_s
+          data_path = source_data_path + "/" + filename
+          source_file = MyFile.new(project, data_path)
+          if File.file? source_file.full_path
+            MyFile.copy_file_from_template(source_file, target_folder)
+          else
+            MyFile.copy_folder_from_template(source_file, target_folder)
+          end
+        end
+        project_root = @@root + "/" + project.path.to_s
+        full_path = project_root + target_data_path + "/meta.txt"
+        return unless File.file? full_path
+        lines = File.read_lines(full_path)
+        result = String.build do |str|
+          str << lines[0] << "\n" unless lines.empty?
+          str << meta_data << "\n"
+        end
+        File.write(full_path, result)
+      end
+
       def self.clean_temp
         now = Time.now
         Dir.foreach @@tmp do |filename|

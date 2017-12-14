@@ -4,7 +4,7 @@
       <div class="modal-background"></div>
       <div class="modal-card">
         <header class="modal-card-head">
-          <p class="modal-card-title">Edit Folder / File</p>
+          <p class="modal-card-title">Edit File</p>
           <button class="delete" @click="close"></button>
         </header>
         <section class="modal-card-body modal-body">
@@ -33,7 +33,7 @@
         </section>
         <footer class="modal-card-foot">
           <a class="button is-danger" :class="{'is-loading': waiting}" :disabled="changed" @click="deleteFile">Delete</a>
-          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!changed" @click="updateName">Update</a>
+          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!changed" @click="updateFile">Update</a>
           <a class="button button-right" @click="close">Cancel</a> 
         </footer>
       </div>
@@ -49,7 +49,7 @@
 import ConfirmModal from './ConfirmModal'
 
 export default {
-  name: 'edit-name-modal',
+  name: 'edit-file-modal',
   components: {
     ConfirmModal,
   },
@@ -108,20 +108,20 @@ export default {
   },
   methods: {
     close(){
-      this.$emit('close-edit-name-modal', false)
+      this.$emit('close-edit-file-modal', false)
     },
-    updateName(){
+    updateFile(){
       if(!this.changed) return
       var vm = this
       vm.waiting = true
       var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath, newName: vm.newName.trim(),
         newPermission: vm.newPermission, oldPermission: vm.oldPermission}
-      vm.$http.post(xHTTPx + '/update_folder_file_name', message).then(response => {
+      vm.$http.post(xHTTPx + '/update_file', message).then(response => {
         var resp = response.body
         vm.waiting= false
-        this.$emit('close-edit-name-modal', true)
+        this.$emit('close-edit-file-modal', true)
       }, response => {
-        vm.error = 'Failed to udpate user!'
+        vm.error = 'Failed to udpate file!'
         vm.waiting= false
       })
     },
@@ -137,9 +137,9 @@ export default {
       var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath}
       vm.$http.post(xHTTPx + '/delete_folder_file', message).then(response => {
         vm.waiting= false
-        this.$emit('close-edit-name-modal', 'deleted')
+        this.$emit('close-edit-file-modal', 'deleted')
       }, response => {
-        vm.error = 'Failed to udpate user!'
+        vm.error = 'Failed to delete file!'
         vm.waiting= false
       })
     },

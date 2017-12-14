@@ -226,6 +226,8 @@ module DMACServer
           project_id = get_param!(ctx, "projectId")
           data_path = get_param!(ctx, "dataPath")
           permission = get_param!(ctx, "permission")
+          copy_from_data_path = get_param!(ctx, "copyFromDataPath")
+          meta_data = get_param!(ctx, "metaData")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
@@ -234,6 +236,11 @@ module DMACServer
 
           full_path = MyFile.create_folder(project, data_path)
           Local.set_file_permission(project, full_path, permission) if permission != "Normal"
+          unless copy_from_data_path == ""
+            MyFile.copy_directory_files(project, copy_from_data_path, data_path, meta_data)
+            Channel.copy_directory_channels(project, copy_from_data_path, data_path)
+          end
+          Git.commit(project, email + " created folder " + data_path)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -269,7 +276,48 @@ module DMACServer
         end
       end
 
-      def update_folder_file_name(ctx)
+      def update_folder(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+          name = get_param!(ctx, "newName")
+          old_permission = get_param!(ctx, "oldPermission")
+          new_permission = get_param!(ctx, "newPermission")
+          meta_data_file = get_param!(ctx, "metaDataFile")
+          meta_data = get_param!(ctx, "metaData")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          role = control.role.to_s
+          raise "Permission denied" if role == "Viewer"
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
+
+          new_full_path = MyFile.update_folder_file_name(project, data_path, name, control)
+          Local.set_file_permission(project, new_full_path, new_permission) if old_permission != new_permission
+
+          unless meta_data_file.empty?
+            meta_full_path = new_full_path + "/" + meta_data_file
+            raise "cannot find meta data file" unless File.file? meta_full_path
+            lines = File.read_lines(meta_full_path)
+            result = String.build do |str|
+              str << lines[0] << "\n" unless lines.empty?
+              str << meta_data << "\n"
+            end
+            File.write(meta_full_path, result)
+          end
+
+          Git.commit(project, email + " updated " + data_path)
+
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
+
+      def update_file(ctx)
         begin
           email = verify_token(ctx)
           project_id = get_param!(ctx, "projectId")

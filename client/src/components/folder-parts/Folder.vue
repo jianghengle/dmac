@@ -112,7 +112,7 @@
             <td class="text-cell">{{f.modifiedAt}}</td>
             <td class="text-cell">
               <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && f.type=='file' && f.access==0) : true )"
-                @click.stop="openEditNameModal(f)"
+                @click.stop="openEditModal(f)"
                 class="action-icon main-link">
                 <icon name="edit"></icon>
               </a>
@@ -164,13 +164,21 @@
       @close-file-upload-modal="closeFileUploadModal">
     </file-upload-modal>
 
-    <edit-name-modal
-      :opened="editNameModal.opened"
+    <edit-folder-modal
+      :opened="editFolderModal.opened"
       :role="projectRole"
       :files="files"
-      :file="editNameModal.file"
-      @close-edit-name-modal="closeEditNameModal">
-    </edit-name-modal>
+      :file="editFolderModal.file"
+      @close-edit-folder-modal="closeEditFolderModal">
+    </edit-folder-modal>
+
+    <edit-file-modal
+      :opened="editFileModal.opened"
+      :role="projectRole"
+      :files="files"
+      :file="editFileModal.file"
+      @close-edit-file-modal="closeEditFileModal">
+    </edit-file-modal>
 
     <confirm-modal
       :opened="confirmModal.opened"
@@ -185,7 +193,8 @@ import NewFolderModal from '../modals/NewFolderModal'
 import NewFileModal from '../modals/NewFileModal'
 import NewMetaModal from '../modals/NewMetaModal'
 import FileUploadModal from '../modals/FileUploadModal'
-import EditNameModal from '../modals/EditNameModal'
+import EditFolderModal from '../modals/EditFolderModal'
+import EditFileModal from '../modals/EditFileModal'
 import ConfirmModal from '../modals/ConfirmModal'
 
 export default {
@@ -196,7 +205,8 @@ export default {
     NewFileModal,
     NewMetaModal,
     FileUploadModal,
-    EditNameModal,
+    EditFolderModal,
+    EditFileModal,
     ConfirmModal
   },
   data () {
@@ -213,7 +223,11 @@ export default {
       fileUploadModal: {
         opened: false
       },
-      editNameModal: {
+      editFolderModal: {
+        opened: false,
+        file: null
+      },
+      editFileModal: {
         opened: false,
         file: null
       },
@@ -318,12 +332,29 @@ export default {
     viewFile (f) {
       this.$router.push(f.path)
     },
-    openEditNameModal(f){
-      this.editNameModal.file = f
-      this.editNameModal.opened = true
+    openEditModal(f){
+      if(f.type == 'folder'){
+        this.openEditFolderModal(f)
+      }else{
+        this.openEditFileModal(f)
+      }
     },
-    closeEditNameModal(result){
-      this.editNameModal.opened = false
+    openEditFolderModal(f){
+      this.editFolderModal.file = f
+      this.editFolderModal.opened = true
+    },
+    closeEditFolderModal(result){
+      this.editFolderModal.opened = false
+      if(result){
+        this.$emit('content-changed', true)
+      }
+    },
+    openEditFileModal(f){
+      this.editFileModal.file = f
+      this.editFileModal.opened = true
+    },
+    closeEditFileModal(result){
+      this.editFileModal.opened = false
       if(result){
         this.$emit('content-changed', true)
       }

@@ -113,8 +113,12 @@ module DMACServer
         HttpAPI::ProjectController.create_file(env)
       end
 
-      post "/update_folder_file_name" do |env|
-        HttpAPI::ProjectController.update_folder_file_name(env)
+      post "/update_folder" do |env|
+        HttpAPI::ProjectController.update_folder(env)
+      end
+
+      post "/update_file" do |env|
+        HttpAPI::ProjectController.update_file(env)
       end
 
       post "/delete_folder_file" do |env|

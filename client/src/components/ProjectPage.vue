@@ -495,7 +495,7 @@ export default {
   }
 
   .channel-box {
-    margin-top: 0px;
+    margin-top: 5px;
     padding-top: 10px;
     padding-bottom: 10px;
     margin-bottom: 15px;

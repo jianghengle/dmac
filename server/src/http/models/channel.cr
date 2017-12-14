@@ -135,6 +135,27 @@ module DMACServer
         end
       end
 
+      def self.copy_directory_channels(project, source_data_path, target_data_path)
+        query = Query.where(project_id: project.id)
+        channels = Repo.all(Channel, query)
+        channels.as(Array) unless channels.nil?
+        channels.each do |c|
+          path = c.path.to_s
+          if path.starts_with?(source_data_path)
+            channel = Channel.new
+            channel.project_id = project.id
+            channel.path = path.sub(source_data_path, target_data_path)
+            channel.meta_data = c.meta_data
+            channel.instruction = c.instruction
+            channel.rename = c.rename
+            channel.files = c.files
+            channel.status = "Open"
+            changeset = Repo.insert(channel)
+            raise changeset.errors.to_s unless changeset.valid?
+          end
+        end
+      end
+
       def self.get_meta(project, id)
         channel = Repo.get_by(Channel, id: id)
         raise "cannot find channel" if channel.nil?
