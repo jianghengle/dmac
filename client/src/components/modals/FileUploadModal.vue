@@ -12,7 +12,19 @@
           <button class="delete" @click="error=''"></button>
           {{error}}
         </div>
-        <input v-if="opened" type="file" class="files-input" multiple @change="onFileChange">
+        <div v-if="opened" class="file files-input">
+          <label class="file-label">
+            <input class="file-input" type="file" multiple @change="onFileChange">
+            <span class="file-cta">
+              <span class="file-icon">
+                <icon name="upload"></icon>
+              </span>
+              <span class="file-label">
+                Choose files …
+              </span>
+            </span>
+          </label>
+        </div>
         <div v-if="Object.keys(uploads).length">
           <table class="table is-narrow is-fullwidth">
             <thead>
@@ -43,7 +55,7 @@
 <script>
 export default {
   name: 'file-upload-modal',
-  props: ['opened', 'projectId', 'dataPath'],
+  props: ['opened', 'projectId', 'dataPath', 'dropFiles'],
   data () {
     return {
       files: null,
@@ -54,8 +66,28 @@ export default {
   },
   watch: {
     opened: function (val) {
-      this.uploads = {}
-      this.waiting = false
+      if(val){
+        this.uploads = {}
+        this.waiting = false
+        if(this.dropFiles && this.dropFiles.length){
+          this.files = this.dropFiles
+          for(var i=0;i<this.files.length;i++){
+            var file = this.files[i]
+            if(!this.uploads[file.name]){
+              var upload = {
+                filename: file.name,
+                size: file.size,
+                loaded: 0,
+                percentage: 0,
+                done: false,
+                request: null
+              }
+              this.$set(this.uploads, file.name, upload)
+            }
+          }
+          this.uploadFiles()
+        }
+      }
     },
   },
   methods: {
@@ -157,7 +189,7 @@ export default {
 }
 
 .files-input {
-  font-size: 14px;
+  margin-bottom: 10px;
 }
 
 .number-cell {

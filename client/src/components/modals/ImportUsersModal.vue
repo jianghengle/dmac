@@ -12,9 +12,24 @@
           <button class="delete" @click="error=''"></button>
           {{error}}
         </div>
-        <input v-if="opened" type="file" class="files-input" @change="onFileChange">
+        <div class="file has-name is-fullwidth users-file-input">
+          <label class="file-label">
+            <input class="file-input" type="file" @change="onFileChange">
+            <span class="file-cta">
+              <span class="file-icon">
+                <icon name="upload"></icon>
+              </span>
+              <span class="file-label">
+                Choose a file…
+              </span>
+            </span>
+            <span class="file-name">
+              {{filename}}
+            </span>
+          </label>
+        </div>
         <div v-if="newUsers.length">
-          <table class="table is-narrow">
+          <table class="table is-narrow is-fullwidth">
             <thead>
               <tr>
                 <th>#</th>
@@ -60,7 +75,8 @@ export default {
     return {
       newUsers: [],
       waiting: false,
-      error: ''
+      error: '',
+      filename: ''
     }
   },
   computed: {
@@ -75,7 +91,8 @@ export default {
     opened: function (val) {
       this.newUsers = []
       this.waiting = false
-      error: ''
+      this.error = ''
+      this.filename = ''
     },
   },
   methods: {
@@ -87,6 +104,7 @@ export default {
       if (!files.length)
         return
       var file = files[0]
+      this.filename = file.name
 
       this.newUsers = []
       var emails = {}
@@ -169,8 +187,8 @@ export default {
     font-size: 16px;
 }
 
-.files-input {
-  font-size: 14px;
+.users-file-input {
+  margin-bottom: 10px;
 }
 
 .center-text {

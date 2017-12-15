@@ -55,7 +55,7 @@
     </nav>
 
 
-    <div class="file-content">
+    <div class="file-content" @drop.prevent="dropFiles" @dragover.prevent>
       <table class="table is-narrow is-fullwidth is-hoverable">
         <thead>
           <tr>
@@ -164,6 +164,7 @@
       :opened="fileUploadModal.opened"
       :project-id="projectId"
       :data-path="folder && folder.dataPath"
+      :drop-files="fileUploadModal.dropFiles"
       @close-file-upload-modal="closeFileUploadModal">
     </file-upload-modal>
 
@@ -224,7 +225,8 @@ export default {
         opened: false
       },
       fileUploadModal: {
-        opened: false
+        opened: false,
+        dropFiles: null
       },
       editFolderModal: {
         opened: false,
@@ -337,9 +339,11 @@ export default {
       }
     },
     openFileUploadModal(){
+      this.fileUploadModal.dropFiles = null
       this.fileUploadModal.opened = true
     },
     closeFileUploadModal(result){
+      this.fileUploadModal.dropFiles = null
       this.fileUploadModal.opened = false
       if(result){
         this.$emit('content-changed', true)
@@ -487,6 +491,12 @@ export default {
         console.log('failed to delete files')
       })
     },
+    dropFiles(e){
+      this.fileUploadModal.dropFiles = e.target.files || e.dataTransfer.files
+      this.$nextTick(function(){
+        this.fileUploadModal.opened = true
+      })
+    }
   },
   mounted () {
     this.reloadSelection()

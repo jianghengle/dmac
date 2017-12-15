@@ -58,14 +58,30 @@
               {{error}}
           </div>
 
-          <div class="field file-field">
-            <input v-if="opened" type="file" class="upload-file-input" multiple @change="onFileChange">
-            &nbsp;
-            <span v-if="channel" class="upload-info">
-              Must Select <strong>{{channel.files}}</strong> File(s)
-            </span>
-            <div v-if="channel">
-              <table class="table is-narrow">
+          <div v-if="channel" class="field file-field">
+            <div v-if="opened" class="file upload-file-input">
+              <label class="file-label">
+                <input class="file-input" type="file" multiple @change="onFileChange">
+                <span class="file-cta">
+                  <span class="file-icon">
+                    <icon name="upload"></icon>
+                  </span>
+                  <span class="file-label">
+                    Must Select&nbsp;<strong>{{channel.files}}</strong>&nbsp;File(s)
+                  </span>
+                </span>
+              </label>
+            </div>
+
+            <div v-if="uploads.length">
+              <table class="table is-narrow is-fullwidth">
+                <thead>
+                  <tr>
+                    <th>File Name</th>
+                    <th v-if="channel.rename">Rename</th>
+                    <th>Progress</th>
+                  </tr>
+                </thead>
                 <tbody>
                   <tr v-for="(v, k) in uploads">
                     <td>{{v.filename}}</td>
@@ -307,11 +323,7 @@ export default {
 }
 
 .upload-file-input {
-  font-size: 14px;
-}
-
-.upload-info {
-  font-size: 14px;
+  margin-bottom: 10px;
 }
 
 </style>
