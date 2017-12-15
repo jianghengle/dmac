@@ -2,7 +2,7 @@
     <div class="modal"
         :class="{'is-active': opened}">
       <div class="modal-background"></div>
-      <div class="modal-card">
+      <div class="modal-card wide-modal">
         <header class="modal-card-head">
           <p class="modal-card-title">New Project</p>
           <button class="delete" @click="close"></button>
@@ -58,27 +58,6 @@
                 </div>
               </div>
             </div>
-            <div class="field is-horizontal meta-field" v-for="meta in metaData">
-              <div class="field-label is-normal">
-                <label class="label">{{meta.name}}</label>
-              </div>
-              <div class="field-body">
-                <div class="field">
-                  <div class="control">
-                    <div v-if="meta.options">
-                      <div class="select">
-                        <select v-model="meta.value">
-                          <option v-for="option in meta.options">{{option}}</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div v-else>
-                      <input class="input" type="text" v-model="meta.value">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
             <div class="field is-horizontal meta-field" v-if="templateId && !isPublicTemplate">
               <div class="field-label">
                 <label class="label">Copy Users</label>
@@ -89,6 +68,41 @@
                     <label class="checkbox">
                       <input type="checkbox" v-model="copyUsers">
                     </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-if="metaData && metaData.length">
+              <div class="field is-horizontal meta-field">
+                <div class="field-label is-normal">
+                  <label class="label">Meta Data</label>
+                </div>
+                <div class="field-body">
+                  <div class="field">
+                    <div class="control">
+                      <input class="input is-static" type="text" value="meta.txt" readonly>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="field is-horizontal meta-field" v-for="meta in metaData">
+                <div class="field-label is-normal">
+                  <label class="label">{{meta.name}}</label>
+                </div>
+                <div class="field-body">
+                  <div class="field">
+                    <div class="control">
+                      <div v-if="meta.options">
+                        <div class="select">
+                          <select v-model="meta.value">
+                            <option v-for="option in meta.options">{{option}}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div v-else>
+                        <input class="input" type="text" v-model="meta.value">
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -255,6 +269,10 @@ export default {
 .modal-body {
   color: black;
   font-size: 16px;
+}
+
+.wide-modal {
+  width: 800px;
 }
 
 .button-right {

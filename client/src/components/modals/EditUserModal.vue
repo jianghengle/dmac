@@ -15,7 +15,7 @@
           <div class="field">
             <label class="label">Email</label>
             <p class="control">
-              <input class="input" type="text" v-model="newEmail" readonly>
+              <input class="input is-static" type="text" v-model="newEmail" readonly>
             </p>
           </div>
           <div class="field">

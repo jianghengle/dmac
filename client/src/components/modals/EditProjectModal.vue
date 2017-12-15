@@ -2,7 +2,7 @@
     <div class="modal"
         :class="{'is-active': opened}">
       <div class="modal-background"></div>
-      <div class="modal-card">
+      <div class="modal-card wide-modal">
         <header class="modal-card-head">
           <p class="modal-card-title">Edit Project</p>
           <button class="delete" @click="close"></button>
@@ -67,7 +67,7 @@
               <div class="field-body">
                 <div class="field">
                   <div class="control">
-                    <input class="input" type="text" :value="metaDataFile || '(None)'" readonly>
+                    <input class="input is-static" type="text" :value="metaDataFile || '(None)'" readonly>
                   </div>
                 </div>
               </div>
@@ -283,6 +283,10 @@ export default {
 .modal-body {
   color: black;
   font-size: 16px;
+}
+
+.wide-modal {
+  width: 800px;
 }
 
 .button-right {

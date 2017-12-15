@@ -2,7 +2,7 @@
     <div class="modal"
         :class="{'is-active': opened}">
       <div class="modal-background"></div>
-      <div class="modal-card">
+      <div class="modal-card wide-modal">
         <header class="modal-card-head">
           <p class="modal-card-title">Upload Data</p>
           <button class="delete" @click="close"></button>
@@ -18,7 +18,7 @@
               <div class="field-body">
                 <div class="field">
                   <div class="control">
-                    <input class="input field-text" type="text" readonly :value="channel && channel.path">
+                    <input class="input field-text is-static" type="text" readonly :value="channel && channel.path">
                   </div>
                 </div>
               </div>
@@ -31,7 +31,7 @@
               <div class="field-body">
                 <div class="field">
                   <div class="control">
-                    <input class="input field-text" type="text" readonly :value="channel.metaData">
+                    <input class="input field-text is-static" type="text" readonly :value="channel.metaData">
                   </div>
                 </div>
               </div>
@@ -44,7 +44,7 @@
               <div class="field-body">
                 <div class="field">
                   <div class="control">
-                    <textarea class="textarea field-text" readonly>{{channel && channel.instruction}}</textarea>
+                    <textarea class="textarea field-text is-static" readonly>{{channel && channel.instruction}}</textarea>
                   </div>
                 </div>
               </div>
@@ -290,6 +290,10 @@ export default {
 .modal-body {
   color: black;
   font-size: 16px;
+}
+
+.wide-modal {
+  width: 800px;
 }
 
 .button-right {
