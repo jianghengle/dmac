@@ -60,6 +60,8 @@ module DMACServer
         Local.run("setfacl -dm \"g:" + editor_group + ":rwx\" \"" + project_root + "\"")
         Local.run("setfacl -m \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
         Local.run("setfacl -dm \"g:" + viewer_group + ":rx\" \"" + project_root + "\"")
+        Local.run("setfacl -m u:dmac:rx \"" + project_root + "\"")
+        Local.run("setfacl -dm u:dmac:rx \"" + project_root + "\"")
       end
 
       def self.init_project_controls(project)
