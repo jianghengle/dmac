@@ -254,9 +254,21 @@ module DMACServer
         return full_path
       end
 
-      def self.delete_project_folder(project)
+      def self.mark_project_folder_deleted(project)
         full_path = @@root + "/" + project.path.to_s
-        MyFile.delete_files(full_path)
+        dir_name = File.dirname(full_path)
+        base_name = File.basename(full_path)
+        new_base = ".deleted__" + base_name
+        new_name = new_base
+        new_full_path = File.join(dir_name, new_name)
+        i = 1
+        while File.exists? new_full_path
+          new_name = new_base + "_" + i.to_s
+          new_full_path = File.join(dir_name, new_name)
+          i += 1
+        end
+        File.rename(full_path, new_full_path)
+        Local.remove_all_acls(new_full_path)
       end
 
       def self.delete_files(path)

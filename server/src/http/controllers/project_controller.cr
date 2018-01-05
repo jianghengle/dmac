@@ -207,7 +207,7 @@ module DMACServer
           raise "Permission denied" unless control.role.to_s == "Owner"
 
           Control.delete_all_by_project(project)
-          MyFile.delete_project_folder(project)
+          MyFile.mark_project_folder_deleted(project)
           Public.delete_all_by_project(project)
           Channel.delete_all_by_project(project)
           Project.delete_project(project)

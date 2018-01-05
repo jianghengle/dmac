@@ -255,6 +255,12 @@ module DMACServer
           Local.set_file_permission(project, full_path, "Hidden")
         end
       end
+
+      def self.remove_all_acls(full_path)
+        return unless @@enabled
+
+        Local.run("setfacl -b \"" + full_path + "\"")
+      end
     end
   end
 end
