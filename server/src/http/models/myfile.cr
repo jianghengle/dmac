@@ -268,7 +268,7 @@ module DMACServer
           i += 1
         end
         File.rename(full_path, new_full_path)
-        Local.remove_all_acls(new_full_path)
+        Local.remove_acls_except_dmac(new_full_path)
       end
 
       def self.delete_files(path)

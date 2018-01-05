@@ -256,10 +256,12 @@ module DMACServer
         end
       end
 
-      def self.remove_all_acls(full_path)
+      def self.remove_acls_except_dmac(full_path)
         return unless @@enabled
 
-        Local.run("setfacl -b \"" + full_path + "\"")
+        Local.run("setfacl -R -b \"" + full_path + "\"")
+        Local.run("setfacl -R -m u:dmac:rx \"" + full_path + "\"")
+        Local.run("setfacl -R -dm u:dmac:rx \"" + full_path + "\"")
       end
     end
   end
