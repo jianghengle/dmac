@@ -15,6 +15,7 @@ class Project < ApplicationRecord
           ['Active', 'Archived', 'Template', 'Public Template']
         end
       end
+      field :auto_history
       field :key
       field :path
       field :meta_data

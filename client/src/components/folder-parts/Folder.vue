@@ -44,6 +44,10 @@
               <a class="navbar-item action-item" v-if="canEditFolder && canPaste" @click="pasteSelection">
                 <icon name="paste"></icon>&nbsp;&nbsp;Paste ({{clipboardSize}}) Here
               </a>
+              <hr class="navbar-divider" v-if="(projectRole=='Owner' || projectRole=='Admin')">
+              <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin')" @click="openSaveHistoryModal">
+                <icon name="history"></icon>&nbsp;&nbsp;New History Record
+              </a>
               <hr class="navbar-divider" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'">
               <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="publicFolder">
                 <icon name="share-alt"></icon>&nbsp;&nbsp;Publish
@@ -189,6 +193,12 @@
       :message="confirmModal.message"
       @close-confirm-modal="closeConfirmModal">
     </confirm-modal>
+
+    <save-history-modal
+      :opened="saveHistoryModal.opened"
+      :project-id="projectId"
+      @close-save-history-modal="closeSaveHistoryModal">
+    </save-history-modal>
   </div>
 </template>
 
@@ -200,6 +210,7 @@ import FileUploadModal from '../modals/FileUploadModal'
 import EditFolderModal from '../modals/EditFolderModal'
 import EditFileModal from '../modals/EditFileModal'
 import ConfirmModal from '../modals/ConfirmModal'
+import SaveHistoryModal from '../modals/SaveHistoryModal'
 
 export default {
   name: 'folder',
@@ -211,7 +222,8 @@ export default {
     FileUploadModal,
     EditFolderModal,
     EditFileModal,
-    ConfirmModal
+    ConfirmModal,
+    SaveHistoryModal
   },
   data () {
     return {
@@ -240,6 +252,9 @@ export default {
         opened: false,
         message: '',
         context: null
+      },
+      saveHistoryModal: {
+        opened: false
       },
       urls: {},
       typeOrder: ['folder', 'file'],
@@ -496,7 +511,13 @@ export default {
       this.$nextTick(function(){
         this.fileUploadModal.opened = true
       })
-    }
+    },
+    openSaveHistoryModal () {
+      this.saveHistoryModal.opened = true
+    },
+    closeSaveHistoryModal(result){
+      this.saveHistoryModal.opened = false
+    },
   },
   mounted () {
     this.reloadSelection()

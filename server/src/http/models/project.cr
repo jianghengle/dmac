@@ -5,6 +5,7 @@ module DMACServer
         field :name, String
         field :description, String
         field :status, String
+        field :auto_history, Bool
         field :key, String
         field :path, String
       end
@@ -16,6 +17,7 @@ module DMACServer
           str << "\"name\":" << @name.to_json << ","
           str << "\"description\":" << @description.to_json << ","
           str << "\"status\":\"" << @status << "\","
+          str << "\"autoHistory\":" << @auto_history.to_json << ","
           str << "\"key\":\"" << @key << "\","
           str << "\"path\":\"" << @path << "\","
           fields.each do |k, v|
@@ -89,6 +91,7 @@ module DMACServer
         project.name = name
         project.description = description
         project.status = "Active"
+        project.auto_history = false
         changeset = Repo.insert(project)
         raise changeset.errors.to_s unless changeset.valid?
         changeset.changes.each do |change|
@@ -103,7 +106,7 @@ module DMACServer
         return project
       end
 
-      def self.update_project(project, name, description, status, meta_data_file, meta_data)
+      def self.update_project(project, name, description, status, auto_history, meta_data_file, meta_data)
         if project.name.to_s != name
           root = ENV["DMAC_ROOT"]
           old_path = project.path.to_s
@@ -116,6 +119,7 @@ module DMACServer
         project.name = name
         project.description = description
         project.status = status
+        project.auto_history = auto_history == "true"
         changeset = Repo.update(project)
         raise changeset.errors.to_s unless changeset.valid?
         unless meta_data_file.empty?

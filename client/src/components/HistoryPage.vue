@@ -7,6 +7,11 @@
         <icon name="history"></icon>&nbsp;
         Project History
       </div>
+      <div class="column commit-buttons">
+        <a class="button default-btn" @click="openSaveHistoryModal">
+          New History Record
+        </a>
+      </div>
     </div>
 
     <div v-if="error" class="notification is-danger login-text">
@@ -38,23 +43,34 @@
     </div>
 
     <div class="empty-label" v-if="!waiting && !commits.length">(Empty)</div>
+
+    <save-history-modal
+      :opened="saveHistoryModal.opened"
+      :project-id="projectId"
+      @close-save-history-modal="closeSaveHistoryModal">
+    </save-history-modal>
     
   </div>
 </template>
 
 <script>
 import AddressBar from './AddressBar'
+import SaveHistoryModal from './modals/SaveHistoryModal'
 
 export default {
   name: 'HistoryPage',
   components: {
-    AddressBar
+    AddressBar,
+    SaveHistoryModal
   },
   data () {
     return {
       error: '',
       waiting: false,
       commits: [],
+      saveHistoryModal: {
+        opened: false
+      },
     }
   },
   computed: {
@@ -105,7 +121,16 @@ export default {
     viewCommit (c) {
       var path = '/projects/' + this.projectId + '/history/' + c.hash
       this.$router.push(path)
-    } 
+    },
+    openSaveHistoryModal () {
+      this.saveHistoryModal.opened = true
+    },
+    closeSaveHistoryModal(result){
+      this.saveHistoryModal.opened = false
+      if(result){
+        this.requestCommits()
+      }
+    },
   },
   mounted () {
     var vm = this

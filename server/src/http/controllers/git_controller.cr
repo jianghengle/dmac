@@ -86,6 +86,26 @@ module DMACServer
         end
       end
 
+      def commit_history(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          commit_message = get_param!(ctx, "commitMessage")
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin"
+
+          result = Git.commit(project, commit_message)
+          raise "no change since the last record" if result.includes?("nothing to commit, working tree clean")
+          {"ok": true}.to_json
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
     end
   end
 end

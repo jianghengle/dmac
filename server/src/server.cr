@@ -188,6 +188,10 @@ module DMACServer
         HttpAPI::GitController.delete_history(env)
       end
 
+      post "/commit_history" do |env|
+        HttpAPI::GitController.commit_history(env)
+      end
+
       get "/get_channels/:project_id" do |env|
         HttpAPI::ChannelController.get_channels(env)
       end

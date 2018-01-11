@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171213191508) do
+ActiveRecord::Schema.define(version: 20180111183603) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -53,10 +53,11 @@ ActiveRecord::Schema.define(version: 20171213191508) do
     t.text     "description"
     t.string   "status"
     t.string   "key"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
     t.string   "path"
     t.string   "meta_data"
+    t.boolean  "auto_history"
     t.index ["key"], name: "index_projects_on_key", unique: true, using: :btree
     t.index ["status"], name: "index_projects_on_status", using: :btree
   end

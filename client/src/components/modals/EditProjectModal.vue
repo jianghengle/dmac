@@ -59,6 +59,25 @@
             </div>
           </div>
 
+          <div class="field is-horizontal">
+            <div class="field-label">
+              <label class="label">History</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <label class="checkbox">
+                    <input type="checkbox" v-model="newAutoHistory">
+                    &nbsp;Auto Save History
+                  </label>
+                </div>
+                <p class="help is-info">
+                  In spite of manually saving history, automatically save every edit as a history record.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div class="meta-fields">
             <div class="field is-horizontal meta-field">
               <div class="field-label is-normal">
@@ -140,6 +159,7 @@ export default {
       newName: '',
       newDescription: '',
       newStatus: '',
+      newAutoHistory: false,
       metaDataFile: '',
       metaData: [],
       oldMetaValues: [],
@@ -157,6 +177,7 @@ export default {
       return this.project.name != this.newName
         || this.project.description != this.newDescription
         || this.project.status != this.newStatus
+        || this.project.autoHistory != this.newAutoHistory
         || JSON.stringify(this.oldMetaValues) != JSON.stringify(this.metaValues)
     },
     metaValues () {
@@ -171,6 +192,7 @@ export default {
         this.newName = this.project.name
         this.newDescription = this.project.description
         this.newStatus = this.project.status
+        this.newAutoHistory = this.project.autoHistory
         this.metaDataFile = ''
         this.metaData = []
         this.oldMetaValues = []
@@ -184,15 +206,22 @@ export default {
     },
     update(){
       if(!this.newName.length || !this.projectChanged) return
-      var vm = this
-      vm.waiting = true
-      var message = {id: vm.project.id, name: vm.newName, description: vm.newDescription, status: vm.newStatus, metaDataFile: vm.metaDataFile, metaData: vm.metaValues.join('\t')}
-      vm.$http.post(xHTTPx + '/update_project', message).then(response => {
-        vm.waiting= false
+      this.waiting = true
+      var message = {
+        id: this.project.id,
+        name: this.newName,
+        description: this.newDescription,
+        status: this.newStatus,
+        autoHistory: this.newAutoHistory,
+        metaDataFile: this.metaDataFile,
+        metaData: this.metaValues.join('\t')
+      }
+      this.$http.post(xHTTPx + '/update_project', message).then(response => {
+        this.waiting= false
         this.$emit('close-edit-project-modal', true)
       }, response => {
-        vm.error = 'Failed to update project!'
-        vm.waiting= false
+        this.error = 'Failed to update project!'
+        this.waiting= false
       })
     },
     deleteProject(){

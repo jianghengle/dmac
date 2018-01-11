@@ -177,6 +177,7 @@ module DMACServer
           name = get_param!(ctx, "name")
           description = get_param!(ctx, "description")
           status = get_param!(ctx, "status")
+          auto_history = get_param!(ctx, "autoHistory")
           meta_data_file = get_param!(ctx, "metaDataFile")
           meta_data = get_param!(ctx, "metaData")
 
@@ -187,9 +188,8 @@ module DMACServer
           if project.status.to_s != status
             Local.change_project_status(project, status)
           end
-          Project.update_project(project, name, description, status, meta_data_file, meta_data)
-          Git.commit(project, email + " update project") unless meta_data_file.empty?
-          {"ok": true}.to_json
+          Project.update_project(project, name, description, status, auto_history, meta_data_file, meta_data)
+          Git.commit(project, email + " update project") if (project.auto_history && meta_data_file != "")
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
         rescue e : Exception
@@ -240,7 +240,7 @@ module DMACServer
             MyFile.copy_directory_files(project, copy_from_data_path, data_path, meta_data)
             Channel.copy_directory_channels(project, copy_from_data_path, data_path)
           end
-          Git.commit(project, email + " created folder " + data_path)
+          Git.commit(project, email + " created folder " + data_path) if project.auto_history
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -267,7 +267,7 @@ module DMACServer
 
           full_path = MyFile.create_file(project, data_path, control, content)
           Local.set_file_permission(project, full_path, permission) if permission != "Normal"
-          Git.commit(project, email + " created file " + data_path)
+          Git.commit(project, email + " created file " + data_path) if project.auto_history
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -307,7 +307,7 @@ module DMACServer
             File.write(meta_full_path, result)
           end
 
-          Git.commit(project, email + " updated " + data_path)
+          Git.commit(project, email + " updated " + data_path) if project.auto_history
 
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -336,7 +336,7 @@ module DMACServer
           Local.set_file_permission(project, new_full_path, new_permission) if old_permission != new_permission
 
           rel_path = data_path
-          Git.commit(project, email + " renamed " + rel_path + " to " + name)
+          Git.commit(project, email + " renamed " + rel_path + " to " + name) if project.auto_history
 
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -361,7 +361,7 @@ module DMACServer
           MyFile.delete_folder_file(project, data_path, control)
 
           rel_path = data_path
-          Git.commit(project, email + " deleted " + rel_path)
+          Git.commit(project, email + " deleted " + rel_path) if project.auto_history
 
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -386,7 +386,7 @@ module DMACServer
             MyFile.delete_folder_file(project, dp, control)
           end
 
-          Git.commit(project, email + " deleted multiple items")
+          Git.commit(project, email + " deleted multiple items") if project.auto_history
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -410,7 +410,7 @@ module DMACServer
           raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
           rel_path = MyFile.upload_file(project, data_path, file, control)
-          Git.commit(project, email + " uploaded " + rel_path)
+          Git.commit(project, email + " uploaded " + rel_path) if project.auto_history
 
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -436,7 +436,7 @@ module DMACServer
           MyFile.save_text_file(project, data_path, text, control)
 
           rel_path = data_path
-          Git.commit(project, email + " save file " + rel_path)
+          Git.commit(project, email + " save file " + rel_path) if project.auto_history
 
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -480,7 +480,7 @@ module DMACServer
           MyFile.copy_files(source_files, target_path, target_control)
 
           rel_path = target_data_path
-          Git.commit(target_project, email + " copy something into " + rel_path)
+          Git.commit(target_project, email + " copy something into " + rel_path) if target_project.auto_history
 
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -503,7 +503,7 @@ module DMACServer
           MyFile.unzip_file(project, data_path)
 
           rel_path = data_path
-          Git.commit(project, email + " extract " + rel_path)
+          Git.commit(project, email + " extract " + rel_path) if project.auto_history
 
           {"ok": true}.to_json
         rescue ex : InsufficientParameters

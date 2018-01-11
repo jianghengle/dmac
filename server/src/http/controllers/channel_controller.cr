@@ -168,7 +168,7 @@ module DMACServer
           raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
 
           rel_path = Channel.upload_file(project, id, file, new_name)
-          Git.commit(project, email + " uploaded " + rel_path + " by channel")
+          Git.commit(project, email + " uploaded " + rel_path + " by channel") if project.auto_history
 
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -191,7 +191,7 @@ module DMACServer
           raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
 
           rel_path = Channel.upload_meta(project, id, meta_data)
-          Git.commit(project, email + " uploaded meta data in " + rel_path + " by channel")
+          Git.commit(project, email + " uploaded meta data in " + rel_path + " by channel") if project.auto_history
 
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
