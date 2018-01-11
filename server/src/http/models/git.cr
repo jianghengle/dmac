@@ -44,7 +44,7 @@ module DMACServer
 
       def self.commit(project, message)
         project_root = @@root + "/" + project.path.to_s
-        command = "cd \"" + project_root + "\" && git add . && git commit -m\"" + message + "\""
+        command = "cd \"" + project_root + "\" && git add --all . && git commit -m\"" + message + "\""
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
         io.to_s
