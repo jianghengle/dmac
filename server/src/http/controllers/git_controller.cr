@@ -98,7 +98,7 @@ module DMACServer
           raise "Permission denied" unless role == "Owner" || role == "Admin"
 
           result = Git.commit(project, commit_message)
-          raise "no change since the last record" if result.includes?("nothing to commit, working tree clean")
+          raise "no change since the last record" if result.includes?("nothing to commit,")
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
