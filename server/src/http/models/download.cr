@@ -7,7 +7,7 @@ module DMACServer
         field :data_path, String
       end
 
-      def to_url()
+      def to_url
         result = String.build do |str|
           str << "/download_file/"
           str << @key
@@ -49,10 +49,10 @@ module DMACServer
           next if span.total_minutes < 60
           download_ids << download.id
         end
+        return if download_ids.empty?
         query = Query.where(:id, download_ids)
         Repo.delete_all(Download, query)
       end
-
     end
   end
 end

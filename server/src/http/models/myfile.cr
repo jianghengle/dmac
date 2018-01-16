@@ -580,6 +580,27 @@ module DMACServer
           MyFile.delete_files(path)
         end
       end
+
+      def self.clean_deleted_projects
+        now = Time.now
+        Dir.foreach @@root do |user_dir|
+          username = user_dir.to_s
+          next if username == "." || username == ".." || username == "tmp"
+          user_path = @@root + "/" + username
+          next unless File.directory? user_path
+          Dir.foreach user_path do |project_dir|
+            project_name = project_dir.to_s
+            next if project_name == "." || project_name == ".."
+            next unless project_name.starts_with? ".deleted__"
+            project_path = user_path + "/" + project_name
+            next unless File.directory? project_path
+            modified_at = File.stat(project_path).mtime
+            span = now - modified_at.as(Time)
+            next if span.total_days < 14
+            MyFile.delete_files(project_path)
+          end
+        end
+      end
     end
   end
 end
