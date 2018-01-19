@@ -17,7 +17,7 @@ module DMACServer
 
       def self.create_download(project_key, data_path)
         download = Download.new
-        download.key = SecureRandom.hex(32).to_s
+        download.key = Random::Secure.urlsafe_base64(32).to_s
         download.project_key = project_key
         download.data_path = data_path
         changeset = Repo.insert(download)

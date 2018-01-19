@@ -48,7 +48,7 @@ module DMACServer
         user = User.new
         user.email = email
         user.encrypted_password = encrypted_password.to_s
-        user.auth_token = SecureRandom.hex(32).to_s
+        user.auth_token = Random::Secure.base64(32).to_s
         user.role = "Subscriber"
         user.first_name = first_name
         user.last_name = last_name
@@ -72,11 +72,11 @@ module DMACServer
         user = Repo.get_by(User, email: email)
         auth_token = ""
         if user.nil?
-          password = SecureRandom.base64
+          password = Random::Secure.base64
           user = User.create_user(email, password, "", "")
         else
           user = user.as(User)
-          user.auth_token = SecureRandom.hex(32).to_s
+          user.auth_token = Random::Secure.base64(32).to_s
           changeset = Repo.update(user)
           raise changeset.errors.to_s unless changeset.valid?
         end

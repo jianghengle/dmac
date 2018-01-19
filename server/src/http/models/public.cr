@@ -34,7 +34,7 @@ module DMACServer
         public.data_path = data_path
         public.path = project.path.to_s
         public.path = public.path.to_s + data_path
-        public.key = SecureRandom.uuid.to_s
+        public.key = UUID.random.to_s
         changeset = Repo.insert(public)
         raise changeset.errors.to_s unless changeset.valid?
         return public
@@ -85,7 +85,7 @@ module DMACServer
           public = Public.new
           public.project_id = project.id
           public.data_path = p.data_path
-          public.key = SecureRandom.uuid.to_s
+          public.key = UUID.random.to_s
           public.path = project.path.to_s + p.data_path.to_s
           changeset = Repo.insert(public)
           raise changeset.errors.to_s unless changeset.valid?

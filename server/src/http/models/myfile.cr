@@ -173,7 +173,7 @@ module DMACServer
         raise "You do not have permission" unless dir.viewable?(control)
         files << dir
         return files if dir.type.to_s == "file"
-        Dir.foreach dir.full_path do |filename|
+        Dir.each_entry dir.full_path do |filename|
           next if @@ignore.has_key? filename.to_s
           dp = "/" + filename
           dp = data_path + dp unless data_path == "/"
@@ -276,7 +276,7 @@ module DMACServer
         if File.file?(path)
           File.delete(path)
         else
-          Dir.foreach path do |filename|
+          Dir.each_entry path do |filename|
             if filename.to_s != "." && filename.to_s != ".."
               p = path + "/" + filename
               MyFile.delete_files(p)
@@ -369,7 +369,7 @@ module DMACServer
         new_target_path = MyFile.new(target_path.project, new_target_data_path)
         new_folders[new_target_path.full_path] = true
 
-        Dir.foreach source_full_path do |filename|
+        Dir.each_entry source_full_path do |filename|
           next if @@ignore.has_key? filename.to_s
           new_source_full_path = source_full_path + "/" + filename
           if File.file? new_source_full_path
@@ -401,7 +401,7 @@ module DMACServer
           target_path = target_path + "/" + s if s != file.name
         end
 
-        Dir.foreach temp_path do |filename|
+        Dir.each_entry temp_path do |filename|
           next if filename.to_s == "." || filename.to_s == ".."
           source = temp_path + "/" + filename
           if File.file? source
@@ -413,7 +413,7 @@ module DMACServer
       end
 
       def self.unzip_to_temp(source)
-        temp_path = @@tmp + "/" + SecureRandom.hex(32).to_s
+        temp_path = @@tmp + "/" + Random::Secure.hex(32).to_s
         Dir.mkdir(temp_path)
         command = "unzip \"" + source + "\" -d " + temp_path
         io = IO::Memory.new
@@ -437,7 +437,7 @@ module DMACServer
         new_target = target + "/" + name
         return if ((File.exists? new_target) && (File.file? new_target))
         Dir.mkdir(new_target) unless File.exists? new_target
-        Dir.foreach source do |filename|
+        Dir.each_entry source do |filename|
           next if @@ignore.has_key? filename.to_s
           new_source = source + "/" + filename
           if File.file? new_source
@@ -469,7 +469,7 @@ module DMACServer
         Dir.mkdir(new_full_path) unless File.exists? new_full_path
         new_folders[new_full_path] = true
 
-        Dir.foreach file.full_path do |filename|
+        Dir.each_entry file.full_path do |filename|
           next if @@ignore.has_key? filename.to_s
           new_data_path = file.data_path + "/" + filename
           new_file = MyFile.new(file.project, new_data_path)
@@ -494,7 +494,7 @@ module DMACServer
       def self.copy_project_files(source, target)
         source_path = @@root + "/" + source.path.to_s
         target_path = @@root + "/" + target.path.to_s
-        Dir.foreach source_path do |filename|
+        Dir.each_entry source_path do |filename|
           next if @@ignore.has_key? filename.to_s
           source_data_path = "/" + filename
           source_file = MyFile.new(source, source_data_path)
@@ -532,7 +532,7 @@ module DMACServer
         new_target_data_path = "/" + name if target_folder.data_path == "/"
         new_target_folder = MyFile.new(target_folder.project, new_target_data_path)
         Local.keep_file_permission(source_folder, new_target_folder)
-        Dir.foreach source_folder.full_path do |filename|
+        Dir.each_entry source_folder.full_path do |filename|
           next if @@ignore.has_key? filename.to_s
           new_source_data_path = source_folder.data_path + "/" + filename
           new_source_data_path = "/" + filename if source_folder.data_path == "/"
@@ -548,7 +548,7 @@ module DMACServer
       def self.copy_directory_files(project, source_data_path, target_data_path, meta_data)
         source_path = @@root + "/" + project.path.to_s + source_data_path
         target_folder = MyFile.new(project, target_data_path)
-        Dir.foreach source_path do |filename|
+        Dir.each_entry source_path do |filename|
           next if @@ignore.has_key? filename.to_s
           data_path = source_data_path + "/" + filename
           source_file = MyFile.new(project, data_path)
@@ -571,7 +571,7 @@ module DMACServer
 
       def self.clean_temp
         now = Time.now
-        Dir.foreach @@tmp do |filename|
+        Dir.each_entry @@tmp do |filename|
           next if filename.to_s == "." || filename.to_s == ".."
           path = @@tmp + "/" + filename
           created_at = File.stat(path).ctime
@@ -583,12 +583,12 @@ module DMACServer
 
       def self.clean_deleted_projects
         now = Time.now
-        Dir.foreach @@root do |user_dir|
+        Dir.each_entry @@root do |user_dir|
           username = user_dir.to_s
           next if username == "." || username == ".." || username == "tmp"
           user_path = @@root + "/" + username
           next unless File.directory? user_path
-          Dir.foreach user_path do |project_dir|
+          Dir.each_entry user_path do |project_dir|
             project_name = project_dir.to_s
             next if project_name == "." || project_name == ".."
             next unless project_name.starts_with? ".deleted__"
