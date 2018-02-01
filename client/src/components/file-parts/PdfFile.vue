@@ -5,7 +5,14 @@
         <span class="main-link search-button" @click="openSearch">
           <icon name="search"></icon>
         </span>&nbsp;
-        {{file && file.name}}&nbsp;
+        {{file && file.name}}
+        <span class="tag is-warning file-tag" v-if="file && file.access==1">Readonly</span>
+        <span class="tag is-danger file-tag" v-if="file && file.access==2">Hidden</span>
+        <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && file.access==0) : true )"
+          @click="openEditFileModal"
+          class="action-icon main-link">
+          <icon name="edit"></icon>
+        </a>
         <a :href="url" :download="file && file.name" target="_blank" class="action-icon main-link"><icon name="download"></icon></a>
       </div>
       <div class="column buttons">
@@ -49,7 +56,7 @@ export default {
       return this.$store.state.projects.nodeMap
     },
     project () {
-      return this.nodeMap['/' + this.projectId]
+      return this.nodeMap['/projects/' + this.projectId]
     },
     projectRole () {
       return this.project && this.project.projectRole
@@ -93,7 +100,10 @@ export default {
     openSearch(){
       var searchPath = this.$route.path.replace('/data/', '/search/')
       this.$router.push(searchPath)
-    }
+    },
+    openEditFileModal(){
+      this.$emit('open-edit-file-modal')
+    },
   },
   mounted () {
     this.pdfWidth = this.$el.clientWidth
@@ -129,6 +139,11 @@ export default {
 .doc {
   width: 100%;
   height: 1000px;
+}
+
+.file-tag {
+  position: relative;
+  top: -3px;
 }
 
 </style>

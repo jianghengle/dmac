@@ -6,6 +6,13 @@
           <icon name="search"></icon>
         </span>&nbsp;
         {{file && file.name}}
+        <span class="tag is-warning file-tag" v-if="file && file.access==1">Readonly</span>
+        <span class="tag is-danger file-tag" v-if="file && file.access==2">Hidden</span>
+        <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && file.access==0) : true )"
+          @click="openEditFileModal"
+          class="main-link">
+          <icon name="edit"></icon>
+        </a>
       </div>
       <div class="column buttons">
         <label class="checkbox">
@@ -362,7 +369,10 @@ export default {
     openSearch(){
       var searchPath = this.$route.path.replace('/data/', '/search/')
       this.$router.push(searchPath)
-    }
+    },
+    openEditFileModal(){
+      this.$emit('open-edit-file-modal')
+    },
   },
   mounted () {
     this.loadTable()
@@ -423,5 +433,9 @@ export default {
   color: #2e1052;
 }
 
+.file-tag {
+  position: relative;
+  top: -3px;
+}
 
 </style>

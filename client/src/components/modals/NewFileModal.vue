@@ -30,6 +30,18 @@
             </p>
             <p class="help is-info">{{permissionTip}}</p>
           </div>
+          <div class="field">
+            <label class="label">Copy From</label>
+            <div class="control">
+              <div class="select">
+                <select v-model="copyFromDataPath">
+                  <option v-for="option in copyOptions" v-bind:value="option.dataPath">
+                    {{ option.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
         </section>
         <footer class="modal-card-foot">
           <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!newNameValid" @click="create">Create</a>
@@ -51,25 +63,26 @@ export default {
       nameTip: "Name must be less or equal than 255 charactors and do not start or end with '.'",
       permissions: ['Normal', 'Readonly', 'Hidden'],
       newPermission: 'Normal',
-      permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Readonly - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)"
+      permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Readonly - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)",
+      copyFromDataPath: '',
     }
   },
   computed: {
-    nameMap () {
-      if(!this.files) return {}
-      var nm = {}
-      this.files.forEach(function(f){
-        nm[f.name] = true
-      })
-      return nm
-    },
     newNameValid () {
       var newName = this.newName.trim()
       var len = newName.length
       if(len == 0 || len > 255) return false
-      if(this.nameMap[newName]) return false
       if(newName[0] == "." || newName[len-1] == ".") return false
       return true
+    },
+    copyOptions () {
+      if(this.files){
+        var options = this.files.filter(function(f){
+          return f.type == 'file'
+        })
+        options.unshift({name: '(None)', dataPath: ''})
+        return options
+      }
     }
   },
   watch: {
@@ -77,6 +90,7 @@ export default {
       if(val){
         this.newName = ''
         this.error = ''
+        this.copyFromDataPath = ''
       }
     },
   },
@@ -86,19 +100,18 @@ export default {
     },
     create(){
       if(!this.newNameValid) return
-      var vm = this
-      vm.waiting = true
-      var dataPath = '/' + vm.newName.trim()
-      if(vm.dataPath != '/'){
-        dataPath = vm.dataPath + dataPath
+      this.waiting = true
+      var dataPath = '/' + this.newName.trim()
+      if(this.dataPath != '/'){
+        dataPath = this.dataPath + dataPath
       }
-      var message = {projectId: vm.projectId, dataPath:  dataPath, permission: vm.newPermission}
-      vm.$http.post(xHTTPx + '/create_file', message).then(response => {
-        vm.waiting= false
-        vm.$emit('close-new-file-modal', true)
+      var message = {projectId: this.projectId, dataPath:  dataPath, permission: this.newPermission, copyFromDataPath: this.copyFromDataPath}
+      this.$http.post(xHTTPx + '/create_file', message).then(response => {
+        this.waiting= false
+        this.$emit('close-new-file-modal', true)
       }, response => {
-        vm.error = 'Failed to create file!'
-        vm.waiting= false
+        this.error = 'Failed to create file!' + JSON.stringify(response.body)
+        this.waiting= false
       })
     }
   },

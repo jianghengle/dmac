@@ -240,7 +240,7 @@ module DMACServer
         Dir.mkdir(full_path)
       end
 
-      def self.create_file(project, data_path, control, content)
+      def self.create_file(project, data_path, control, content, copy_from_data_path)
         full_path = @@root + "/" + project.path.to_s + data_path
         raise "Already exist" if File.exists?(full_path)
         role = control.role.to_s
@@ -250,7 +250,17 @@ module DMACServer
           parent_file = MyFile.new(project, parent_data_path)
           raise "File permission denied" if parent_file.access > 0
         end
-        File.write(full_path, content, 0o660)
+        if copy_from_data_path == ""
+          File.write(full_path, content, 0o660)
+        else
+          copy_from_file = MyFile.new(project, copy_from_data_path)
+          raise "No permission" unless copy_from_file.viewable?(control)
+          File.open(full_path, "w", 0o660) do |tf|
+            File.open(copy_from_file.full_path) do |sf|
+              IO.copy(sf, tf)
+            end
+          end
+        end
         return full_path
       end
 
@@ -289,9 +299,11 @@ module DMACServer
       def self.update_folder_file_name(project, data_path, name, control)
         file = MyFile.new(project, data_path)
         raise "No permission" unless file.editable?(control)
+        return file.full_path if file.name == name
         full_path = file.full_path
         dirname = File.dirname(full_path)
         new_full_path = dirname.to_s + "/" + name
+        raise "File name exists" if File.exists?(new_full_path)
         File.rename(full_path, new_full_path)
         return new_full_path
       end

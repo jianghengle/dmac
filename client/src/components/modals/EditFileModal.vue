@@ -53,7 +53,7 @@ export default {
   components: {
     ConfirmModal,
   },
-  props: ['opened', 'role', 'files', 'file'],
+  props: ['opened', 'role', 'file'],
   data () {
     return {
       error: '',
@@ -71,22 +71,6 @@ export default {
     }
   },
   computed: {
-    nameMap () {
-      if(!this.files) return {}
-      var nm = {}
-      this.files.forEach(function(f){
-        nm[f.name] = true
-      })
-      return nm
-    },
-    newNameValid () {
-      var newName = this.newName.trim()
-      var len = newName.length
-      if(len == 0 || len > 255) return false
-      if(newName[0] == '.' || newName[len-1] == '.') return false
-      if(this.nameMap[newName]) return false
-      return true
-    },
     oldPermission () {
       return this.file && this.permissions[this.file.access]
     },
@@ -112,17 +96,16 @@ export default {
     },
     updateFile(){
       if(!this.changed) return
-      var vm = this
-      vm.waiting = true
-      var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath, newName: vm.newName.trim(),
-        newPermission: vm.newPermission, oldPermission: vm.oldPermission}
-      vm.$http.post(xHTTPx + '/update_file', message).then(response => {
+      this.waiting = true
+      var message = {projectId: this.file.projectId, dataPath: this.file.dataPath, newName: this.newName.trim(),
+        newPermission: this.newPermission, oldPermission: this.oldPermission}
+      this.$http.post(xHTTPx + '/update_file', message).then(response => {
         var resp = response.body
-        vm.waiting= false
-        this.$emit('close-edit-file-modal', true)
+        this.waiting= false
+        this.$emit('close-edit-file-modal', this.newName.trim())
       }, response => {
-        vm.error = 'Failed to udpate file!'
-        vm.waiting= false
+        this.error = 'Failed to udpate file: ' + JSON.stringify(response.body)
+        this.waiting= false
       })
     },
     deleteFile(){
@@ -132,15 +115,14 @@ export default {
       this.openConfirmModal(message, context)
     },
     deleteFileConfirmed(){
-      var vm = this
-      vm.waiting = true
-      var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath}
-      vm.$http.post(xHTTPx + '/delete_folder_file', message).then(response => {
-        vm.waiting= false
-        this.$emit('close-edit-file-modal', 'deleted')
+      this.waiting = true
+      var message = {projectId: this.file.projectId, dataPath: this.file.dataPath}
+      this.$http.post(xHTTPx + '/delete_folder_file', message).then(response => {
+        this.waiting= false
+        this.$emit('close-edit-file-modal', '.deleted.')
       }, response => {
-        vm.error = 'Failed to delete file!'
-        vm.waiting= false
+        this.error = 'Failed to delete file!'
+        this.waiting= false
       })
     },
     openConfirmModal(message, context){
@@ -159,11 +141,6 @@ export default {
       }
       this.confirmModal.context = null
     },
-  },
-  mounted () {
-    if(this.user){
-      this.newName = this.file.name
-    }
   }
 }
 </script>

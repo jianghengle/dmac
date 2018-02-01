@@ -183,7 +183,7 @@ export default {
       this.$http.post(xHTTPx + '/update_folder', message).then(response => {
         var resp = response.body
         this.waiting= false
-        this.$emit('close-edit-folder-modal', true)
+        this.$emit('close-edit-folder-modal', this.newName.trim())
       }, response => {
         this.error = 'Failed to udpate folder!'
         this.waiting= false
@@ -201,9 +201,9 @@ export default {
       var message = {projectId: vm.file.projectId, dataPath: vm.file.dataPath}
       vm.$http.post(xHTTPx + '/delete_folder_file', message).then(response => {
         vm.waiting= false
-        this.$emit('close-edit-folder-modal', 'deleted')
+        this.$emit('close-edit-folder-modal', '.deleted.')
       }, response => {
-        vm.error = 'Failed to udpate user!'
+        vm.error = 'Failed to udpate folder!'
         vm.waiting= false
       })
     },

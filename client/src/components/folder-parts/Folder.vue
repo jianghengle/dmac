@@ -7,11 +7,16 @@
             <span class="main-link search-button" @click="openSearch">
               <icon name="search"></icon>
             </span>&nbsp;
-            <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">Readonly</span>
-            <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">Hidden</span>
             {{folder && folder.name}}
             <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
               <icon class="action-icon" name="share-alt"></icon>
+            </a>
+            <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">Readonly</span>
+            <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">Hidden</span>
+            <a v-if="folder.dataPath != '/' && canEditFolder"
+              @click="emitOpenEditFolderModal"
+              class="main-link">
+              <icon class="action-icon" name="edit"></icon>
             </a>
           </div>
         </div>
@@ -103,12 +108,12 @@
               </span>
             </td>
             <td>
+              {{f.name}}
+              <span v-if="f.publicUrl">*</span>
               <span v-if="folder.dataPath=='/' || folder.access < f.access">
                 <span class="tag is-warning" v-if="f.access==1">Readonly</span>
                 <span class="tag is-danger" v-if="f.access==2">Hidden</span>
               </span>
-              {{f.name}}
-              <span v-if="f.publicUrl">*</span>
             </td>
             <td class="number-cell">
               <span class="tooltip">
@@ -183,7 +188,6 @@
     <edit-file-modal
       :opened="editFileModal.opened"
       :role="projectRole"
-      :files="files"
       :file="editFileModal.file"
       @close-edit-file-modal="closeEditFileModal">
     </edit-file-modal>
@@ -517,6 +521,9 @@ export default {
     },
     closeSaveHistoryModal(result){
       this.saveHistoryModal.opened = false
+    },
+    emitOpenEditFolderModal(){
+      this.$emit('open-edit-folder-modal')
     },
   },
   mounted () {
