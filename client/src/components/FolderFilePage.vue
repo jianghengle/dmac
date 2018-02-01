@@ -192,11 +192,11 @@ export default {
           var dataPath = this.$route.params.dataPath
           var ss = dataPath.split('/')
           ss.pop()
-          this.requestFile(ss.join('/'))
+          this.requestFile(ss.length > 1 ? ss.join('/') : '/')
           ss.push(result)
           this.requestFile(ss.join('/'))
         }
-        var newDataPath = ss.join('/')
+        var newDataPath = ss.length > 1 ? ss.join('/') : '/'
         var newPath = '/projects/' + this.projectId + '/data/' + encodeURIComponent(newDataPath)
         this.$nextTick(function(){
           this.$router.push(newPath)
