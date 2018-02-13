@@ -13,6 +13,19 @@
 
             <div class="field is-horizontal channel-field">
               <div class="field-label is-normal">
+                <label class="label">Name</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input class="input field-text is-static" type="text" readonly :value="channel && channel.name">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal channel-field">
+              <div class="field-label is-normal">
                 <label class="label">Folder</label>
               </div>
               <div class="field-body">

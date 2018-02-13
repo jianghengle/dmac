@@ -111,26 +111,43 @@
       </div>
 
       <div class="column channels" v-if="project && projectRole && projectRole!='Viewer'">
-        <div class="channels-header">
-          <span class="channel-label">Channels</span>&nbsp;
-          <span class="edit-icon main-link"
-            v-if="projectRole=='Owner' || projectRole=='Admin'"
-            @click="openNewChannelModal">
-            <icon name="plus"></icon>
-          </span>
+        <div class="channels-header columns">
+          <div class="column">
+            <span class="channel-label">Channels</span>&nbsp;
+            <span class="edit-icon main-link"
+              v-if="projectRole=='Owner' || projectRole=='Admin'"
+              @click="openNewChannelModal">
+              <icon name="plus"></icon>
+            </span>
+          </div>
+          <div v-if="project && projectRole && (projectRole=='Owner' || projectRole=='Admin')" class="column filter-column">
+            <div class="select filter">
+              <select v-model="channelFilter">
+                <option>All</option>
+                <option>Open</option>
+                <option>Closed</option>
+              </select>
+            </div>
+          </div>
+          <div class="column sort-column">
+            <div class="select sort">
+              <select v-model="channelSort">
+                <option>Sort by Name</option>
+                <option>Sort by Folder</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div class="box channel-box" v-for="channel in channels":key="channel.id" @click="openUploadChannelModal(channel)">
+        <div class="box channel-box" v-for="channel in channels":key="channel.id"
+          @click="openUploadChannelModal(channel)"
+          v-show="channelFilter=='All' || channelFilter==channel.status">
           <div class="header">
             <span class="name">
+              {{channel.name}}
               <span class="tag" :class="{
                 'is-success': channel.status!='Closed',
                 'is-danger': channel.status=='Closed'
               }">{{channel.status=='Closed' ? 'Closed' : 'Open'}}</span>
-              {{channel.path}}
-            </span>&nbsp;
-            <span class="edit-icon main-link"
-              @click.stop="openChannelPath(channel)">
-              <icon name="sign-in"></icon>
             </span>&nbsp;
             <span class="edit-icon main-link"
               v-if="projectRole=='Owner' || projectRole=='Admin'"
@@ -139,6 +156,12 @@
             </span>
             <span class="info">
               <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
+            </span>
+            <br/>
+            <span class="target">{{channel.path}}</span>&nbsp;
+            <span class="edit-icon main-link"
+              @click.stop="openChannelPath(channel)">
+              <icon name="sign-in"></icon>
             </span>
           </div>
           <div class="description">{{channel.instruction}}</div>
@@ -230,6 +253,8 @@ export default {
       },
       metaDataFile: '',
       metaData: [],
+      channelFilter: 'Open',
+      channelSort: 'Sort by Folder'
     }
   },
   computed: {
@@ -260,21 +285,28 @@ export default {
       this.requestProject()
       this.requestChannels()
     },
+    channelFilter: function (val) {
+      this.$store.commit('options/setChannelFilter', val)
+    },
+    channelSort: function (val) {
+      this.$store.commit('options/setChannelSort', val)
+      console.log('sort ', val)
+      this.sortChannels()
+    }
   },
   methods: {
     requestProject () {
-      var vm = this
-      vm.waiting = true
-      vm.$http.get(xHTTPx + '/get_project/' + vm.projectId).then(response => {
+      this.waiting = true
+      this.$http.get(xHTTPx + '/get_project/' + this.projectId).then(response => {
         var resp = response.body
         this.$store.commit('projects/setProject', resp)
-        vm.waiting = false
-        vm.$nextTick(function(){
-          vm.requestMetaData()
+        this.waiting = false
+        this.$nextTick(function(){
+          this.requestMetaData()
         })
       }, response => {
-        vm.error = 'Failed to get project!'
-        vm.waiting = false
+        this.error = 'Failed to get project!'
+        this.waiting = false
       })
     },
     viewUsers () {
@@ -307,15 +339,15 @@ export default {
       }
     },
     requestChannels () {
-      var vm = this
-      vm.waiting = true
-      vm.$http.get(xHTTPx + '/get_channels/' + vm.projectId).then(response => {
+      this.waiting = true
+      this.$http.get(xHTTPx + '/get_channels/' + this.projectId).then(response => {
         var resp = response.body
-        vm.channels = resp
-        vm.waiting = false
+        this.channels = resp
+        this.sortChannels()
+        this.waiting = false
       }, response => {
-        vm.error = 'Failed to get project channels!'
-        vm.waiting = false
+        this.error = 'Failed to get project channels!'
+        this.waiting = false
       })
     },
     requestMetaData(){
@@ -420,13 +452,35 @@ export default {
     openChannelPath(channel){
       var path = '/projects/' + this.projectId + '/data/' + encodeURIComponent(channel.path)
       this.$router.push(path)
+    },
+    sortChannels(){
+      this.channels.sort(this.compareChannels)
+    },
+    compareChannels(c1, c2){
+      var name1 = c1.name ? c1.name : ''
+      var name2 = c2.name ? c2.name : ''
+      var path1 = c1.path ? c1.path : ''
+      var path2 = c2.path ? c2.path : ''
+      if(this.channelSort == 'Sort by Folder'){
+        if(path1 == path2) {
+          return name1.localeCompare(name2)
+        }
+        return path1.localeCompare(path2)
+      }else if(this.channelSort == 'Sort by Name'){
+        if(name1 == name2) {
+          return path1.localeCompare(path2)
+        }
+        return name1.localeCompare(name2)
+      }
+      return 0
     }
   },
   mounted () {
-    var vm = this
-    vm.$nextTick(function(){
-      vm.requestProject()
-      vm.requestChannels()
+    this.channelFilter = this.$store.state.options.channelFilter
+    this.channelSort = this.$store.state.options.channelSort
+    this.$nextTick(function(){
+      this.requestProject()
+      this.requestChannels()
     })
   }
 }
@@ -490,16 +544,33 @@ export default {
 
   .channels-header{
     padding: 5px;
+    margin-bottom: -5px;
 
     .channel-label {
       color: #2e1052;
       font-size: 18px;
       font-weight: bold;
     }
+
+    .filter-column {
+      text-align: center;
+
+      .filter {
+        margin-top: -5px;
+      }
+    }
+
+    .sort-column {
+      text-align: right;
+
+      .sort {
+        margin-top: -5px;
+      }
+    }
   }
 
   .channel-box {
-    margin-top: 5px;
+    margin-top: 0px;
     padding-top: 10px;
     padding-bottom: 10px;
     margin-bottom: 15px;
@@ -510,6 +581,12 @@ export default {
         font-size: 18px;
         font-weight: bold;
         color: #2e1052;
+      }
+
+      .target {
+        font-size: 16px;
+        color: #2e1052;
+        font-weight: bold;
       }
 
       .edit-icon {

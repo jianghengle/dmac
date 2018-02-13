@@ -39,8 +39,11 @@
               <a class="navbar-item action-item" v-if="canEditFolder" @click="openFileUploadModal">
                 <icon name="upload"></icon>&nbsp;&nbsp;Upload File
               </a>
+              <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="openNewChannelModal">
+                <icon name="plus"></icon>&nbsp;&nbsp;New Channel
+              </a>
               <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && selectedDataPaths.length" @click="deleteSelection">
-                <icon name="upload"></icon>&nbsp;&nbsp;Delete Selected ({{selectedDataPaths.length}})
+                <icon name="minus"></icon>&nbsp;&nbsp;Delete Selected ({{selectedDataPaths.length}})
               </a>
               <hr class="navbar-divider" v-if="canEditFolder">
               <a class="navbar-item action-item" v-if="projectRole" @click="copySelection">
@@ -203,6 +206,13 @@
       :project-id="projectId"
       @close-save-history-modal="closeSaveHistoryModal">
     </save-history-modal>
+
+    <new-channel-modal
+      :opened="newChannelModal.opened"
+      :project="project"
+      :target="folder && folder.dataPath"
+      @close-new-channel-modal="closeNewChannelModal">
+    </new-channel-modal>
   </div>
 </template>
 
@@ -215,6 +225,7 @@ import EditFolderModal from '../modals/EditFolderModal'
 import EditFileModal from '../modals/EditFileModal'
 import ConfirmModal from '../modals/ConfirmModal'
 import SaveHistoryModal from '../modals/SaveHistoryModal'
+import NewChannelModal from '../modals/NewChannelModal'
 
 export default {
   name: 'folder',
@@ -227,7 +238,8 @@ export default {
     EditFolderModal,
     EditFileModal,
     ConfirmModal,
-    SaveHistoryModal
+    SaveHistoryModal,
+    NewChannelModal
   },
   data () {
     return {
@@ -263,7 +275,10 @@ export default {
       urls: {},
       typeOrder: ['folder', 'file'],
       pasting: false,
-      selection: {}
+      selection: {},
+      newChannelModal: {
+        opened: false
+      },
     }
   },
   computed: {
@@ -525,6 +540,12 @@ export default {
     emitOpenEditFolderModal(){
       this.$emit('open-edit-folder-modal')
     },
+    openNewChannelModal(){
+      this.newChannelModal.opened = true
+    },
+    closeNewChannelModal(result){
+      this.newChannelModal.opened = false
+    }
   },
   mounted () {
     this.reloadSelection()

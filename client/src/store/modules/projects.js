@@ -1,13 +1,10 @@
 import Vue from 'vue'
 import DateForm from 'dateformat'
 
-var showOption = localStorage.getItem('showOption')
-
 // initial state
 export const state = {
   showNav: true,
   nodeMap: {},
-  showOption: showOption ? showOption : 'Active',
   clipboard: {projectId: null, dataPaths: []},
   publicDataPath: ''
 }

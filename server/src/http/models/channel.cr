@@ -6,6 +6,7 @@ module DMACServer
 
       schema "channels" do
         field :project_id, Int32
+        field :name, String
         field :path, String
         field :meta_data, String
         field :instruction, String
@@ -20,6 +21,7 @@ module DMACServer
           str << "{"
           str << "\"id\":" << @id << ","
           str << "\"projectId\":" << @project_id << ","
+          str << "\"name\":" << @name.to_json << ","
           str << "\"path\":" << @path.to_json << ","
           str << "\"metaData\":" << @meta_data.to_json << ","
           str << "\"instruction\":" << @instruction.to_json << ","
@@ -79,7 +81,7 @@ module DMACServer
         return files
       end
 
-      def self.create_channel(project, path, meta_data, instruction, rename, files, status)
+      def self.create_channel(project, path, meta_data, instruction, rename, files, status, name)
         channel = Channel.new
         channel.project_id = project.id
         channel.path = path
@@ -88,11 +90,12 @@ module DMACServer
         channel.files = files.to_i
         channel.rename = rename == "true"
         channel.status = status
+        channel.name = name
         changeset = Repo.insert(channel)
         raise changeset.errors.to_s unless changeset.valid?
       end
 
-      def self.update_channel(id, path, meta_data, instruction, rename, files, status)
+      def self.update_channel(id, path, meta_data, instruction, rename, files, status, name)
         channel = Repo.get(Channel, id)
         raise "Cannot find channel" if channel.nil?
         channel = channel.as(Channel)
@@ -102,6 +105,7 @@ module DMACServer
         channel.rename = rename == "true"
         channel.files = files.to_i
         channel.status = status
+        channel.name = name
         changeset = Repo.update(channel)
         raise changeset.errors.to_s unless changeset.valid?
         return channel
@@ -130,6 +134,7 @@ module DMACServer
           channel.rename = c.rename
           channel.files = c.files
           channel.status = c.status
+          channel.name = c.name
           changeset = Repo.insert(channel)
           raise changeset.errors.to_s unless changeset.valid?
         end
@@ -138,7 +143,7 @@ module DMACServer
       def self.copy_directory_channels(project, source_data_path, target_data_path)
         query = Query.where(project_id: project.id)
         channels = Repo.all(Channel, query)
-        channels.as(Array) unless channels.nil?
+        channels = channels.as(Array) unless channels.nil?
         channels.each do |c|
           path = c.path.to_s
           if path.starts_with?(source_data_path)
@@ -150,10 +155,26 @@ module DMACServer
             channel.rename = c.rename
             channel.files = c.files
             channel.status = "Open"
+            channel.name = c.name
             changeset = Repo.insert(channel)
             raise changeset.errors.to_s unless changeset.valid?
           end
         end
+      end
+
+      def self.delete_all_by_directory(project, data_path)
+        query = Query.where(project_id: project.id)
+        channels = Repo.all(Channel, query)
+        channels = channels.as(Array) unless channels.nil?
+        ids = [] of Int32 | Int64 | Nil
+        channels.each do |c|
+          path = c.path.to_s
+          if path.starts_with?(data_path)
+            ids << c.id
+          end
+        end
+        query = Query.where(:id, ids)
+        Repo.delete_all(Channel, query)
       end
 
       def self.get_meta(project, id)

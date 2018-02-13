@@ -14,6 +14,13 @@
           </div>
 
           <div class="field">
+            <label class="label">Name</label>
+            <p class="control">
+              <input v-if="opened" class="input" type="text" v-model="name" v-focus>
+            </p>
+          </div>
+
+          <div class="field">
             <label class="label">Status</label>
             <p class="control">
               <span class="select">
@@ -94,7 +101,7 @@
 <script>
 export default {
   name: 'new-channel-modal',
-  props: ['opened', 'project'],
+  props: ['opened', 'project', 'target'],
   data () {
     return {
       error: '',
@@ -106,12 +113,13 @@ export default {
       instruction: '',
       filesUpload: 1,
       rename: true,
-      status: 'Open'
+      status: 'Open',
+      name: ''
     }
   },
   computed: {
     canCreate () {
-      return this.project && this.targetFolder
+      return this.project && this.targetFolder && this.name
     },
   },
   watch: {
@@ -123,7 +131,15 @@ export default {
         this.targetFolder = null
         this.fileOptions = []
         this.metadataFile = ''
-        this.requestFolders()
+        this.name = ''
+        if(this.target){
+          this.folderOptions = [{name: this.target, path: this.target}]
+          this.$nextTick(function(){
+            this.targetFolder = this.target
+          })
+        }else{
+          this.requestFolders()
+        }
       }
     },
     targetFolder: function (val) {
@@ -168,8 +184,10 @@ export default {
       })
     },
     create(){
+      if(!this.canCreate)
+        return
       this.waiting= true
-      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.filesUpload, status: this.status }
+      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.filesUpload, status: this.status, name: this.name }
       this.$http.post(xHTTPx + '/create_channel', message).then(response => {
         this.waiting= false
         this.$emit('close-new-channel-modal', true)

@@ -312,6 +312,7 @@ module DMACServer
         file = MyFile.new(project, data_path)
         raise "No permission" unless file.editable?(control)
         MyFile.delete_files(file.full_path)
+        Channel.delete_all_by_directory(project, file.data_path)
       end
 
       def self.upload_file(project, data_path, file, control)

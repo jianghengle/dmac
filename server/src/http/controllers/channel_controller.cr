@@ -77,12 +77,13 @@ module DMACServer
           files = get_param!(ctx, "files")
           rename = get_param!(ctx, "rename")
           status = get_param!(ctx, "status")
+          name = get_param!(ctx, "name")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          Channel.create_channel(project, path, meta_data, instruction, rename, files, status)
+          Channel.create_channel(project, path, meta_data, instruction, rename, files, status, name)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -102,12 +103,13 @@ module DMACServer
           files = get_param!(ctx, "files")
           rename = get_param!(ctx, "rename")
           status = get_param!(ctx, "status")
+          name = get_param!(ctx, "name")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          Channel.update_channel(id, path, meta_data, instruction, rename, files, status)
+          Channel.update_channel(id, path, meta_data, instruction, rename, files, status, name)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

@@ -14,6 +14,13 @@
           </div>
 
           <div class="field">
+            <label class="label">Name</label>
+            <p class="control">
+              <input v-if="opened" class="input" type="text" v-model="name" v-focus>
+            </p>
+          </div>
+
+          <div class="field">
             <label class="label">Status</label>
             <p class="control">
               <span class="select">
@@ -106,18 +113,20 @@ export default {
       instruction: '',
       rename: true,
       files: 1,
-      status: 'Open'
+      status: 'Open',
+      name: ''
     }
   },
   computed: {
     canUpdate () {
-      return this.project && this.channel &&
+      return this.project && this.channel && this.name &&
         (this.targetFolder != this.channel.path
         || this.metadataFile != this.channel.metaData
         || this.instruction != this.channel.instruction
         || this.rename != this.channel.rename
         || this.files != this.channel.files
-        || this.status != this.channel.status)
+        || this.status != this.channel.status
+        || this.name != this.channel.name )
     },
   },
   watch: {
@@ -133,6 +142,7 @@ export default {
         this.rename = this.channel.rename
         this.files = this.channel.files
         this.status = this.channel.status
+        this.name = this.channel.name
         this.requestFolders()
         this.requestFiles()
       }
@@ -181,12 +191,12 @@ export default {
     },
     update(){
       this.waiting= true
-      var message = { projectId: this.project.id, id: this.channel.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.files, status: this.status }
+      var message = { projectId: this.project.id, id: this.channel.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.files, status: this.status, name: this.name }
       this.$http.post(xHTTPx + '/update_channel', message).then(response => {
         this.waiting= false
         this.$emit('close-edit-channel-modal', true)
       }, response => {
-        this.error = 'Failed to create channel!'
+        this.error = 'Failed to update channel!'
         this.waiting= false
       })
     }

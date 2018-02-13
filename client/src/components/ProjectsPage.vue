@@ -16,7 +16,7 @@
               <div class="field is-narrow">
                 <div class="control">
                   <div class="select is-fullwidth">
-                    <select v-model="showOption">
+                    <select v-model="projectFilter">
                       <option>Active</option>
                       <option>Archived</option>
                       <option>Template</option>
@@ -42,7 +42,7 @@
       {{error}}
     </div>
     <div class="box project-box" v-for="project in projects":key="project.id" @click="viewProject(project)"
-      v-show="showOption=='All' || showOption==project.status">
+      v-show="projectFilter=='All' || projectFilter==project.status">
       <div class="header">
         <span class="name">
           <span class="tag" :class="{
@@ -108,7 +108,7 @@ export default {
         opened: false,
         project: null
       },
-      showOption: 'Active',
+      projectFilter: 'Active',
       isSubscriber: true
     }
   },
@@ -132,25 +132,24 @@ export default {
     }
   },
   watch: {
-    showOption: function (val) {
-      this.$store.commit('projects/setShowOption', this.showOption)
-    },
-    projects: function(val) {
-      this.initShowOption()
+    projectFilter: function (val) {
+      this.$store.commit('options/setProjectFilter', val)
     }
   },
   methods: {
     requestProjects(){
-      var vm = this
-      vm.waiting = true
-      vm.$http.get(xHTTPx + '/get_projects').then(response => {
+      this.waiting = true
+      this.$http.get(xHTTPx + '/get_projects').then(response => {
         var resp = response.body
-        vm.isSubscriber = resp[0] == 'Subscriber'
+        this.isSubscriber = resp[0] == 'Subscriber'
         this.$store.commit('projects/setProjects', resp.slice(1))
-        vm.waiting= false
+        this.$nextTick(function(){
+          this.initProjectFilter()
+        })
+        this.waiting= false
       }, response => {
-        vm.error = 'Failed to get projects!'
-        vm.waiting= false
+        this.error = 'Failed to get projects!'
+        this.waiting= false
       })
     },
     viewProject (project) {
@@ -175,28 +174,27 @@ export default {
         this.requestProjects()
       }
     },
-    initShowOption(){
-      if(this.projects && this.projects.length){
-        var noActive = true
+    initProjectFilter(){
+      if(this.projects && this.projects.length && this.projectFilter != 'All'){
+        var noProject = true
         for(var i=0;i<this.projects.length;i++){
-          if(this.projects[i].status == 'Active'){
-            noActive = false
+          if(this.projects[i].status == this.projectFilter){
+            noProject = false
             break
           }
         }
-        if(noActive){
-          this.$store.commit('projects/setShowOption', 'All')
+        if(noProject){
+          this.projectFilter = 'All'
+          this.$store.commit('options/setProjectFilter', 'All')
         }
       }
     }
   },
   mounted () {
-    var vm = this
-    vm.$nextTick(function(){
-      vm.requestProjects()
+    this.projectFilter = this.$store.state.options.projectFilter
+    this.$nextTick(function(){
+      this.requestProjects()
     })
-    this.showOption = this.$store.state.projects.showOption
-    this.initShowOption()
   },
 }
 </script>

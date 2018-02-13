@@ -4,6 +4,7 @@ class Channel < ApplicationRecord
   rails_admin do
     edit do
       field :project
+      field :name
       field :path
       field :meta_data
       field :instruction
