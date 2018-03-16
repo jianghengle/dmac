@@ -244,6 +244,10 @@ module DMACServer
         HttpAPI::PublicController.search_in_file(env)
       end
 
+      post "/list_irods_path" do |env|
+        HttpAPI::IrodsController.list_irods_path(env)
+      end
+
       port = 3000
       port = ENV["DMAC_PORT"].to_i if ENV.has_key?("DMAC_PORT")
       Kemal.run port

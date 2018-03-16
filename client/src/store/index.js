@@ -4,6 +4,7 @@ import user from './modules/user'
 import projects from './modules/projects'
 import search from './modules/search'
 import options from './modules/options'
+import irods from './modules/irods'
 
 Vue.use(Vuex)
 
@@ -12,6 +13,7 @@ export default new Vuex.Store({
     user: user,
     projects: projects,
     search: search,
-    options: options
+    options: options,
+    irods: irods
   }
 })

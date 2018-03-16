@@ -21,7 +21,7 @@
           </div>
         </div>
         <div class="navbar-end">
-          <div class="navbar-item has-dropdown is-hoverable">
+          <div class="navbar-item has-dropdown is-hoverable" v-if="!publicKey">
             <a class="navbar-link actions-label">
               Actions
             </a>
@@ -59,6 +59,10 @@
               <hr class="navbar-divider" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'">
               <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="publicFolder">
                 <icon name="share-alt"></icon>&nbsp;&nbsp;Publish
+              </a>
+              <hr class="navbar-divider">
+              <a class="navbar-item action-item" @click="irodsModal.opened = true">
+                <icon name="exchange"></icon>&nbsp;&nbsp;CyVerse
               </a>
             </div>
           </div>
@@ -213,6 +217,12 @@
       :target="folder && folder.dataPath"
       @close-new-channel-modal="closeNewChannelModal">
     </new-channel-modal>
+
+    <irods-modal
+      :opened="irodsModal.opened"
+      :folder="folder"
+      @close-irods-modal="closeIrodsModal">
+    </irods-modal>
   </div>
 </template>
 
@@ -226,6 +236,7 @@ import EditFileModal from '../modals/EditFileModal'
 import ConfirmModal from '../modals/ConfirmModal'
 import SaveHistoryModal from '../modals/SaveHistoryModal'
 import NewChannelModal from '../modals/NewChannelModal'
+import IrodsModal from '../modals/IrodsModal'
 
 export default {
   name: 'folder',
@@ -239,7 +250,8 @@ export default {
     EditFileModal,
     ConfirmModal,
     SaveHistoryModal,
-    NewChannelModal
+    NewChannelModal,
+    IrodsModal
   },
   data () {
     return {
@@ -279,6 +291,9 @@ export default {
       newChannelModal: {
         opened: false
       },
+      irodsModal: {
+        opened: false
+      }
     }
   },
   computed: {
@@ -545,6 +560,10 @@ export default {
     },
     closeNewChannelModal(result){
       this.newChannelModal.opened = false
+    },
+    closeIrodsModal(){
+      this.irodsModal.opened = false
+      this.$emit('content-changed', true)
     }
   },
   mounted () {
