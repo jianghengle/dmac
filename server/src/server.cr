@@ -248,6 +248,14 @@ module DMACServer
         HttpAPI::IrodsController.list_irods_path(env)
       end
 
+      post "/transfer_to_irods" do |env|
+        HttpAPI::IrodsController.transfer_to_irods(env)
+      end
+
+      post "/transfer_from_irods" do |env|
+        HttpAPI::IrodsController.transfer_from_irods(env)
+      end
+
       port = 3000
       port = ENV["DMAC_PORT"].to_i if ENV.has_key?("DMAC_PORT")
       Kemal.run port

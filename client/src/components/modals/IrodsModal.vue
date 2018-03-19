@@ -50,12 +50,12 @@
                       </tbody>
                     </table>
                   </div>
-                </div>
-                <div class="column-button">
-                  <a class="button is-primary" :disabled="!canTransterTo">
-                    Transfer {{dmacSelected.length}} To CyVerse
-                    &nbsp;<icon name="arrow-right"></icon>
-                  </a>
+                  <div class="column-button">
+                    <a class="button is-primary" :disabled="!canTransterTo" @click="transferTo">
+                      Transfer {{dmacSelected.length}} To CyVerse
+                      &nbsp;<icon name="arrow-right"></icon>
+                    </a>
+                  </div>
                 </div>
               </div>
               <div class="column irods-column">
@@ -114,7 +114,7 @@
                       <tbody>
                         <tr v-for="f in irodsFiles" :key="f.path" class="entry" :class="{'selected': f.selected}">
                           <td class="number-cell">
-                            <input type="checkbox" class="clickable" v-model="f.selected" @click="toggleSelected(irodsFiles, f)">
+                            <input type="checkbox" class="clickable" v-if="f.type=='file' || canSelectIrodsFolder" v-model="f.selected" @click="toggleSelected(irodsFiles, f)">
                           </td>
                           <td class="text-cell">
                             <icon class="type-icon" v-if="f.type=='folder'" name="folder"></icon>
@@ -126,7 +126,7 @@
                     </table>
                   </div>
                   <div class="column-button">
-                    <a class="button is-primary" :disabled="!canTransterFrom">
+                    <a class="button is-primary" :disabled="!canTransterFrom" @click="transferFrom">
                       <icon name="arrow-left"></icon>&nbsp;Transfer {{irodsSelected.length}} To DMAC
                     </a>
                   </div>
@@ -138,12 +138,22 @@
         <footer class="modal-card-foot">
         </footer>
       </div>
+      <confirm-modal
+        :opened="confirmModal.opened"
+        :message="confirmModal.message"
+        @close-confirm-modal="closeConfirmModal">
+      </confirm-modal>
     </div>
 </template>
 
 <script>
+import ConfirmModal from './ConfirmModal'
+
 export default {
   name: 'irods-modal',
+  components: {
+    ConfirmModal,
+  },
   props: ['opened', 'folder'],
   data () {
     return {
@@ -156,7 +166,12 @@ export default {
       irodsFolder: null,
       irodsFiles: null,
       irodsUsernameInput: '',
-      irodsPasswordInput: ''
+      irodsPasswordInput: '',
+      confirmModal: {
+        opened: false,
+        message: '',
+        context: null
+      },
     }
   },
   computed: {
@@ -171,6 +186,9 @@ export default {
     },
     projectRole () {
       return this.project && this.project.projectRole
+    },
+    canSelectIrodsFolder () {
+      return this.projectRole == 'Owner' || this.projectRole == 'Admin'
     },
     dmacAddress () {
       var nodes = []
@@ -203,7 +221,7 @@ export default {
       return selected
     },
     canTransterTo () {
-      return this.dmacSelected.length
+      return this.dmacSelected.length && this.irodsFolder
     },
     irodsUsername () {
       return this.$store.state.irods.username
@@ -243,7 +261,14 @@ export default {
       return selected
     },
     canTransterFrom () {
-      return this.irodsSelected.length
+      if(!this.irodsSelected.length) return false
+      if(!this.dmacFolder) return false
+      if(this.projectRole == 'Owner' || this.projectRole == 'Admin')
+        return true
+      if(this.projectRole == 'Viewer') return false
+      if(this.project.status != "Active") return false
+      if(this.dmacFolder.dataPath == '/') return false
+      return this.dmacFolder.access == 0
     },
   },
   watch: {
@@ -361,6 +386,69 @@ export default {
       if(f.path == this.irodsFolder.path)
         return
       this.requestIrodsFolder(this.irodsUsername, this.irodsPassword, f.path)
+    },
+    openConfirmModal (message, context) {
+      this.confirmModal.message = message
+      this.confirmModal.context = context
+      this.confirmModal.opened = true
+    },
+    closeConfirmModal (result) {
+      this.confirmModal.message = ''
+      this.confirmModal.opened = false
+      if(result && this.confirmModal.context){
+          var context = this.confirmModal.context
+          if(context.callback){
+              context.callback.apply(this, context.args)
+          }
+      }
+      this.confirmModal.context = null
+    },
+    transferTo () {
+      if(!this.canTransterTo) return
+      var message = 'Are you sure to transfer the ' + this.dmacSelected.length  + ' item(s) on DMAC: '
+      var names = this.dmacSelected.map(function(i){return i.name})
+      message += names.join(', ') + ' to CyVerse at ' + this.irodsFolder.path + '?'
+      message += '\nThis might overwrite files with the same names on CyVerse!'
+      var context = {callback: this.transferToConfirmed, args: []}
+      this.openConfirmModal(message, context)
+    },
+    transferToConfirmed () {
+      this.irodsWaiting = true
+      var dataPaths = this.dmacSelected.map(function(i){return i.dataPath})
+      var message = {projectId: this.projectId, dataPaths: dataPaths, path: this.irodsFolder.path,
+        username: this.irodsUsername, password: this.irodsPassword}
+      this.$http.post(xHTTPx + '/transfer_to_irods', message).then(response => {
+        this.irodsWaiting= false
+        this.requestIrodsFolder (this.irodsUsername, this.irodsPassword, this.irodsFolder.path)
+      }, response => {
+        this.irodsError = 'Failed to transfer to!'
+        this.irodsWaiting= false
+      })
+    },
+    transferFrom () {
+      if(!this.canTransterFrom) return
+      var message = 'Are you sure to transfer the ' + this.irodsSelected.length  + ' item(s) on CyVerse: '
+      var names = this.irodsSelected.map(function(i){return i.name})
+      message += names.join(', ') + ' to DMAC at Project' + this.dmacFolder.dataPath + '?'
+      message += '\nThis might overwrite files with the same names on DMAC!'
+      var context = {callback: this.transferFromConfirmed, args: []}
+      this.openConfirmModal(message, context)
+    },
+    transferFromConfirmed () {
+      this.dmacWaiting = true
+      this.irodsWaiting = true
+      var files = this.irodsSelected.map(function(i){return [i.name, i.type, i.path]})
+      var message = {projectId: this.projectId, dataPath: this.dmacFolder.dataPath, files: files,
+        username: this.irodsUsername, password: this.irodsPassword}
+      this.$http.post(xHTTPx + '/transfer_from_irods', message).then(response => {
+        this.dmacWaiting = false
+        this.irodsWaiting= false
+        this.requestDmacFolder(this.dmacFolder.dataPath)
+      }, response => {
+        this.irodsError = 'Failed to transfer from!'
+        this.dmacWaiting = false
+        this.irodsWaiting= false
+      })
     },
   },
 }

@@ -16,8 +16,42 @@ module DMACServer
         raise "no IRODS_SCRIPT variable" if @@script == ""
 
         command = "python #{@@script} list \"#{username}\" \"#{password}\" \"#{path}\""
+        io = Local.run(command)
+        raise "something wrong" if io == ""
+        io
+      end
 
-        puts command
+      def self.transfer_file_to(username, password, local_path, path)
+        raise "no IRODS_SCRIPT variable" if @@script == ""
+
+        command = "python #{@@script} putfile \"#{username}\" \"#{password}\" \"#{local_path}\" \"#{path}\""
+        io = Local.run(command)
+        raise "something wrong" if io == ""
+        io
+      end
+
+      def self.transfer_folder_to(username, password, local_path, path)
+        raise "no IRODS_SCRIPT variable" if @@script == ""
+
+        command = "python #{@@script} putfolder \"#{username}\" \"#{password}\" \"#{local_path}\" \"#{path}\""
+        io = Local.run(command)
+        raise "something wrong" if io == ""
+        io
+      end
+
+      def self.transfer_file_from(username, password, path, local_path)
+        raise "no IRODS_SCRIPT variable" if @@script == ""
+
+        command = "python #{@@script} getfile \"#{username}\" \"#{password}\" \"#{path}\" \"#{local_path}\""
+        io = Local.run(command)
+        raise "something wrong" if io == ""
+        io
+      end
+
+      def self.transfer_folder_from(username, password, path, local_path)
+        raise "no IRODS_SCRIPT variable" if @@script == ""
+
+        command = "python #{@@script} getfolder \"#{username}\" \"#{password}\" \"#{path}\" \"#{local_path}\""
         io = Local.run(command)
         raise "something wrong" if io == ""
         io
