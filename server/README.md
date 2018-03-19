@@ -8,7 +8,8 @@ DMAC_SERVER: the server's domain name or ip adress
 DMAC_PORT: the server's port  
 GLOBUS_CLIENT_ID: the app client id registered on Globus   
 GLOBUS_CLIENT_SECRET: the app client secret generated on Globus   
-DMAC_PERMISSION: if using local user and file acl permission to adapt to Globus connect server. Set `local` to enable it.  
+DMAC_PERMISSION: if using local user and file acl permission to adapt to Globus connect server. Set `local` to enable it.
+IRODS_SCRIPT: point to the `script/unl_irods/unl_irods.py` to work with CyVerse. 
 
 When working with Globus connect server:
 - set 002 as umask
