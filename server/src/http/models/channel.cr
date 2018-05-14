@@ -50,7 +50,7 @@ module DMACServer
 
       def self.get_directories(path, project_root)
         directories = [] of String
-        Dir.each_entry path do |filename|
+        Dir.each path do |filename|
           if filename.to_s != "." && filename.to_s != ".." && filename.to_s != ".git" && filename.to_s != "__MACOSX"
             full_path = path + "/" + filename
             if File.directory? full_path
@@ -70,7 +70,7 @@ module DMACServer
         project_root = root + "/" + project.path.to_s
         full_path = project_root + path
         files = [] of String
-        Dir.each_entry full_path do |filename|
+        Dir.each full_path do |filename|
           if filename.to_s != "." && filename.to_s != ".." && filename.to_s != ".gitignore" && filename.to_s != ".DS_Store"
             file_path = full_path + "/" + filename
             if File.file? file_path
