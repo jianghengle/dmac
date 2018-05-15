@@ -1,23 +1,18 @@
 <template>
   <div>
-    <div class="columns">
-      <div class="view-title column">
-        <span class="main-link search-button" @click="openSearch">
-          <icon name="search"></icon>
-        </span>&nbsp;
-        {{file && file.name}}
-        <span class="tag is-warning file-tag" v-if="file && file.access==1">Readonly</span>
-        <span class="tag is-danger file-tag" v-if="file && file.access==2">Hidden</span>
-        <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && file.access==0) : true )"
-          @click="openEditFileModal"
-          class="action-icon main-link">
-          <icon name="edit"></icon>
-        </a>
-        <a :href="url" :download="file && file.name" target="_blank" class="action-icon main-link"><icon name="download"></icon></a>
-      </div>
-      <div class="column buttons">
-        
-      </div>
+    <div class="view-title">
+      <span class="main-link search-button" @click="openSearch">
+        <icon name="search"></icon>
+      </span>&nbsp;
+      {{file && file.name}}
+      <span class="tag is-warning file-tag" v-if="file && file.access==1">Readonly</span>
+      <span class="tag is-danger file-tag" v-if="file && file.access==2">Hidden</span>
+      <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && file.access==0) : true )"
+        @click="openEditFileModal"
+        class="action-icon main-link">
+        <icon name="edit"></icon>
+      </a>
+      <a :href="url" :download="file && file.name" target="_blank" class="action-icon main-link"><icon name="download"></icon></a>
     </div>
 
     <div class="file-content">

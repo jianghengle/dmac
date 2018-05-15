@@ -1,20 +1,19 @@
 <template>
   <div>
-    <div class="columns">
-      <div class="view-title column">
-        <span class="main-link search-button" @click="openSearch">
-          <icon name="search"></icon>
-        </span>&nbsp;
-        {{file && file.name}}
-        <span class="tag is-warning file-tag" v-if="file && file.access==1">Readonly</span>
-        <span class="tag is-danger file-tag" v-if="file && file.access==2">Hidden</span>
-        <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && file.access==0) : true )"
-          @click="openEditFileModal"
-          class="main-link">
-          <icon name="edit"></icon>
-        </a>
-      </div>
-      <div class="column buttons">
+    <div class="view-title">
+      <span class="main-link search-button" @click="openSearch">
+        <icon name="search"></icon>
+      </span>&nbsp;
+      {{file && file.name}}
+      <span class="tag is-warning file-tag" v-if="file && file.access==1">Readonly</span>
+      <span class="tag is-danger file-tag" v-if="file && file.access==2">Hidden</span>
+      <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && file.access==0) : true )"
+        @click="openEditFileModal"
+        class="main-link">
+        <icon name="edit"></icon>
+      </a>
+
+      <div class="is-pulled-right checkboxes">
         <label class="checkbox">
           <input type="checkbox" v-model="showTable">
           Table
@@ -36,8 +35,7 @@
     </div>
 
     <div class="columns" v-if="tableHeader.length">
-      <div class="column" v-show="showTable"
-        :class="{'half-width': showTable && showCharts, 'full-width': showTable && !showCharts}">
+      <div class="column" :class="{'is-half': showTable && showCharts}" v-show="showTable">
         <div v-show="totalPages > 1">
           <nav class="pagination is-small csv-pages">
             <ul class="pagination-list">
@@ -50,7 +48,7 @@
           </nav>
         </div>
 
-        <div class="csv-table">
+       <div class="csv-table">
           <table class="table is-narrow">
             <thead>
               <tr>
@@ -78,39 +76,41 @@
         </div>
       </div>
 
-      <div class="column" v-show="showCharts"
-        :class="{'half-width': showTable && showCharts, 'full-width': showTable && !showCharts}">
-        <nav class="navbar is-transparent" role="navigation" aria-label="dropdown navigation">
-          <div class="navbar-menu is-active">
-            <div class="navbar-start">
-              <div class="navbar-item has-dropdown is-hoverable">
-                <a class="navbar-link new-chart-button">
-                  New Chart
-                </a>
-                <div class="navbar-dropdown is-boxed">
-                  <a class="navbar-item new-chart-button" @click="addChart('Simple')">
-                    Simple Chart
-                  </a>
-                  <a class="navbar-item new-chart-button" @click="addChart('XY')">
-                    XY Chart
-                  </a>
-                  <a class="navbar-item new-chart-button" @click="addChart('Parallel Coordinates')">
-                    Parallel Coordinates
-                  </a>
-                  <a class="navbar-item new-chart-button" @click="addChart('Histogram')">
-                    Histogram
-                  </a>
-                  <a class="navbar-item new-chart-button" @click="addChart('Histograms')">
-                    Histograms
-                  </a>
-                  <a class="navbar-item new-chart-button" @click="addChart('Correlations')">
-                    Correlation Matrix
-                  </a>
-                </div>
-              </div>
+      <div class="column" :class="{'is-half': showTable && showCharts}" v-show="showCharts">
+        <div class="dropdown is-hoverable">
+          <div class="dropdown-trigger">
+            <button class="button default-btn dropdown-trigger-button" aria-haspopup="true" aria-controls="dropdown-menu">
+              <span class="plus-icon"><icon name="plus"></icon></span>&nbsp;&nbsp;
+              <span>Chart</span>
+              <span class="icon is-small">
+                <icon name="chevron-down" scale="0.8"></icon>
+              </span>
+            </button>
+          </div>
+          <div class="dropdown-menu" id="dropdown-menu" role="menu">
+            <div class="dropdown-content">
+              <a class="dropdown-item new-chart-button" @click="addChart('Simple')">
+                Simple Chart
+              </a>
+              <a class="dropdown-item new-chart-button" @click="addChart('XY')">
+                XY Chart
+              </a>
+              <a class="dropdown-item new-chart-button" @click="addChart('Parallel Coordinates')">
+                Parallel Coordinates
+              </a>
+              <a class="dropdown-item new-chart-button" @click="addChart('Histogram')">
+                Histogram
+              </a>
+              <a class="dropdown-item new-chart-button" @click="addChart('Histograms')">
+                Histograms
+              </a>
+              <a class="dropdown-item new-chart-button" @click="addChart('Correlations')">
+                Correlation Matrix
+              </a>
             </div>
           </div>
-        </nav>
+        </div>
+
         <div v-for="c in charts" :key="c.id">
           <simple-chart
             v-if="c.type == 'Simple'"
@@ -382,21 +382,10 @@ export default {
 
 <style lang="scss" scoped>
 
-.buttons {
-  text-align: right;
-  margin: auto;
+.checkboxes {
+  font-size: 16px;
+  font-weight: normal;
 }
-
-.full-width {
-  width: 100%;
-  max-width: 100%;
-}
-
-.half-width {
-  width: 50%;
-  max-width: 50%;
-}
-
 
 .active-btn {
   background-color: #2e1052!important;
@@ -436,6 +425,16 @@ export default {
 .file-tag {
   position: relative;
   top: -3px;
+}
+
+
+.dropdown-trigger-button {
+  border: none;
+}
+
+.plus-icon {
+  position: relative;
+  top: 2px;
 }
 
 </style>

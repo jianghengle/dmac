@@ -1,51 +1,35 @@
 <template>
   <div class="project-page">
     <address-bar></address-bar>
-    
-    <div class="columns">
-      <div class="view-title column">
-        <span class="project-icon">
-          <icon name="folder-open"></icon>
-        </span>&nbsp;
+
+    <div class="view-title">
+      <span class="project-icon">
+        <icon name="folder-open"></icon>
+      </span>&nbsp;
+      <span class="main-link" @click="viewData">
         {{project && project.name}}
+        <icon name="sign-in"></icon>
+      </span>
+
+      <div class="is-pulled-right project-buttons">
+        <div class="buttons">
+          <span class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
+            <icon name="user"></icon>&nbsp;
+            <span>Users</span>
+          </span>
+          <span class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
+            <icon name="share-alt"></icon>&nbsp;
+            <span>Public URLs</span>
+          </span>
+          <span class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewHistory">
+            <icon name="history"></icon>&nbsp;
+            <span>History</span>
+          </span>
+        </div>
       </div>
     </div>
 
-    <nav class="navbar">
-      <div class="navbar-menu is-active">
-        <div class="navbar-start">
-          <div class="navbar-item">
-            <a class="button main-btn"  @click="viewData">
-              <icon name="folder-open"></icon>&nbsp;
-              <span>Data Explorer</span>
-            </a>
-          </div>
-        </div>
-
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewHistory">
-              <icon name="history"></icon>&nbsp;
-              <span>History</span>
-            </a>
-          </div>
-          <div class="navbar-item">
-            <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
-              <icon name="share-alt"></icon>&nbsp;
-              <span>Public URLs</span>
-            </a>
-          </div>
-          <div class="navbar-item">
-            <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
-              <icon name="user"></icon>&nbsp;
-              <span>Users</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <div class="columns">
+    <div class="columns project-content">
 
       <div class="column project-info" v-if="project">
         <div class="info-label">
@@ -494,7 +478,7 @@ export default {
 
 .project-icon {
   position: relative;
-  top: 3px;
+  top: 1px;
 }
 
 .action {
@@ -511,6 +495,14 @@ export default {
 .detail-header {
   font-size: 20px;
   font-weight: bold;
+}
+
+.project-content {
+  width: 100%;
+}
+
+.project-buttons {
+  margin-right: 10px;
 }
 
 .project-info {
@@ -561,7 +553,7 @@ export default {
     }
 
     .sort-column {
-      text-align: right;
+      text-align: center;
 
       .sort {
         margin-top: -5px;

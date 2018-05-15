@@ -1,75 +1,73 @@
 <template>
   <div>
-    <nav class="navbar is-transparent" role="navigation" aria-label="dropdown navigation">
-      <div class="navbar-menu is-active">
-        <div class="navbar-start">
-          <div class="view-title">
-            <span class="main-link search-button" @click="openSearch">
-              <icon name="search"></icon>
-            </span>&nbsp;
-            {{folder && folder.name}}
-            <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
-              <icon class="action-icon" name="share-alt"></icon>
-            </a>
-            <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">Readonly</span>
-            <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">Hidden</span>
-            <a v-if="folder.dataPath != '/' && canEditFolder"
-              @click="emitOpenEditFolderModal"
-              class="main-link">
-              <icon class="action-icon" name="edit"></icon>
-            </a>
-          </div>
-        </div>
-        <div class="navbar-end">
-          <div class="navbar-item has-dropdown is-hoverable" v-if="!publicKey">
-            <a class="navbar-link actions-label">
-              Actions
-            </a>
+    <div class="view-title">
+      <span class="main-link search-button" @click="openSearch">
+        <icon name="search"></icon>
+      </span>&nbsp;
+      {{folder && folder.name}}
+      <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
+        <icon class="action-icon" name="share-alt"></icon>
+      </a>
+      <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">Readonly</span>
+      <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">Hidden</span>
+      <a v-if="folder.dataPath != '/' && canEditFolder"
+        @click="emitOpenEditFolderModal"
+        class="main-link">
+        <icon class="action-icon" name="edit"></icon>
+      </a>
 
-            <div class="navbar-dropdown is-right is-boxed">
-              <a class="navbar-item action-item" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFolderModal">
-                <icon name="plus"></icon>&nbsp;&nbsp;New Folder
-              </a>
-              <a class="navbar-item action-item" v-if="canEditFolder" @click="openNewFileModal">
-                <icon name="plus"></icon>&nbsp;&nbsp;New File
-              </a>
-              <a class="navbar-item action-item" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewMetaModal">
-                <icon name="plus"></icon>&nbsp;&nbsp;Meta Data File
-              </a>
-              <a class="navbar-item action-item" v-if="canEditFolder" @click="openFileUploadModal">
-                <icon name="upload"></icon>&nbsp;&nbsp;Upload File
-              </a>
-              <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="openNewChannelModal">
-                <icon name="plus"></icon>&nbsp;&nbsp;New Channel
-              </a>
-              <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && selectedDataPaths.length" @click="deleteSelection">
-                <icon name="minus"></icon>&nbsp;&nbsp;Delete Selected ({{selectedDataPaths.length}})
-              </a>
-              <hr class="navbar-divider" v-if="canEditFolder">
-              <a class="navbar-item action-item" v-if="projectRole" @click="copySelection">
-                <icon name="copy"></icon>&nbsp;&nbsp;Copy Selected ({{selectedDataPaths.length}})
-              </a>
-              <a class="navbar-item action-item" v-if="canEditFolder && canPaste" @click="pasteSelection">
-                <icon name="paste"></icon>&nbsp;&nbsp;Paste ({{clipboardSize}}) Here
-              </a>
-              <hr class="navbar-divider" v-if="(projectRole=='Owner' || projectRole=='Admin')">
-              <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin')" @click="openSaveHistoryModal">
-                <icon name="history"></icon>&nbsp;&nbsp;New History Record
-              </a>
-              <hr class="navbar-divider" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'">
-              <a class="navbar-item action-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="publicFolder">
-                <icon name="share-alt"></icon>&nbsp;&nbsp;Publish
-              </a>
-              <hr class="navbar-divider">
-              <a class="navbar-item action-item" @click="irodsModal.opened = true">
-                <icon name="exchange"></icon>&nbsp;&nbsp;CyVerse
-              </a>
-            </div>
+      <div class="dropdown is-pulled-right is-right is-hoverable">
+        <div class="dropdown-trigger">
+          <button class="button default-btn dropdown-trigger-button" aria-haspopup="true" aria-controls="dropdown-menu">
+            <span>Actions</span>
+            <span class="icon is-small">
+              <icon name="chevron-down" scale="0.8"></icon>
+            </span>
+          </button>
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+          <div class="dropdown-content">
+            <a class="dropdown-item" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewFolderModal">
+              <icon name="plus" class="action-icon"></icon>&nbsp;&nbsp;New Folder
+            </a>
+            <a class="dropdown-item" v-if="canEditFolder" @click="openNewFileModal">
+              <icon name="plus" class="action-icon"></icon>&nbsp;&nbsp;New File
+            </a>
+            <a class="dropdown-item" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewMetaModal">
+              <icon name="plus" class="action-icon"></icon>&nbsp;&nbsp;Meta Data File
+            </a>
+            <a class="dropdown-item" v-if="canEditFolder" @click="openFileUploadModal">
+              <icon name="plus" class="action-icon"></icon>&nbsp;&nbsp;Upload File
+            </a>
+            <a class="dropdown-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="openNewChannelModal">
+              <icon name="plus" class="action-icon"></icon>&nbsp;&nbsp;New Channel
+            </a>
+            <a class="dropdown-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && selectedDataPaths.length" @click="deleteSelection">
+              <icon name="minus" class="action-icon"></icon>&nbsp;&nbsp;Delete Selected ({{selectedDataPaths.length}})
+            </a>
+            <hr class="dropdown-divider" v-if="canEditFolder">
+            <a class="dropdown-item" v-if="projectRole" @click="copySelection">
+              <icon name="copy" class="action-icon"></icon>&nbsp;&nbsp;Copy Selected ({{selectedDataPaths.length}})
+            </a>
+            <a class="dropdown-item" v-if="canEditFolder && canPaste" @click="pasteSelection">
+              <icon name="paste" class="action-icon"></icon>&nbsp;&nbsp;Paste ({{clipboardSize}}) Here
+            </a>
+            <hr class="dropdown-divider" v-if="(projectRole=='Owner' || projectRole=='Admin')">
+            <a class="dropdown-item" v-if="(projectRole=='Owner' || projectRole=='Admin')" @click="openSaveHistoryModal">
+              <icon name="history" class="action-icon"></icon>&nbsp;&nbsp;New History Record
+            </a>
+            <hr class="dropdown-divider" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'">
+            <a class="dropdown-item" v-if="(projectRole=='Owner' || projectRole=='Admin') && folder.dataPath != '/'" @click="publicFolder">
+              <icon name="share-alt" class="action-icon"></icon>&nbsp;&nbsp;Publish
+            </a>
+            <hr class="dropdown-divider">
+            <a class="dropdown-item" @click="irodsModal.opened = true">
+              <icon name="exchange" class="action-icon"></icon>&nbsp;&nbsp;CyVerse
+            </a>
           </div>
         </div>
       </div>
-    </nav>
-
+    </div>
 
     <div class="file-content" @drop.prevent="dropFiles" @dragover.prevent>
       <table class="table is-narrow is-fullwidth is-hoverable">
@@ -573,6 +571,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.dropdown-trigger-button {
+  border: none;
+  font-weight: bold;
+}
 
 .empty-label {
   text-align: center;

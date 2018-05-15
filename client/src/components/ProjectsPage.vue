@@ -30,9 +30,13 @@
           </div>
         </div>
         <div class="column">
-          <a class="button main-btn project-button" v-if="!isSubscriber" @click="openNewProjectModal">
-            <icon name="plus"></icon>&nbsp;New Project
-          </a>
+          <div class="field is-grouped is-grouped-right">
+            <p class="control">
+              <a class="button main-btn" v-if="!isSubscriber" @click="openNewProjectModal">
+                <icon name="plus"></icon>&nbsp;New Project
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -213,13 +217,6 @@ export default {
   .filter-label {
     margin-right: 0.5rem;
   }
-}
-
-.project-button {
-  float: right;
-  font-size: 16px;
-  font-weight: normal;
-  line-height: 2.5;
 }
 
 .project-box {

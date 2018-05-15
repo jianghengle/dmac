@@ -8,7 +8,7 @@
       <div class="column is-one-quarter" v-show="showNav">
         <dmac-nav></dmac-nav>
       </div>
-      <div class="column main-window" :class="{'is-three-quarter': showNav, 'show-nav': showNav}">
+      <div class="column" :class="{'is-three-quarter': showNav}" :style="{'max-width': mainWindowMaxWidth}">
         <router-view></router-view>
       </div>
     </div>
@@ -27,6 +27,11 @@ export default {
     DmacNav,
     DmacLogin
   },
+  data () {
+    return {
+      windowWidth: 0
+    }
+  },
   computed: {
     token () {
       return this.$store.state.user.token
@@ -40,7 +45,25 @@ export default {
     },
     showNav () {
       return this.$store.state.projects.showNav
+    },
+    mainWindowMaxWidth () {
+      if(this.showNav && this.windowWidth > 768){
+        return '75%'
+      }
+      return '100%'
     }
+  },
+  methods: {
+    handleResize () {
+      this.windowWidth = window.innerWidth
+    }
+  },
+  mounted () {
+    this.windowWidth = window.innerWidth
+    window.addEventListener('resize', this.handleResize)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.handleResize)
   }
 }
 </script>
@@ -65,6 +88,7 @@ body {
   color: white!important;
   background-color: #2e1052!important;
   border-color: #2e1052!important;
+  font-weight: normal;
 }
 
 .main-btn:hover {
@@ -73,10 +97,12 @@ body {
 
 .default-btn {
   color: #2e1052!important;
+  font-weight: normal;
 }
 
 .main-link {
   color: #2e1052;
+  cursor: pointer;
 }
 
 .main-link:hover {
@@ -96,14 +122,6 @@ body {
 
 .spinner-container {
   text-align: center;
-}
-
-.main-window {
-  max-width: 100%;
-}
-
-.show-nav {
-  max-width: 75%;
 }
 
 .dygraph-title {

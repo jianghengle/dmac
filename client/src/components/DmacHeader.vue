@@ -5,9 +5,16 @@
         <router-link class="nav-item app-name" :to="'/'">
           Data Management and Analysis Core
         </router-link>
+
+        <div class="navbar-burger burger app-burger" :class="{'is-active': menuActive}"
+          @click="menuActive = !menuActive">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
 
-      <div class="navbar-menu is-active menu">
+      <div class="navbar-menu app-menu" :class="{'is-active': menuActive}">
         <div class="navbar-start">
         </div>
 
@@ -40,7 +47,8 @@ export default {
   name: 'dmac-header',
   data () {
     return {
-      showEmail: false
+      showEmail: false,
+      menuActive: false
     }
   },
   computed: {
@@ -75,11 +83,6 @@ export default {
 <style lang="scss" scoped>
 .header {
   background-color: #2e1052;
-  border-radius: 3px;
-
-  .menu {
-    background-color: #2e1052;
-  }
 }
 
 .app-name {
@@ -88,6 +91,14 @@ export default {
   font-size: 18px;
   margin: auto;
   padding-left: 20px;
+}
+
+.app-burger {
+  color: white;
+}
+
+.app-menu {
+  background-color: #2e1052;
 }
 
 .nav-icon {
