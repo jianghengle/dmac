@@ -7,6 +7,7 @@
         </router-link>
 
         <div class="navbar-burger burger app-burger" :class="{'is-active': menuActive}"
+          v-if="token"
           @click="menuActive = !menuActive">
           <span></span>
           <span></span>
@@ -14,23 +15,20 @@
         </div>
       </div>
 
-      <div class="navbar-menu app-menu" :class="{'is-active': menuActive}">
-        <div class="navbar-start">
-        </div>
-
+      <div v-if="token" class="navbar-menu app-menu" :class="{'is-active': menuActive}">
         <div class="navbar-end">
           <div class="navbar-item">
-            <span class="app-item" v-if="token" @mouseover="showEmail=true" @mouseout="showEmail=false">Hi,&nbsp;
+            <span class="app-item" @mouseover="showEmail=true" @mouseout="showEmail=false">Hi,&nbsp;
               <span>{{name}}</span>
             </span>
           </div>
           <div class="navbar-item">
-            <router-link class="app-item" v-if="token" :to="'/help'">
+            <router-link class="app-item" :to="'/help'">
               <span class="nav-icon"><icon name="question"></icon></span>Help
             </router-link>
           </div>
           <div class="navbar-item">
-            <a class="app-item" v-if="token" @click="logout">
+            <a class="app-item" @click="logout">
               <span class="nav-icon"><icon name="sign-out"></icon></span>Logout
             </a>
           </div>
@@ -72,6 +70,7 @@ export default {
       delete Vue.http.headers.common['Authorization']
       var loginFrom = this.$store.state.user.loginFrom
       this.$store.commit('user/reset')
+      this.menuActive = false
       if(loginFrom == 'Globus'){
         window.location.href = 'https://auth.globus.org/v2/web/logout?redirect_uri=' + xHTTPx + '&redirect_name=DMAC' 
       }
