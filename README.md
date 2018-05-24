@@ -1,7 +1,7 @@
 # DMAC
 The prototype of Data Management and Analysis Core.
 
-Online demo(http://34.212.66.157)
+App(https://dmac.unl.edu)
   
 Need to install Postgres, Git, Zip and Unzip on the server to make the application fully work.
 
