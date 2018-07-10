@@ -57,6 +57,20 @@ Rails.application.configure do
   # config.active_job.queue_name_prefix = "admin_#{Rails.env}"
   config.action_mailer.perform_caching = false
 
+  config.to_prepare { Devise::SessionsController.force_ssl }
+  config.to_prepare { Devise::RegistrationsController.force_ssl }
+  config.to_prepare { Devise::PasswordsController.force_ssl }
+  config.action_mailer.default_url_options = { protocol: 'https', host: 'dmac.unl.edu', port: 3001 }
+
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+      :address              => 'hcc.unl.edu',
+      :port                 => 25,
+      :user_name          => ENV["SMTP_USERNAME"],
+      :password           => ENV["SMTP_PASSWORD"]
+  }
+
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
