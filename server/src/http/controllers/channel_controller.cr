@@ -75,6 +75,7 @@ module DMACServer
           meta_data = get_param!(ctx, "metaData")
           instruction = get_param!(ctx, "instruction")
           files = get_param!(ctx, "files")
+          file_filter = get_param!(ctx, "fileFilter")
           rename = get_param!(ctx, "rename")
           status = get_param!(ctx, "status")
           name = get_param!(ctx, "name")
@@ -83,7 +84,7 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          Channel.create_channel(project, path, meta_data, instruction, rename, files, status, name)
+          Channel.create_channel(project, path, meta_data, instruction, rename, files, file_filter, status, name)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")
@@ -101,6 +102,7 @@ module DMACServer
           meta_data = get_param!(ctx, "metaData")
           instruction = get_param!(ctx, "instruction")
           files = get_param!(ctx, "files")
+          file_filter = get_param!(ctx, "fileFilter")
           rename = get_param!(ctx, "rename")
           status = get_param!(ctx, "status")
           name = get_param!(ctx, "name")
@@ -109,7 +111,7 @@ module DMACServer
           control = Control.get_control!(email, project)
           raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
 
-          Channel.update_channel(id, path, meta_data, instruction, rename, files, status, name)
+          Channel.update_channel(id, path, meta_data, instruction, rename, files, file_filter, status, name)
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
           error(ctx, "Not all required parameters were present")

@@ -74,6 +74,14 @@
           </div>
 
           <div class="field">
+            <label class="label">File Filter</label>
+            <p class="control">
+              <input class="input" type="text" v-model="fileFilter">
+            </p>
+            <p class="help is-info">File extensions separated by commas, e.g: ".csv, .doc". Leave it empty to allow any file.</p>
+          </div>
+
+          <div class="field">
             <p class="control">
               <label class="checkbox">
                 <input type="checkbox" v-model="rename">
@@ -113,6 +121,7 @@ export default {
       instruction: '',
       rename: true,
       files: 1,
+      fileFilter: '',
       status: 'Open',
       name: ''
     }
@@ -125,6 +134,7 @@ export default {
         || this.instruction != this.channel.instruction
         || this.rename != this.channel.rename
         || this.files != this.channel.files
+        || this.fileFilter != this.channel.fileFilter
         || this.status != this.channel.status
         || this.name != this.channel.name )
     },
@@ -141,6 +151,7 @@ export default {
         this.instruction = this.channel.instruction
         this.rename = this.channel.rename
         this.files = this.channel.files
+        this.fileFilter = this.channel.fileFilter
         this.status = this.channel.status
         this.name = this.channel.name
         this.requestFolders()
@@ -191,7 +202,7 @@ export default {
     },
     update(){
       this.waiting= true
-      var message = { projectId: this.project.id, id: this.channel.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.files, status: this.status, name: this.name }
+      var message = { projectId: this.project.id, id: this.channel.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.files, fileFilter: this.fileFilter, status: this.status, name: this.name }
       this.$http.post(xHTTPx + '/update_channel', message).then(response => {
         this.waiting= false
         this.$emit('close-edit-channel-modal', true)

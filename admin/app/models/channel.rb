@@ -9,6 +9,7 @@ class Channel < ApplicationRecord
       field :meta_data
       field :instruction
       field :files
+      field :file_filter
       field :rename
       field :status, :enum do
         enum do

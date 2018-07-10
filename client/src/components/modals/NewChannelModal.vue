@@ -74,6 +74,14 @@
           </div>
 
           <div class="field">
+            <label class="label">File Filter</label>
+            <p class="control">
+              <input class="input" type="text" v-model="fileFilter">
+            </p>
+            <p class="help is-info">File extensions separated by commas, e.g: ".csv, .doc". Leave it empty to allow any file.</p>
+          </div>
+
+          <div class="field">
             <p class="control">
               <label class="checkbox">
                 <input type="checkbox" v-model="rename">
@@ -112,6 +120,7 @@ export default {
       metadataFile: '',
       instruction: '',
       filesUpload: 1,
+      fileFilter: '',
       rename: true,
       status: 'Open',
       name: ''
@@ -187,7 +196,7 @@ export default {
       if(!this.canCreate)
         return
       this.waiting= true
-      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.filesUpload, status: this.status, name: this.name }
+      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.filesUpload, fileFilter: this.fileFilter, status: this.status, name: this.name }
       this.$http.post(xHTTPx + '/create_channel', message).then(response => {
         this.waiting= false
         this.$emit('close-new-channel-modal', true)

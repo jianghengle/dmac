@@ -74,7 +74,7 @@
           <div v-if="channel" class="field file-field">
             <div v-if="opened" class="file upload-file-input">
               <label class="file-label">
-                <input class="file-input" type="file" multiple @change="onFileChange">
+                <input class="file-input" type="file" :accept="channel.fileFilter" multiple @change="onFileChange">
                 <span class="file-cta">
                   <span class="file-icon">
                     <icon name="upload"></icon>
