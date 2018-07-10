@@ -54,7 +54,7 @@
       </div>
 
       <div>
-        <a :href="adminPage" class="main-link">Forgot your password?</a>
+        <a :href="passwordPage" class="main-link">Forgot your password?</a>
       </div>
       <div>
         <a @click="showLogin = false" class="main-link">Register new account</a>
@@ -155,6 +155,11 @@ export default {
       newLastName: '',
       registerError: '',
       registerInfo: ''
+    }
+  },
+  computed: {
+    passwordPage () {
+      return this.adminPage + '/users/password/new'
     }
   },
   watch: {
