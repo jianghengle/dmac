@@ -79,7 +79,7 @@ export default {
       newPermission: 'Normal',
       permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Readonly - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)",
       fields: [],
-      fieldTip: "Leave entry empty if not appliable. Options must be seperated by '|'. "
+      fieldTip: "Leave entry empty if not appliable. Options must be seperated by '|', e.g. \"opt1 | opt2 | *\". Use '|*' to add an \"Other\" option for be specified."
     }
   },
   computed: {

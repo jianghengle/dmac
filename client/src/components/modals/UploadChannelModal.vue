@@ -120,9 +120,10 @@
                       <div v-if="meta.options">
                         <div class="select">
                           <select v-model="meta.value">
-                            <option v-for="option in meta.options">{{option}}</option>
+                            <option v-for="option in meta.options" v-bind:value="option.value">{{option.text}}</option>
                           </select>
                         </div>
+                        <input v-if="meta.value == '__other__'" class="input other-input" type="text" placeholder="Please specify..." v-model="meta.otherValue">
                       </div>
                       <div v-else>
                         <input class="input" type="text" v-model="meta.value">
@@ -169,6 +170,8 @@ export default {
         for(var i=0;i<this.metaData.length;i++){
           if(!this.metaData[i].value)
             return false
+          if(this.metaData[i].value == '__other__' && !this.metaData[i].otherValue)
+            return false
         }
       }
       return true
@@ -208,9 +211,14 @@ export default {
           }
           var name = m.slice(0, optionsStart).trim()
           var options = m.slice(optionsStart+1, optionsEnd).split('|').map(function(s){
-            return s.trim()
+            s = s.trim()
+            return {text: s, value: s}
           })
-          return {name: name, value: '', options: options}
+          var otherValue = ''
+          if(options.length && options[options.length - 1].text == '*'){
+            options[options.length - 1] = {text: 'Other', value: '__other__'}
+          }
+          return {name: name, value: '', options: options, otherValue: otherValue}
         })
       }, response => {
         this.error = 'Failed to get meta data!'
@@ -275,7 +283,7 @@ export default {
         if(vm.channel && vm.channel.metaData){
           var url = xHTTPx + '/upload_meta_by_channel/' + vm.project.id + '/' + vm.channel.id
           var values = vm.metaData.map(function(d){
-            return d.value
+            return d.value == '__other__' ? d.otherValue : d.value
           })
           var message = { metaData:  values.join('\t')}
           this.$http.post(url, message).then(response => {
@@ -341,6 +349,10 @@ export default {
 
 .upload-file-input {
   margin-bottom: 10px;
+}
+
+.other-input {
+  margin-top: 5px;
 }
 
 </style>

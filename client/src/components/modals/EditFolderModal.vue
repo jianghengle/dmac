@@ -70,9 +70,10 @@
                       <div v-if="meta.options">
                         <div class="select">
                           <select v-model="meta.value">
-                            <option v-for="option in meta.options">{{option}}</option>
+                            <option v-for="option in meta.options" v-bind:value="option.value">{{option.text}}</option>
                           </select>
                         </div>
+                        <input v-if="meta.value == '__other__'" class="input other-input" type="text" placeholder="Please specify..." v-model="meta.otherValue">
                       </div>
                       <div v-else>
                         <input class="input" type="text" v-model="meta.value">
@@ -149,7 +150,7 @@ export default {
     },
     metaValues () {
       return this.metaData.map(function(m){
-        return m.value
+        return m.value == '__other__' ? m.otherValue : m.value
       })
     },
     changed () {
@@ -247,19 +248,39 @@ export default {
           var optionsEnd = header.indexOf('}')
           var name = ''
           var options = null
+          var isOtherOption = false
           var value = ''
           if(optionsStart == -1 || optionsEnd == -1 || optionsStart >= optionsEnd){
             name = header
           }else{
             name = header.slice(0, optionsStart).trim()
             options = header.slice(optionsStart+1, optionsEnd).split('|').map(function(s){
-              return s.trim()
+              s = s.trim()
+              return {text: s, value: s}
             })
+            var otherValue = ''
+            if(options.length && options[options.length - 1].text == '*'){
+              options[options.length - 1] = {text: 'Other', value: '__other__'}
+              if(i < values.length){
+                value = values[i]
+                var hasValue = false
+                for(var j=0;j<options.length-1;j++){
+                  if(value == options[j].value){
+                    hasValue = true
+                    break
+                  }
+                }
+                if(!hasValue){
+                  otherValue = value
+                  isOtherOption = true
+                }
+              }
+            }
           }
           if(i < values.length){
             value = values[i]
           }
-          this.metaData.push({name: name, value: value, options: options})
+          this.metaData.push({name: name, value: isOtherOption ? '__other__' : value, options: options, otherValue: otherValue})
           this.oldMetaValues.push(value)
         }
         this.metaDataFile = 'meta.txt'
@@ -287,5 +308,9 @@ export default {
   position: absolute;
   right: 0px;
   margin-right: 20px;
+}
+
+.other-input {
+  margin-top: 5px;
 }
 </style>

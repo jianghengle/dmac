@@ -173,7 +173,14 @@ export default {
       var re=/\r\n|\n\r|\n|\r/g
       var lines = this.textInput.replace(re,'\n').split('\n')
       if(!lines.length) return
-      this.tableHeader = lines[0].split('\t')
+      this.tableHeader = lines[0].split('\t').map(function(s){
+        var optionsStart = s.indexOf('{')
+        var optionsEnd = s.indexOf('}')
+        if(optionsStart == -1 || optionsEnd == -1 || optionsStart >= optionsEnd){
+          return s.trim()
+        }
+        return s.slice(0, optionsStart).trim()
+      })
       var width = this.tableHeader.length
       var tableData = []
       for(var i=1;i<lines.length;i++){
