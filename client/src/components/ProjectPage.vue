@@ -113,7 +113,7 @@
             </div>
           </div>
         </div>
-        <div class="tabs is-boxed" v-if="project && projectRole && (projectRole=='Owner' || projectRole=='Admin')">
+        <div class="tabs is-boxed channel-tab" v-if="project && projectRole && (projectRole=='Owner' || projectRole=='Admin')">
           <ul>
             <li v-for="cf in channelFilters" :key="'cf-' + cf" :class="{'is-active': channelFilter == cf}">
               <a @click="channelFilter = cf">{{cf}} ({{channelCounts[cf]}})</a>
@@ -545,7 +545,7 @@ export default {
 
 .channels {
   margin-top: 20px;
-  margin-right: 10px;
+  margin-right: -20px;
 
   .channels-header{
     padding: 5px;
@@ -566,14 +566,18 @@ export default {
     }
   }
 
+  .channel-tab {
+    margin-bottom: 15px;
+  }
+
   .channel-box {
     margin-top: 0px;
     padding-top: 10px;
     padding-bottom: 10px;
     margin-bottom: 15px;
     cursor: pointer;
-    min-height: 80px;
-    max-height: 80px;
+    min-height: 100px;
+    max-height: 100px;
     overflow: auto;
 
     .header {

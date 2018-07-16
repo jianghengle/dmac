@@ -148,9 +148,6 @@ export default {
         var resp = response.body
         this.isSubscriber = resp[0] == 'Subscriber'
         this.$store.commit('projects/setProjects', resp.slice(1))
-        this.$nextTick(function(){
-          this.initProjectFilter()
-        })
         this.waiting= false
       }, response => {
         this.error = 'Failed to get projects!'
@@ -167,7 +164,9 @@ export default {
       this.newProjectModal.opened = false
       if(result){
         this.requestProjects()
-        this.projectFilter = 'Active'
+        if(this.projectFilter != 'Active' && this.projectFilter != 'All'){
+          this.projectFilter = 'All'
+        }
       }
     },
     openEditProjectModal(project){
@@ -178,21 +177,6 @@ export default {
       this.editProjectModal.opened = false
       if(result){
         this.requestProjects()
-      }
-    },
-    initProjectFilter(){
-      if(this.projects && this.projects.length && this.projectFilter != 'All'){
-        var noProject = true
-        for(var i=0;i<this.projects.length;i++){
-          if(this.projects[i].status == this.projectFilter){
-            noProject = false
-            break
-          }
-        }
-        if(noProject){
-          this.projectFilter = 'All'
-          this.$store.commit('options/setProjectFilter', 'All')
-        }
       }
     }
   },
