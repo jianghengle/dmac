@@ -15,19 +15,19 @@
         </div>
       </div>
 
-      <div v-if="token" class="navbar-menu app-menu" :class="{'is-active': menuActive}">
+      <div class="navbar-menu app-menu" :class="{'is-active': menuActive}">
         <div class="navbar-end">
-          <div class="navbar-item">
+          <div v-if="token" class="navbar-item">
             <span class="app-item" @mouseover="showEmail=true" @mouseout="showEmail=false">Hi,&nbsp;
               <span>{{name}}</span>
             </span>
           </div>
           <div class="navbar-item">
-            <router-link class="app-item" :to="'/help'">
+            <a class="app-item" @click="toggleHelpPage">
               <span class="nav-icon"><icon name="question"></icon></span>Help
-            </router-link>
+            </a>
           </div>
-          <div class="navbar-item">
+          <div v-if="token" class="navbar-item">
             <a class="app-item" @click="logout">
               <span class="nav-icon"><icon name="sign-out"></icon></span>Logout
             </a>
@@ -74,6 +74,9 @@ export default {
       if(loginFrom == 'Globus'){
         window.location.href = 'https://auth.globus.org/v2/web/logout?redirect_uri=' + xHTTPx + '&redirect_name=DMAC' 
       }
+    },
+    toggleHelpPage () {
+      this.$emit('toggle-help-page')
     }
   },
 }

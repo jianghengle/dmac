@@ -1,12 +1,7 @@
 <template>
 
   <div class="help-page">
-    <div>
-      <a class="button back-btn" @click="$router.go(-1)">
-        <icon name="arrow-left"></icon>&nbsp;
-        Back
-      </a>
-    </div>
+    <div class="main-link close-btn" @click="toggleHelpPage"><icon name="times" scale="1.5"></icon></div>
 
     <div class="help-nav">
       <a class="main-link" @click="scrollToElement('helpOnProject')">
@@ -108,6 +103,9 @@ export default {
     scrollToElement(id){
       var el = document.getElementById(id)
       window.scroll(0, el.offsetTop)
+    },
+    toggleHelpPage(){
+      this.$emit('toggle-help-page')
     }
   }
 }
@@ -119,8 +117,10 @@ export default {
   padding: 10px;
 }
 
-.back-btn {
-  margin-bottom: 10px;
+.close-btn {
+  margin-right: 15px;
+  margin-top: 10px;
+  float: right;
 }
 
 .help-nav {

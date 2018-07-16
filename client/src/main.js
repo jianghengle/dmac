@@ -49,6 +49,7 @@ import 'vue-awesome/icons/arrow-right'
 import 'vue-awesome/icons/search'
 import 'vue-awesome/icons/exchange'
 import 'vue-awesome/icons/chevron-down'
+import 'vue-awesome/icons/times'
 import Icon from 'vue-awesome/components/Icon'
 Vue.component('icon', Icon)
 

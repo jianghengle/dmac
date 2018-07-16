@@ -7,28 +7,6 @@
           <icon name="database"></icon>
           Projects
         </div>
-        <div class="column  projects-filter">
-          <div class="field is-horizontal">
-            <div class="field-label is-normal filter-label">
-              <label class="label">Show</label>
-            </div>
-            <div class="field-body">
-              <div class="field is-narrow">
-                <div class="control">
-                  <div class="select is-fullwidth">
-                    <select v-model="projectFilter">
-                      <option>Active</option>
-                      <option>Archived</option>
-                      <option>Template</option>
-                      <option>Public Template</option>
-                      <option>All</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="column">
           <div class="field is-grouped is-grouped-right">
             <p class="control">
@@ -45,32 +23,43 @@
       <button class="delete" @click="error=''"></button>
       {{error}}
     </div>
-    <div class="box project-box" v-for="project in projects":key="project.id" @click="viewProject(project)"
-      v-show="projectFilter=='All' || projectFilter==project.status">
-      <div class="header">
-        <span class="name">
-          <span class="tag" :class="{
-            'is-success': project.status=='Active',
-            'is-dark': project.status=='Archived',
-            'is-warning': project.status=='Template',
-            'is-danger': project.status=='Public Template'
-          }">
-            {{project.status}}
-          </span>
-          {{project.name}}
-        </span>&nbsp;
-        <span class="edit-icon main-link"
-          v-if="project.projectRole=='Owner' || project.projectRole=='Admin'"
-          @click.stop="openEditProjectModal(project)">
-          <icon name="edit"></icon>
-        </span>
-        <span class="info">{{project.createdDate}}</span>
+
+    <div class="tabs is-boxed">
+      <ul>
+        <li v-for="pf in projectFilters" :key="'pf-' + pf" :class="{'is-active': projectFilter == pf}">
+          <a @click="projectFilter = pf">{{pf}} ({{projectCounts[pf]}})</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="columns is-multiline">
+      <div class="column is-half" v-for="project in projects":key="project.id"
+        v-show="projectFilter=='All' || projectFilter==project.status">
+        <div class="box project-box" @click="viewProject(project)">
+          <div class="header">
+            <span class="info">{{project.createdDate}}</span>
+            <span class="name">
+              <span class="tag" :class="{
+                'is-success': project.status=='Active',
+                'is-dark': project.status=='Archived',
+                'is-warning': project.status=='Template',
+                'is-danger': project.status=='Public Template'
+              }">
+                {{project.status}}
+              </span>
+              {{project.name}}
+            </span>&nbsp;
+            <span class="edit-icon main-link"
+              v-if="project.projectRole=='Owner' || project.projectRole=='Admin'"
+              @click.stop="openEditProjectModal(project)">
+              <icon name="edit"></icon>
+            </span>
+          </div>
+          <div class="description">{{project.description}}</div>
+        </div>
       </div>
-      <div class="description">{{project.description}}</div>          
     </div>
-    <div v-if="projects && projects.length == 0">
-    You have no projects yet.
-    </div>
+
     <div class="spinner-container" v-if="waiting">
       <icon name="spinner" class="icon is-medium fa-spin"></icon>
     </div>
@@ -113,6 +102,7 @@ export default {
         project: null
       },
       projectFilter: 'Active',
+      projectFilters: ['Active', 'Archived', 'Template', 'Public Template', 'All'],
       isSubscriber: true
     }
   },
@@ -133,6 +123,17 @@ export default {
         return (p.status == 'Template' || p.status == 'Public Template') && (p.projectRole == 'Owner' || p.projectRole == 'Admin')
       })
       return templates
+    },
+    projectCounts () {
+      var counts = {}
+      this.projectFilters.forEach(function(f){
+        counts[f] = 0
+      })
+      this.projects.forEach(function(p){
+        counts[p.status]++
+        counts['All']++
+      })
+      return counts
     }
   },
   watch: {
@@ -166,6 +167,7 @@ export default {
       this.newProjectModal.opened = false
       if(result){
         this.requestProjects()
+        this.projectFilter = 'Active'
       }
     },
     openEditProjectModal(project){
@@ -221,10 +223,11 @@ export default {
 
 .project-box {
   cursor: pointer;
-  margin-top:10px;
   padding-top: 10px;
   padding-bottom: 10px;
-  margin-bottom: 15px;
+  min-height: 100px;
+  max-height: 100px;
+  overflow: auto;
   
   &.inactive {
     color: #7a7a7a;

@@ -1,15 +1,20 @@
 <template>
   <div id="app">
-    <dmac-header></dmac-header>
-    <div v-if="showLogin">
-      <dmac-login></dmac-login>
+    <dmac-header @toggle-help-page="showHelp = !showHelp"></dmac-header>
+    <div v-if="showHelp">
+      <help-page @toggle-help-page="showHelp = !showHelp"></help-page>
     </div>
-    <div v-if="!showLogin" class="columns">
-      <div class="column is-one-quarter" v-show="showNav">
-        <dmac-nav></dmac-nav>
+    <div v-else>
+      <div v-if="showLogin">
+        <dmac-login></dmac-login>
       </div>
-      <div class="column" :class="{'is-three-quarter': showNav}" :style="{'max-width': mainWindowMaxWidth}">
-        <router-view></router-view>
+      <div v-if="!showLogin" class="columns">
+        <div class="column is-one-quarter" v-show="showNav">
+          <dmac-nav></dmac-nav>
+        </div>
+        <div class="column" :class="{'is-three-quarter': showNav}" :style="{'max-width': mainWindowMaxWidth}">
+          <router-view></router-view>
+        </div>
       </div>
     </div>
   </div>
@@ -19,17 +24,20 @@
 import DmacHeader from './components/DmacHeader'
 import DmacNav from './components/DmacNav'
 import DmacLogin from './components/DmacLogin'
+import HelpPage from './components/HelpPage'
 
 export default {
   name: 'app',
   components: {
     DmacHeader,
     DmacNav,
-    DmacLogin
+    DmacLogin,
+    HelpPage
   },
   data () {
     return {
-      windowWidth: 0
+      windowWidth: 0,
+      showHelp: false
     }
   },
   computed: {

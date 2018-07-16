@@ -104,15 +104,6 @@
               <icon name="plus"></icon>
             </span>
           </div>
-          <div v-if="project && projectRole && (projectRole=='Owner' || projectRole=='Admin')" class="column filter-column">
-            <div class="select filter">
-              <select v-model="channelFilter">
-                <option>All</option>
-                <option>Open</option>
-                <option>Closed</option>
-              </select>
-            </div>
-          </div>
           <div class="column sort-column">
             <div class="select sort">
               <select v-model="channelSort">
@@ -122,10 +113,20 @@
             </div>
           </div>
         </div>
+        <div class="tabs is-boxed" v-if="project && projectRole && (projectRole=='Owner' || projectRole=='Admin')">
+          <ul>
+            <li v-for="cf in channelFilters" :key="'cf-' + cf" :class="{'is-active': channelFilter == cf}">
+              <a @click="channelFilter = cf">{{cf}} ({{channelCounts[cf]}})</a>
+            </li>
+          </ul>
+        </div>
         <div class="box channel-box" v-for="channel in channels":key="channel.id"
           @click="openUploadChannelModal(channel)"
           v-show="channelFilter=='All' || channelFilter==channel.status">
           <div class="header">
+            <span class="info">
+              <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
+            </span>
             <span class="name">
               {{channel.name}}
               <span class="tag" :class="{
@@ -137,9 +138,6 @@
               v-if="projectRole=='Owner' || projectRole=='Admin'"
               @click.stop="openEditChannelModal(channel)">
               <icon name="edit"></icon>
-            </span>
-            <span class="info">
-              <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
             </span>
             <br/>
             <span class="target">{{channel.path}}</span>&nbsp;
@@ -238,6 +236,7 @@ export default {
       metaDataFile: '',
       metaData: [],
       channelFilter: 'Open',
+      channelFilters: ['Open', 'Closed', 'All'],
       channelSort: 'Sort by Folder'
     }
   },
@@ -262,6 +261,17 @@ export default {
       if(!this.project) return 1
       var lines = this.project.description.split('\n').length
       return 25*lines + 'px'
+    },
+    channelCounts () {
+      var counts = {}
+      this.channelFilters.forEach(function(f){
+        counts[f] = 0
+      })
+      this.channels.forEach(function(c){
+        counts[c.status]++
+        counts['All']++
+      })
+      return counts
     }
   },
   watch: {
@@ -274,7 +284,6 @@ export default {
     },
     channelSort: function (val) {
       this.$store.commit('options/setChannelSort', val)
-      console.log('sort ', val)
       this.sortChannels()
     }
   },
@@ -287,6 +296,9 @@ export default {
         this.waiting = false
         this.$nextTick(function(){
           this.requestMetaData()
+          if(this.projectRole=='Editor' || this.projectRole=='Viewer'){
+            this.channelFilter = 'Open'
+          }
         })
       }, response => {
         this.error = 'Failed to get project!'
@@ -328,6 +340,7 @@ export default {
         var resp = response.body
         this.channels = resp
         this.sortChannels()
+
         this.waiting = false
       }, response => {
         this.error = 'Failed to get project channels!'
@@ -544,16 +557,8 @@ export default {
       font-weight: bold;
     }
 
-    .filter-column {
-      text-align: center;
-
-      .filter {
-        margin-top: -5px;
-      }
-    }
-
     .sort-column {
-      text-align: center;
+      text-align: right;
 
       .sort {
         margin-top: -5px;
@@ -567,6 +572,9 @@ export default {
     padding-bottom: 10px;
     margin-bottom: 15px;
     cursor: pointer;
+    min-height: 80px;
+    max-height: 80px;
+    overflow: auto;
 
     .header {
       .name {
