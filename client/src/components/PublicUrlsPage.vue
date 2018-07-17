@@ -1,9 +1,13 @@
 <template>
   <div class="projects-page">
   	<address-bar></address-bar>
+    <project-tab></project-tab>
+
     <div class="view-title">
-      <icon name="share-alt"></icon>
-      Project Public URLs
+      <a class="main-link" @click="$router.go(-1)">
+        <icon name="arrow-left"></icon>
+      </a>&nbsp;
+      Public URLs
     </div>
 
     <div v-if="error" class="notification is-danger login-text">
@@ -42,12 +46,14 @@
 <script>
 import DateForm from 'dateformat'
 import AddressBar from './AddressBar'
+import ProjectTab from './ProjectTab'
 import ConfirmModal from './modals/ConfirmModal'
 
 export default {
   name: 'public-urls-page',
   components: {
     AddressBar,
+    ProjectTab,
     ConfirmModal
   },
   data () {

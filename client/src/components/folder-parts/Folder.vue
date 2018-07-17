@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="view-title">
-      <span class="main-link search-button" @click="openSearch">
-        <icon name="search"></icon>
+      <span class="main-link" @click="$router.go(-1)">
+        <icon name="arrow-left"></icon>
       </span>&nbsp;
       {{folder && folder.name}}
       <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
@@ -15,8 +15,11 @@
         class="main-link">
         <icon class="action-icon" name="edit"></icon>
       </a>
+      <span class="main-link search-button" @click="openSearch">
+        <icon name="search"></icon>
+      </span>
 
-      <div class="dropdown is-pulled-right is-right is-hoverable">
+      <div class="dropdown is-pulled-right is-right is-hoverable" v-if="!publicKey">
         <div class="dropdown-trigger">
           <button class="button default-btn dropdown-trigger-button" aria-haspopup="true" aria-controls="dropdown-menu">
             <span>Actions</span>
@@ -573,8 +576,8 @@ export default {
 <style lang="scss" scoped>
 
 .dropdown-trigger-button {
-  border: none;
   font-weight: bold;
+  border: none;
 }
 
 .empty-label {

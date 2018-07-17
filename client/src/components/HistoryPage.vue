@@ -1,11 +1,14 @@
 <template>
   <div class="history-page">
     <address-bar></address-bar>
+    <project-tab></project-tab>
 
     <div class="columns">
       <div class="view-title column">
-        <icon name="history"></icon>&nbsp;
-        Project History
+        <a class="main-link" @click="$router.go(-1)">
+          <icon name="arrow-left"></icon>
+        </a>&nbsp;
+        History
       </div>
       <div class="column commit-buttons">
         <a class="button default-btn" @click="openSaveHistoryModal">
@@ -55,12 +58,14 @@
 
 <script>
 import AddressBar from './AddressBar'
+import ProjectTab from './ProjectTab'
 import SaveHistoryModal from './modals/SaveHistoryModal'
 
 export default {
   name: 'HistoryPage',
   components: {
     AddressBar,
+    ProjectTab,
     SaveHistoryModal
   },
   data () {

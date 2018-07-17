@@ -24,7 +24,7 @@
       {{error}}
     </div>
 
-    <div class="tabs is-boxed">
+    <div class="tabs">
       <ul>
         <li v-for="pf in projectFilters" :key="'pf-' + pf" :class="{'is-active': projectFilter == pf}">
           <a @click="projectFilter = pf">{{pf}} ({{projectCounts[pf]}})</a>

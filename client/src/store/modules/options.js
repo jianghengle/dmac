@@ -2,12 +2,14 @@
 var projectFilter = localStorage.getItem('projectFilter')
 var channelFilter = localStorage.getItem('channelFilter')
 var channelSort = localStorage.getItem('channelSort')
+var projectTab = localStorage.getItem('projectTab')
 
 // initial state
 export const state = {
   projectFilter: projectFilter ? projectFilter : 'Active',
   channelFilter: channelFilter ? channelFilter : 'Open',
-  channelSort: channelSort ? channelSort : 'Sort by Folder'
+  channelSort: channelSort ? channelSort : 'Sort by Folder',
+  projectTab: projectTab ? projectTab : 'Basic'
 }
 
 // mutations
@@ -25,6 +27,11 @@ export const mutations = {
   setChannelSort (state, val) {
     state.channelSort = val
     localStorage.setItem('channelSort', val)
+  },
+
+  setProjectTab (state, val) {
+    state.projectTab = val
+    localStorage.setItem('projectTab', val)
   }
 }
 

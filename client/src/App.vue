@@ -79,7 +79,7 @@ export default {
 <style lang="scss">
 @import "~bulma/sass/utilities/initial-variables";
 $primary: #2e1052;
-$blue: #866ba6;
+$blue: #2e1052;
 @import "~bulma";
 @import "~c3/c3.css";
 @import "~parcoord-es/dist/parcoords.css";
@@ -123,7 +123,7 @@ body {
 }
 
 .view-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   color: #2e1052;
 }

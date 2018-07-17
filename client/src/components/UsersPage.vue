@@ -1,11 +1,14 @@
 <template>
   <div class="users-page">
     <address-bar></address-bar>
+    <project-tab></project-tab>
 
     <div class="columns">
       <div class="view-title column">
-        <icon name="user-o"></icon>&nbsp;
-        Project Users
+        <a class="main-link" @click="$router.go(-1)">
+          <icon name="arrow-left"></icon>
+        </a>&nbsp;
+        Users
       </div>
       <div class="column buttons">
         <a class="button main-btn" @click="openNewUserModal">
@@ -116,6 +119,7 @@
 
 <script>
 import AddressBar from './AddressBar'
+import ProjectTab from './ProjectTab'
 import DateForm from 'dateformat'
 import NewUserModal from './modals/NewUserModal'
 import EditUserModal from './modals/EditUserModal'
@@ -125,6 +129,7 @@ export default {
   name: 'UsersPage',
   components: {
     AddressBar,
+    ProjectTab,
     NewUserModal,
     EditUserModal,
     ImportUsersModal

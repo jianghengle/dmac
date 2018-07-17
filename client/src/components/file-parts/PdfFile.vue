@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="view-title">
-      <span class="main-link search-button" @click="openSearch">
-        <icon name="search"></icon>
+      <span class="main-link" @click="$router.go(-1)">
+        <icon name="arrow-left"></icon>
       </span>&nbsp;
       {{file && file.name}}
       <span class="tag is-warning file-tag" v-if="file && file.access==1">Readonly</span>
@@ -12,6 +12,9 @@
         class="action-icon main-link">
         <icon name="edit"></icon>
       </a>
+      <span class="main-link search-button" @click="openSearch">
+        <icon name="search"></icon>
+      </span>
       <a :href="url" :download="file && file.name" target="_blank" class="action-icon main-link"><icon name="download"></icon></a>
     </div>
 

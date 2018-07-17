@@ -1,37 +1,11 @@
 <template>
   <div class="project-page">
     <address-bar></address-bar>
+    <project-tab></project-tab>
 
-    <div class="view-title">
-      <span class="project-icon">
-        <icon name="folder-open"></icon>
-      </span>&nbsp;
-      <span class="main-link" @click="viewData">
-        {{project && project.name}}
-        <icon name="sign-in"></icon>
-      </span>
+    <div class="project-content">
 
-      <div class="is-pulled-right project-buttons">
-        <div class="buttons">
-          <span class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewUsers">
-            <icon name="user"></icon>&nbsp;
-            <span>Users</span>
-          </span>
-          <span class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewPublicUrls">
-            <icon name="share-alt"></icon>&nbsp;
-            <span>Public URLs</span>
-          </span>
-          <span class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="viewHistory">
-            <icon name="history"></icon>&nbsp;
-            <span>History</span>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="columns project-content">
-
-      <div class="column project-info" v-if="project">
+      <div class="project-info" v-if="project && projectTab == 'Basic'">
         <div class="info-label">
           <span>Basic Info</span>&nbsp;
           <span class="edit-icon main-link"
@@ -40,7 +14,7 @@
             <icon name="edit"></icon>
           </span>
         </div>
-        <table class="table is-striped is-hoverable is-fullwidth">
+        <table class="table is-hoverable info-table">
           <tbody>
             <tr>
               <th class="info-name info-cell">Name</th>
@@ -76,11 +50,18 @@
             </tr>
           </tbody>
         </table>
+      </div>
 
+      <div class="project-info" v-if="project && projectTab == 'Meta'">
         <div class="info-label" v-if="projectRole=='Owner' || projectRole=='Admin'">
-          <span>Meta Data</span>
+          <span>Meta Data</span>&nbsp;
+          <span class="edit-icon main-link"
+            v-if="projectRole=='Owner' || projectRole=='Admin'"
+            @click="openEditProjectModal(project)">
+            <icon name="edit"></icon>
+          </span>
         </div>
-        <table class="table is-striped is-hoverable is-fullwidth">
+        <table class="table is-hoverable info-table">
           <tbody>
             <tr>
               <th class="info-name info-cell">Meta Data File</th>
@@ -94,15 +75,10 @@
         </table>
       </div>
 
-      <div class="column channels" v-if="project && projectRole && projectRole!='Viewer'">
+      <div class="channels" v-if="project && projectTab=='Channels' && projectRole && projectRole!='Viewer'">
         <div class="channels-header columns">
-          <div class="column">
+          <div class="column label-column">
             <span class="channel-label">Channels</span>&nbsp;
-            <span class="edit-icon main-link"
-              v-if="projectRole=='Owner' || projectRole=='Admin'"
-              @click="openNewChannelModal">
-              <icon name="plus"></icon>
-            </span>
           </div>
           <div class="column sort-column">
             <div class="select sort">
@@ -112,46 +88,53 @@
               </select>
             </div>
           </div>
+          <div class="column button-column">
+            <a class="button default-btn" v-if="projectRole=='Owner' || projectRole=='Admin'" @click="openNewChannelModal">
+              <icon name="plus"></icon>&nbsp;New Channel
+            </a>
+          </div>
         </div>
-        <div class="tabs is-boxed channel-tab" v-if="project && projectRole && (projectRole=='Owner' || projectRole=='Admin')">
+        <div class="tabs channel-tab" v-if="project && projectRole && (projectRole=='Owner' || projectRole=='Admin')">
           <ul>
             <li v-for="cf in channelFilters" :key="'cf-' + cf" :class="{'is-active': channelFilter == cf}">
               <a @click="channelFilter = cf">{{cf}} ({{channelCounts[cf]}})</a>
             </li>
           </ul>
         </div>
-        <div class="box channel-box" v-for="channel in channels":key="channel.id"
-          @click="openUploadChannelModal(channel)"
-          v-show="channelFilter=='All' || channelFilter==channel.status">
-          <div class="header">
-            <span class="info">
-              <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
-            </span>
-            <span class="name">
-              {{channel.name}}
-              <span class="tag" :class="{
-                'is-success': channel.status!='Closed',
-                'is-danger': channel.status=='Closed'
-              }">{{channel.status=='Closed' ? 'Closed' : 'Open'}}</span>
-            </span>&nbsp;
-            <span class="edit-icon main-link"
-              v-if="projectRole=='Owner' || projectRole=='Admin'"
-              @click.stop="openEditChannelModal(channel)">
-              <icon name="edit"></icon>
-            </span>
-            <br/>
-            <span class="target">{{channel.path}}</span>&nbsp;
-            <span class="edit-icon main-link"
-              @click.stop="openChannelPath(channel)">
-              <icon name="sign-in"></icon>
-            </span>
+
+        <div class="columns is-multiline">
+          <div class="column is-half" v-for="channel in channels":key="channel.id"
+            v-show="channelFilter=='All' || channelFilter==channel.status">
+            <div class="box channel-box"
+              @click="openUploadChannelModal(channel)">
+              <div class="header">
+                <span class="info">
+                  <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
+                </span>
+                <span class="name">
+                  <span class="tag" :class="{
+                    'is-success': channel.status!='Closed',
+                    'is-danger': channel.status=='Closed'
+                  }">{{channel.status=='Closed' ? 'Closed' : 'Open'}}</span>
+                  {{channel.name}}
+                </span>&nbsp;
+                <span class="edit-icon main-link"
+                  v-if="projectRole=='Owner' || projectRole=='Admin'"
+                  @click.stop="openEditChannelModal(channel)">
+                  <icon name="edit"></icon>
+                </span>
+                <br/>
+                <span class="target">{{channel.path}}</span>&nbsp;
+                <span class="edit-icon main-link"
+                  @click.stop="openChannelPath(channel)">
+                  <icon name="sign-in"></icon>
+                </span>
+              </div>
+              <div class="description">{{channel.instruction}}</div>
+            </div>
           </div>
-          <div class="description">{{channel.instruction}}</div>
         </div>
 
-        <div v-if="channels.length == 0">
-          No channel available in this project yet.
-        </div>
       </div>
     </div>
 
@@ -192,6 +175,7 @@
 
 <script>
 import AddressBar from './AddressBar'
+import ProjectTab from './ProjectTab'
 import EditProjectModal from './modals/EditProjectModal'
 import ConfirmModal from './modals/ConfirmModal'
 import NewChannelModal from './modals/NewChannelModal'
@@ -202,6 +186,7 @@ export default {
   name: 'project-page',
   components: {
     AddressBar,
+    ProjectTab,
     EditProjectModal,
     ConfirmModal,
     NewChannelModal,
@@ -272,6 +257,9 @@ export default {
         counts['All']++
       })
       return counts
+    },
+    projectTab () {
+      return this.$store.state.options.projectTab
     }
   },
   watch: {
@@ -473,12 +461,16 @@ export default {
     }
   },
   mounted () {
-    this.channelFilter = this.$store.state.options.channelFilter
-    this.channelSort = this.$store.state.options.channelSort
-    this.$nextTick(function(){
-      this.requestProject()
-      this.requestChannels()
-    })
+    if(this.projectTab == 'Data'){
+      this.$router.push('/projects/' + this.projectId + '/data/%2F')
+    }else{
+      this.channelFilter = this.$store.state.options.channelFilter
+      this.channelSort = this.$store.state.options.channelSort
+      this.$nextTick(function(){
+        this.requestProject()
+        this.requestChannels()
+      })
+    }
   }
 }
 </script>
@@ -519,18 +511,19 @@ export default {
 }
 
 .project-info {
-  margin-top: 20px;
-  margin-right: 10px;
 
   .info-label {
     color: #2e1052;
-    padding: 5px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
   }
 
   .info-name {
     text-align: right;
+  }
+
+  .info-table {
+    margin-top: 5px;
   }
 
   .field-text {
@@ -544,25 +537,27 @@ export default {
 }
 
 .channels {
-  margin-top: 20px;
-  margin-right: -20px;
 
   .channels-header{
-    padding: 5px;
+    margin-top: -15px;
     margin-bottom: -5px;
 
-    .channel-label {
-      color: #2e1052;
-      font-size: 18px;
-      font-weight: bold;
+    .label-column{
+      padding: 15px;
+
+      .channel-label {
+        color: #2e1052;
+        font-size: 20px;
+        font-weight: bold;
+      }
     }
 
     .sort-column {
-      text-align: right;
+      text-align: center;
+    }
 
-      .sort {
-        margin-top: -5px;
-      }
+    .button-column {
+      text-align: right;
     }
   }
 
@@ -571,10 +566,8 @@ export default {
   }
 
   .channel-box {
-    margin-top: 0px;
     padding-top: 10px;
     padding-bottom: 10px;
-    margin-bottom: 15px;
     cursor: pointer;
     min-height: 100px;
     max-height: 100px;

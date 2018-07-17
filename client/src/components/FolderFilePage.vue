@@ -1,6 +1,7 @@
 <template>
   <div class="folder-file-page">
     <address-bar></address-bar>
+    <project-tab v-if="!publicKey"></project-tab>
 
     <div v-if="error" class="notification is-danger">
       <button class="delete" @click="error=''"></button>
@@ -71,6 +72,7 @@
 
 <script>
 import AddressBar from './AddressBar'
+import ProjectTab from './ProjectTab'
 import Folder from './folder-parts/Folder'
 import NormalFile from './file-parts/NormalFile'
 import ImageFile from './file-parts/ImageFile'
@@ -84,7 +86,8 @@ import EditFolderModal from './modals/EditFolderModal'
 export default {
   name: 'folder-file-page',
   components: {
-  	AddressBar,
+    AddressBar,
+    ProjectTab,
     Folder,
     NormalFile,
     ImageFile,

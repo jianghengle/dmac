@@ -1,6 +1,7 @@
 <template>
   <div class="search-page">
     <address-bar></address-bar>
+    <project-tab></project-tab>
 
     <div>
       <div>
@@ -113,11 +114,13 @@
 
 <script>
 import AddressBar from './AddressBar'
+import ProjectTab from './ProjectTab'
 
 export default {
   name: 'search-page',
   components: {
-  	AddressBar
+    AddressBar,
+    ProjectTab
   },
   data () {
     return {
@@ -289,7 +292,6 @@ export default {
 }
 
 .back-btn {
-  margin-top: 10px;
   margin-bottom: 10px;
 }
 

@@ -1,10 +1,13 @@
 <template>
   <div class="history-page">
     <address-bar></address-bar>
+    <project-tab></project-tab>
 
     <div class="columns">
       <div class="view-title column">
-        <icon name="history"></icon>&nbsp;
+        <a class="main-link" @click="$router.go(-1)">
+          <icon name="arrow-left"></icon>
+        </a>&nbsp;
         {{commit.date}}
       </div>
       <div class="column commit-buttons">
@@ -41,12 +44,14 @@
 
 <script>
 import AddressBar from './AddressBar'
+import ProjectTab from './ProjectTab'
 import ConfirmModal from './modals/ConfirmModal'
 
 export default {
   name: 'CommitPage',
   components: {
     AddressBar,
+    ProjectTab,
     ConfirmModal
   },
   data () {
