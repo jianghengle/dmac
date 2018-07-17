@@ -462,7 +462,7 @@ export default {
   },
   mounted () {
     if(this.projectTab == 'Data'){
-      this.$router.push('/projects/' + this.projectId + '/data/%2F')
+      this.$router.replace('/projects/' + this.projectId + '/data/%2F')
     }else{
       this.channelFilter = this.$store.state.options.channelFilter
       this.channelSort = this.$store.state.options.channelSort

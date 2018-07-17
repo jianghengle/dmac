@@ -1,7 +1,7 @@
 <template>
   <div class="projects-page">
   	<address-bar></address-bar>
-    <div class="view-title">
+    <div class="projects-title">
       <div class="columns">
         <div class="column">
           <icon name="database"></icon>
@@ -193,6 +193,12 @@ export default {
 
 .projects-page {
   padding: 10px;
+}
+
+.projects-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2e1052;
 }
 
 .projects-filter {
