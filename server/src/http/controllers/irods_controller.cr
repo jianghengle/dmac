@@ -31,7 +31,7 @@ module DMACServer
           project_id = get_param!(ctx, "projectId")
           data_paths_json = get_param!(ctx, "dataPaths")
           data_paths = [] of String
-          JSON.parse(data_paths_json).each { |p| data_paths << p.to_s }
+          JSON.parse(data_paths_json).as_a.each { |p| data_paths << p.to_s }
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
@@ -63,9 +63,9 @@ module DMACServer
           files_json = get_param!(ctx, "files")
 
           files = [] of Array(String)
-          JSON.parse(files_json).each do |f|
+          JSON.parse(files_json).as_a.each do |f|
             arr = [] of String
-            JSON.parse(f.to_s).each { |a| arr << a.to_s }
+            JSON.parse(f.to_s).as_a.each { |a| arr << a.to_s }
             files << arr
           end
 

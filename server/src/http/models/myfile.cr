@@ -95,7 +95,7 @@ module DMACServer
         end
 
         @name = File.basename(@full_path)
-        @modified_at = File.stat(@full_path).mtime
+        @modified_at = File.info(@full_path).modification_time
 
         @access = MyFile.get_access(@project, @full_path)
       end
@@ -587,8 +587,8 @@ module DMACServer
         Dir.each @@tmp do |filename|
           next if filename.to_s == "." || filename.to_s == ".."
           path = @@tmp + "/" + filename
-          created_at = File.stat(path).ctime
-          span = now - created_at.as(Time)
+          modified_at = File.info(path).modification_time
+          span = now - modified_at.as(Time)
           next if span.total_minutes < 60
           MyFile.delete_files(path)
         end
@@ -607,7 +607,7 @@ module DMACServer
             next unless project_name.starts_with? ".deleted__"
             project_path = user_path + "/" + project_name
             next unless File.directory? project_path
-            modified_at = File.stat(project_path).mtime
+            modified_at = File.info(project_path).modification_time
             span = now - modified_at.as(Time)
             next if span.total_days < 14
             MyFile.delete_files(project_path)

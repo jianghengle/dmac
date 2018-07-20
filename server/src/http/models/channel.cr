@@ -172,7 +172,7 @@ module DMACServer
         query = Query.where(project_id: project.id)
         channels = Repo.all(Channel, query)
         channels = channels.as(Array) unless channels.nil?
-        ids = [] of Int32 | Int64 | Nil
+        ids = [] of Int32 | Int64 | String | Nil
         channels.each do |c|
           path = c.path.to_s
           if path.starts_with?(data_path)

@@ -15,7 +15,7 @@ module DMACServer
           arr = [] of String
           arr.push(user.role.to_s.to_json)
           if controls.size > 0
-            project_ids = [] of Int32 | Int64 | Nil
+            project_ids = [] of Int32 | Int64 | String | Nil
             controls.each do |k, c|
               project_ids.push(c.project_id)
             end
