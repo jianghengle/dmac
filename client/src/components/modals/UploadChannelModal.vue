@@ -4,7 +4,7 @@
       <div class="modal-background"></div>
       <div class="modal-card wide-modal">
         <header class="modal-card-head">
-          <p class="modal-card-title">Upload Data</p>
+          <p class="modal-card-title">Channel</p>
           <button class="delete" @click="close"></button>
         </header>
         <section class="modal-card-body modal-body">
@@ -71,63 +71,47 @@
               {{error}}
           </div>
 
-          <div v-if="channel" class="field file-field">
-            <div v-if="opened" class="file upload-file-input">
-              <label class="file-label">
-                <input class="file-input" type="file" :accept="channel.fileFilter" multiple @change="onFileChange">
-                <span class="file-cta">
-                  <span class="file-icon">
-                    <icon name="upload"></icon>
-                  </span>
-                  <span class="file-label">
-                    Must Select&nbsp;<strong>{{channel.files}}</strong>&nbsp;File(s)
-                  </span>
-                </span>
-              </label>
-            </div>
-
-            <div v-if="uploads.length">
-              <table class="table is-narrow is-fullwidth">
-                <thead>
-                  <tr>
-                    <th>File Name</th>
-                    <th v-if="channel.rename">Rename</th>
-                    <th>Progress</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(v, k) in uploads">
-                    <td>{{v.filename}}</td>
-                    <td v-if="channel.rename">
-                      <input class="input" v-model="v.newName" type="text" placeholder="New Name">
-                    </td>
-                    <td>{{v.percentage}}%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           <div class="meta-fields">
             <div v-if="channel && channel.metaData">
-              <div class="field is-horizontal meta-field" v-for="meta in metaData">
+              <div class="field is-horizontal meta-field" v-for="(meta, i) in metaData">
                 <div class="field-label is-normal">
                   <label class="label">{{meta.name}}</label>
                 </div>
+
                 <div class="field-body">
-                  <div class="field">
-                    <div class="control">
-                      <div v-if="meta.options">
-                        <div class="select">
-                          <select v-model="meta.value">
-                            <option v-for="option in meta.options" v-bind:value="option.value">{{option.text}}</option>
-                          </select>
-                        </div>
-                        <input v-if="meta.value == '__other__'" class="input other-input" type="text" placeholder="Please specify..." v-model="meta.otherValue">
-                      </div>
-                      <div v-else>
+                  <div v-if="meta.acceptFiles != null" class="field is-expanded">
+                    <div class="field has-addons">
+                      <div class="file">
+                      <label class="file-label">
+                        <input class="file-input" type="file" :accept="meta.acceptFiles" @change="onFileChange($event, i)">
+                        <span class="file-cta">
+                          <span class="file-icon">
+                            <icon name="upload"></icon>
+                          </span>
+                          <span class="file-label">
+                            {{meta.acceptFiles}}
+                          </span>
+                        </span>
+                      </label>
+                    </div>
+                      <p class="control is-expanded">
                         <input class="input" type="text" v-model="meta.value">
+                      </p>
+                    </div>
+                  </div>
+                  <div v-else-if="meta.options" class="field">
+                    <div class="control">
+                      <div class="select">
+                        <select v-model="meta.value">
+                          <option v-for="option in meta.options" v-bind:value="option.value">{{option.text}}</option>
+                        </select>
                       </div>
+                      <input v-if="meta.value == '__other__'" class="input other-input" type="text" placeholder="Please specify..." v-model="meta.otherValue">
+                    </div>
+                  </div>
+                  <div v-else class="field">
+                    <div class="control">
+                      <input class="input" type="text" v-model="meta.value">
                     </div>
                   </div>
                 </div>
@@ -137,7 +121,7 @@
 
         </section>
         <footer class="modal-card-foot">
-          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!canUpload" @click="upload">Upload</a>
+          <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!canUpload" @click="upload">Submit</a>
           <a class="button button-right" @click="close">Cancel</a> 
         </footer>
       </div>
@@ -152,25 +136,21 @@ export default {
     return {
       error: '',
       waiting: false,
-      uploads: [],
       metaData: []
     }
   },
   computed: {
     canUpload () {
       if(!this.channel) return false
-      if(this.uploads.length != this.channel.files) return false
-      for(var i=0;i<this.uploads.length;i++){
-        var upload = this.uploads[i]
-        if(!upload.file || !upload.newName){
+      if(!this.channel.metaData) return false
+
+      for(var i=0;i<this.metaData.length;i++){
+        if(!this.metaData[i].value)
           return false
-        }
-      }
-      if(this.channel.metaData){
-        for(var i=0;i<this.metaData.length;i++){
-          if(!this.metaData[i].value)
-            return false
-          if(this.metaData[i].value == '__other__' && !this.metaData[i].otherValue)
+        if(this.metaData[i].value == '__other__' && !this.metaData[i].otherValue)
+          return false
+        if(this.metaData[i].acceptFiles != null){
+          if(!this.metaData[i].upload)
             return false
         }
       }
@@ -182,7 +162,6 @@ export default {
       if(val){
         this.error = ''
         this.waiting = false
-        this.uploads = []
         this.metaData = []
         if(this.channel && this.channel.metaData){
           this.requestMetaData()
@@ -192,9 +171,11 @@ export default {
   },
   methods: {
     close(){
-      this.uploads.forEach(function(upload){
-        if(!upload.done && upload.request){
-          upload.request.abort()
+      this.metaData.forEach(function(m){
+        if(m.upload){
+          if(!m.upload.done && m.upload.request){
+            m.upload.request.abort()
+          }
         }
       })
       this.$emit('close-upload-channel-modal', false)
@@ -218,33 +199,41 @@ export default {
           if(options.length && options[options.length - 1].text == '*'){
             options[options.length - 1] = {text: 'Other', value: '__other__'}
           }
-          return {name: name, value: '', options: options, otherValue: otherValue}
+
+          var acceptFiles = null
+          if(options.length == 1){
+            if(options[0].text == 'file'){
+              acceptFiles = ''
+              options = null
+            }else if(options[0].text.startsWith('file:')){
+              acceptFiles = options[0].text.slice(5).trim()
+              options = null
+            }
+          }
+          return {name: name, value: '', options: options, otherValue: otherValue, acceptFiles: acceptFiles, upload: null}
         })
       }, response => {
         this.error = 'Failed to get meta data!'
         this.waiting= false
       })
     },
-    onFileChange(e) {
+    onFileChange(e, i) {
       var files = e.target.files || e.dataTransfer.files
       if (!files.length)
         return
-      var uploads = []
-      for(var i=0;i<Math.min(files.length, this.channel.files);i++){
-        var file = files[i]
-        var upload = {
-          file: file,
-          filename: file.name,
-          newName: file.name,
-          size: file.size,
-          loaded: 0,
-          percentage: 0,
-          done: false,
-          request: null
-        }
-        uploads.push(upload)
+
+      var file = files[0]
+      var upload = {
+        file: file,
+        filename: file.name,
+        size: file.size,
+        loaded: 0,
+        percentage: 0,
+        done: false,
+        request: null
       }
-      this.uploads = uploads
+      this.metaData[i].upload = upload
+      this.metaData[i].value = file.name
     },
     upload(){
       if(!this.canUpload) return
@@ -252,10 +241,12 @@ export default {
 
       var promises = []
       var vm = this
-      this.uploads.forEach(function(upload){
+      this.metaData.forEach(function(m){
+        if(!m.upload) return
+        var upload = m.upload
         var formData = new FormData()
         formData.append('file', upload.file)
-        formData.append('newName', upload.newName)
+        formData.append('newName', m.value)
         var url = xHTTPx + '/upload_file_by_channel/' + vm.project.id + '/' + vm.channel.id
         var promise = vm.$http.post(url, formData, {
           before: request => {
@@ -279,7 +270,30 @@ export default {
         promises.push(promise)
       })
 
-      Promise.all(promises).then((response) => {
+      if(promises.length){
+        Promise.all(promises).then((response) => {
+          if(vm.channel && vm.channel.metaData){
+            var url = xHTTPx + '/upload_meta_by_channel/' + vm.project.id + '/' + vm.channel.id
+            var values = vm.metaData.map(function(d){
+              return d.value == '__other__' ? d.otherValue : d.value
+            })
+            var message = { metaData:  values.join('\t')}
+            this.$http.post(url, message).then(response => {
+              this.waiting= false
+              this.$emit('close-upload-channel-modal', true)
+            }, response => {
+              this.error = 'Error in uploading meta data ...'
+              this.waiting= false
+            })
+          }else{
+            this.waiting= false
+            this.$emit('close-upload-channel-modal', true)
+          }
+        }, (response) => {
+          vm.waiting = false
+          vm.error = 'Error in uploading file: ' + response
+        })
+      }else{
         if(vm.channel && vm.channel.metaData){
           var url = xHTTPx + '/upload_meta_by_channel/' + vm.project.id + '/' + vm.channel.id
           var values = vm.metaData.map(function(d){
@@ -297,10 +311,7 @@ export default {
           this.waiting= false
           this.$emit('close-upload-channel-modal', true)
         }
-      }, (response) => {
-        vm.waiting = false
-        vm.error = 'Error in uploading file: ' + response
-      })
+      }
     }
   },
 }

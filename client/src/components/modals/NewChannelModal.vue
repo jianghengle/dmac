@@ -59,38 +59,6 @@
           </div>
 
           <div class="field">
-            <label class="label">Files per Upload</label>
-            <p class="control">
-              <span class="select">
-                <select v-model="filesUpload">
-                  <option>1</option>
-                  <option>2</option>
-                  <option>3</option>
-                  <option>4</option>
-                  <option>5</option>
-                </select>
-              </span>
-            </p>
-          </div>
-
-          <div class="field">
-            <label class="label">File Filter</label>
-            <p class="control">
-              <input class="input" type="text" v-model="fileFilter">
-            </p>
-            <p class="help is-info">File extensions separated by commas, e.g: ".csv, .doc". Leave it empty to allow any file.</p>
-          </div>
-
-          <div class="field">
-            <p class="control">
-              <label class="checkbox">
-                <input type="checkbox" v-model="rename">
-                Rename uploaded file
-              </label>
-            </p>
-          </div>
-
-          <div class="field">
             <label class="label">Instruction</label>
             <p class="control">
               <textarea class="textarea" v-model="instruction"></textarea>
@@ -119,9 +87,6 @@ export default {
       fileOptions: [],
       metadataFile: '',
       instruction: '',
-      filesUpload: 1,
-      fileFilter: '',
-      rename: true,
       status: 'Open',
       name: ''
     }
@@ -196,7 +161,7 @@ export default {
       if(!this.canCreate)
         return
       this.waiting= true
-      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, rename: this.rename, files: this.filesUpload, fileFilter: this.fileFilter, status: this.status, name: this.name }
+      var message = { projectId: this.project.id, path: this.targetFolder, metaData: this.metadataFile, instruction: this.instruction, status: this.status, name: this.name }
       this.$http.post(xHTTPx + '/create_channel', message).then(response => {
         this.waiting= false
         this.$emit('close-new-channel-modal', true)

@@ -26,9 +26,6 @@ module DMACServer
           str << "\"path\":" << @path.to_json << ","
           str << "\"metaData\":" << @meta_data.to_json << ","
           str << "\"instruction\":" << @instruction.to_json << ","
-          str << "\"files\":" << @files << ","
-          str << "\"fileFilter\":" << @file_filter.to_json << ","
-          str << "\"rename\":" << @rename.to_s << ","
           str << "\"status\":" << @status.to_json
           str << "}"
         end
@@ -83,31 +80,25 @@ module DMACServer
         return files
       end
 
-      def self.create_channel(project, path, meta_data, instruction, rename, files, file_filter, status, name)
+      def self.create_channel(project, path, meta_data, instruction, status, name)
         channel = Channel.new
         channel.project_id = project.id
         channel.path = path
         channel.meta_data = meta_data
         channel.instruction = instruction
-        channel.files = files.to_i
-        channel.file_filter = file_filter
-        channel.rename = rename == "true"
         channel.status = status
         channel.name = name
         changeset = Repo.insert(channel)
         raise changeset.errors.to_s unless changeset.valid?
       end
 
-      def self.update_channel(id, path, meta_data, instruction, rename, files, file_filter, status, name)
+      def self.update_channel(id, path, meta_data, instruction, status, name)
         channel = Repo.get(Channel, id)
         raise "Cannot find channel" if channel.nil?
         channel = channel.as(Channel)
         channel.path = path
         channel.meta_data = meta_data
         channel.instruction = instruction
-        channel.rename = rename == "true"
-        channel.files = files.to_i
-        channel.file_filter = file_filter
         channel.status = status
         channel.name = name
         changeset = Repo.update(channel)
@@ -135,9 +126,6 @@ module DMACServer
           channel.path = c.path
           channel.meta_data = c.meta_data
           channel.instruction = c.instruction
-          channel.rename = c.rename
-          channel.files = c.files
-          channel.file_filter = c.file_filter
           channel.status = c.status
           channel.name = c.name
           changeset = Repo.insert(channel)
@@ -157,9 +145,6 @@ module DMACServer
             channel.path = path.sub(source_data_path, target_data_path)
             channel.meta_data = c.meta_data
             channel.instruction = c.instruction
-            channel.rename = c.rename
-            channel.files = c.files
-            channel.file_filter = c.file_filter
             channel.status = "Open"
             channel.name = c.name
             changeset = Repo.insert(channel)
@@ -213,18 +198,7 @@ module DMACServer
         raise "No filename included in upload" if new_name.empty?
 
         target_path = full_path + "/" + filename
-        if channel.rename
-          raise "Filename " + filename + " exists" if File.exists?(target_path)
-        else
-          ext = File.extname(filename)
-          base = File.basename(filename, ext)
-          i = 1
-          while File.exists?(target_path)
-            filename = base + "_" + i.to_s + ext
-            target_path = full_path + "/" + filename
-            i += 1
-          end
-        end
+        raise "Filename " + filename + " exists" if File.exists?(target_path)
 
         File.open(target_path, "w") do |f|
           IO.copy(file.tmpfile, f)
