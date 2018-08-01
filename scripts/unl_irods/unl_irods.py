@@ -5,7 +5,7 @@ import os, sys, json
 class Session:
     def __init__(self, username, password):
         zone = 'iplant'
-        host = 'data.iplantcollaborative.org'
+        host = 'data.cyverse.org'
         self.session = iRODSSession(host=host, port=1247, user=username, password=password, zone=zone)
         self.put_opts = { irods.keywords.OPR_TYPE_KW: 1 }
         self.get_opts = { irods.keywords.FORCE_FLAG_KW: 1 }
