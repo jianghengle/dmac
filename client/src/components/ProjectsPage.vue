@@ -26,27 +26,56 @@
 
     <div class="tabs">
       <ul>
-        <li v-for="pf in projectFilters" :key="'pf-' + pf" :class="{'is-active': projectFilter == pf}">
-          <a @click="projectFilter = pf">{{pf}} ({{projectCounts[pf]}})</a>
+        <li :class="{'is-active': projectFilter == 'My projects'}">
+          <a @click="projectFilter = 'My projects'">My projects ({{projectCounts['My projects']}})</a>
+        </li>
+        <li :class="{'is-active': projectFilter == 'Shared with me'}">
+          <a @click="projectFilter = 'Shared with me'">Shared with me ({{projectCounts['Shared with me']}})</a>
+        </li>
+        <li :class="{'is-active': projectFilter == 'Active'}">
+          <a @click="projectFilter = 'Active'">Active ({{projectCounts['Active']}})</a>
+        </li>
+        <li :class="{'is-active': projectFilter == 'Archive'}">
+          <a @click="projectFilter = 'Archive'">Archive ({{projectCounts['Archive']}})</a>
+        </li>
+        <li :class="{'is-active': projectFilter == 'Templates'}">
+          <a @click="projectFilter = 'Templates'">Templates ({{projectCounts['Templates']}})</a>
+        </li>
+        <li :class="{'is-active': projectFilter == 'All'}">
+          <a @click="projectFilter = 'All'">All ({{projectCounts['All']}})</a>
         </li>
       </ul>
     </div>
 
     <div class="columns is-multiline">
       <div class="column is-half" v-for="project in projects":key="project.id"
-        v-show="projectFilter=='All' || projectFilter==project.status">
+        v-show="projectFilter=='All'
+          || (projectFilter=='Active' && project.status=='Active')
+          || (projectFilter=='Archive' && project.status=='Archived')
+          || (projectFilter=='Templates' && (project.status=='Template' || project.status=='Public Template'))
+          || (projectFilter=='My projects' && project.projectRole=='Owner')
+          || (projectFilter=='Shared with me' && project.projectRole!='Owner')
+          ">
         <div class="box project-box" @click="viewProject(project)">
           <div class="header">
-            <span class="info">{{project.createdDate}}</span>
-            <span class="name">
-              <span class="tag" :class="{
-                'is-success': project.status=='Active',
-                'is-dark': project.status=='Archived',
-                'is-warning': project.status=='Template',
-                'is-danger': project.status=='Public Template'
-              }">
-                {{project.status}}
+            <span class="info">
+              <span class="tags has-addons">
+                <span class="tag" :class="{
+                  'is-primary': project.projectRole=='Owner',
+                  'is-info': project.projectRole=='Admin',
+                  'is-success': project.projectRole=='Editor',
+                  'is-warning': project.projectRole=='Viewer'}">
+                  {{project.projectRole}}
+                </span>
+                <span class="tag" :class="{
+                  'is-success': project.status=='Active',
+                  'is-white': project.status=='Archived',
+                  'is-light': project.status=='Template' || project.status=='Public Template'}">
+                  {{project.status}}
+                </span>
               </span>
+            </span>
+            <span class="name">
               {{project.name}}
             </span>&nbsp;
             <span class="edit-icon main-link"
@@ -101,8 +130,8 @@ export default {
         opened: false,
         project: null
       },
-      projectFilter: 'Active',
-      projectFilters: ['Active', 'Archived', 'Template', 'Public Template', 'All'],
+      projectFilter: 'My projects',
+      projectFilters: ['My projects', 'Shared with me', 'Active', 'Archive', 'Templates', 'All'],
       isSubscriber: true
     }
   },
@@ -130,7 +159,18 @@ export default {
         counts[f] = 0
       })
       this.projects.forEach(function(p){
-        counts[p.status]++
+        if(p.projectRole == 'Owner'){
+          counts['My projects']++
+        }else{
+          counts['Shared with me']++
+        }
+        if(p.status == 'Active'){
+          counts['Active']++
+        }else if(p.status == 'Archived'){
+          counts['Archive']++
+        }else{
+          counts['Templates']++
+        }
         counts['All']++
       })
       return counts
@@ -164,8 +204,8 @@ export default {
       this.newProjectModal.opened = false
       if(result){
         this.requestProjects()
-        if(this.projectFilter != 'Active' && this.projectFilter != 'All'){
-          this.projectFilter = 'All'
+        if(this.projectFilter != 'Active' && this.projectFilter != 'All' && this.projectFilter != 'My projects'){
+          this.projectFilter = 'My projects'
         }
       }
     },

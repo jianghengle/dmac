@@ -104,7 +104,12 @@ export default {
       if(type == 'projects') return true
       if(type == 'project'){
         if(this.projectFilter == 'All') return true
-        return node.status == this.projectFilter
+        if(this.projectFilter=='Active' && node.status=='Active') return true
+        if(this.projectFilter=='Archive' && node.status=='Archived') return true
+        if(this.projectFilter=='Templates' && (node.status=='Template' || node.status=='Public Template')) return true
+        if(this.projectFilter=='My projects' && node.projectRole=='Owner') return true
+        if(this.projectFilter=='Shared with me' && node.projectRole!='Owner') return true
+        return false
       }
 
       var role = this.nodeProjectRole

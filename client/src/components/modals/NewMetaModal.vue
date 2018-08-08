@@ -147,7 +147,7 @@ export default {
         if(!empty)
           content += '\n' + row2.join('\t')
       }
-      var message = {projectId: vm.projectId, dataPath:  dataPath, permission: vm.newPermission, content: content}
+      var message = {projectId: vm.projectId, dataPath:  dataPath, permission: vm.newPermission, content: content, copyFromDataPath: ''}
       vm.$http.post(xHTTPx + '/create_file', message).then(response => {
         vm.waiting= false
         vm.$emit('close-new-meta-modal', true)
