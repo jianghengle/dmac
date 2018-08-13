@@ -79,7 +79,7 @@
                 </div>
 
                 <div class="field-body">
-                  <div v-if="meta.acceptFiles != null" class="field is-expanded">
+                  <div v-if="meta.type == 'file'" class="field is-expanded">
                     <div class="field has-addons">
                       <div class="file">
                       <label class="file-label">
@@ -99,7 +99,7 @@
                       </p>
                     </div>
                   </div>
-                  <div v-else-if="meta.options" class="field">
+                  <div v-if="meta.type == 'select'" class="field">
                     <div class="control">
                       <div class="select">
                         <select v-model="meta.value">
@@ -109,9 +109,17 @@
                       <input v-if="meta.value == '__other__'" class="input other-input" type="text" placeholder="Please specify..." v-model="meta.otherValue">
                     </div>
                   </div>
-                  <div v-else class="field">
+                  <div v-if="meta.type == 'string'" class="field">
                     <div class="control">
                       <input class="input" type="text" v-model="meta.value">
+                    </div>
+                  </div>
+                  <div v-if="meta.type == 'checkboxes'" class="field">
+                    <div class="control checkbox-control">
+                      <label v-for="item in meta.items" class="checkbox checkbox-label">
+                        <input type="checkbox" :value="item" v-model="meta.value">
+                        {{item}}
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -184,38 +192,55 @@ export default {
       this.waiting= true
       this.$http.get(xHTTPx + '/get_meta_by_channel/' + this.project.id + '/' + this.channel.id).then(response => {
         this.waiting= false
-        this.metaData = response.body.map(function(m){
-          var optionsStart = m.indexOf('{')
-          var optionsEnd = m.indexOf('}')
-          if(optionsStart == -1 || optionsEnd == -1 || optionsStart >= optionsEnd){
-            return { name: m, value: '' }
-          }
-          var name = m.slice(0, optionsStart).trim()
-          var options = m.slice(optionsStart+1, optionsEnd).split('|').map(function(s){
-            s = s.trim()
-            return {text: s, value: s}
-          })
-          var otherValue = ''
-          if(options.length && options[options.length - 1].text == '*'){
-            options[options.length - 1] = {text: 'Other', value: '__other__'}
-          }
-
-          var acceptFiles = null
-          if(options.length == 1){
-            if(options[0].text == 'file'){
-              acceptFiles = ''
-              options = null
-            }else if(options[0].text.startsWith('file:')){
-              acceptFiles = options[0].text.slice(5).trim()
-              options = null
-            }
-          }
-          return {name: name, value: '', options: options, otherValue: otherValue, acceptFiles: acceptFiles, upload: null}
-        })
+        this.metaData = response.body.map(this.parseMeta)
       }, response => {
         this.error = 'Failed to get meta data!'
         this.waiting= false
       })
+    },
+    parseMeta(m){
+      var codeStart = m.indexOf('{')
+      var codeEnd = m.indexOf('}')
+      if(codeStart == -1 || codeEnd == -1 || codeStart >= codeEnd){
+        return { name: m.trim(), type: 'string', value: '' }
+      }
+      var name = m.slice(0, codeStart).trim()
+      var code = m.slice(codeStart+1, codeEnd)
+
+      if(code == 'file' || code.startsWith('file:')){
+        var acceptFiles = ''
+        if(code.startsWith('file:')){
+          acceptFiles = code.slice(5).trim()
+        }
+        return {name: name, type: 'file', value: '', acceptFiles: acceptFiles, upload: null}
+      }
+
+      if(code.includes('|')){
+        var options = []
+        code.split('|').forEach(function(s){
+          var opt = s.trim()
+          if(opt){
+            options.push({text: opt, value: opt})
+          }
+        })
+        var otherValue = ''
+        if(options.length && options[options.length - 1].text == '*'){
+          options[options.length - 1] = {text: 'Other', value: '__other__'}
+        }
+        return {name: name, type: 'select', value: '', options: options, otherValue: otherValue}
+      }
+
+      if(code.includes(',')){
+        var items = []
+        code.split(',').forEach(function(s){
+          var item = s.trim()
+          if(item){
+            items.push(item)
+          }
+        })
+        return {name: name, type: 'checkboxes', value: [], items: items}
+      }
+      return {name: name, type: 'unknown'}
     },
     onFileChange(e, i) {
       var files = e.target.files || e.dataTransfer.files
@@ -274,8 +299,12 @@ export default {
         Promise.all(promises).then((response) => {
           if(vm.channel && vm.channel.metaData){
             var url = xHTTPx + '/upload_meta_by_channel/' + vm.project.id + '/' + vm.channel.id
-            var values = vm.metaData.map(function(d){
-              return d.value == '__other__' ? d.otherValue : d.value
+            var values = vm.metaData.map(function(m){
+              if(m.type == 'select' && m.value == '__other__')
+                return m.otherValue
+              if(m.type == 'checkboxes')
+                return m.value.join(', ')
+              return m.value
             })
             var message = { metaData:  values.join('\t')}
             this.$http.post(url, message).then(response => {
@@ -364,6 +393,14 @@ export default {
 
 .other-input {
   margin-top: 5px;
+}
+
+.checkbox-control {
+  margin-top: 6px
+}
+
+.checkbox-label {
+  margin-right: 10px;
 }
 
 </style>
