@@ -39,7 +39,6 @@
       <h3 id="helpOnPermission">Project Status, Role and Permission</h3>
 
       <p>A project can be of one of the four status: <span class="quote">Active</span>(default), <span class="quote">Archived</span>, <span class="quote">Template</span> and <span class="quote">Public Template</span>. You could change a project's status by clicking <span class="icon"><icon name="edit"></icon></span> on the project.</p>
-      <p>On the projects page, you could see all <span class="quote">Active</span> projects by default. Change the filter <span class="quote">Show</span> if you want to see other projects.</p>
       <p>A user must be a project user to access the project. He/She can be of one of the four roles: <span class="quote">Owner</span>(assigned automatically when creating the project), <span class="quote">Admin</span>, <span class="quote">Editor</span> and <span class="quote">Viewer</span>.
         <ul>
           <li><span class="quote">Owner</span> can do any thing include managing the project, users, folders, and files.</li>
@@ -58,9 +57,9 @@
 
       <h3 id="helpOnChannel">Channel</h3>
 
-      <p>A channel is a shortcut for users to upload their data and input the metadata at the same time. It also a way to enforce some rules of uploads like file renaming and metadata collection.</p>
-      <p>To create a channel, go to the project page, click <span class="quote">+ Channel</span>, and in the popped up form specify the target folder, metadata file, how many files per upload, instruction and rename rule. You could also edit or delete existing channels by clicking the corresponding icons on the channel.</p>
-      <p>To upload through a channel, click the channel which will pop up a form containing the required metadata. The user must select the correct number of files and fill out all the fields to upload. The files will be uploaded to the target folder, and the metadata input will be appended in the metadata file of the channel, as the required fields are actually extracted from the first line of the same file (split by "tab"). Note that <span class="quote">Editors</span> could upload files to a hidden or readonly folder through channels.</p>
+      <p>A channel is a shortcut for users to upload their files and input the metadata at the same time. It also a way to enforce some rules of uploads like file renaming and metadata collection.</p>
+      <p>To create a channel, go to the project page, click <span class="quote">+ Channel</span>, and in the popped up form specify the target folder, metadata file, and instruction. You could also edit or delete existing channels by clicking the corresponding icons on the channel.</p>
+      <p>To upload through a channel, click the channel which will pop up a form containing the required metadata. The user must fill out all the fields to upload. The files will be uploaded to the target folder, and the metadata input will be appended in the metadata file of the channel, as the required fields are actually extracted from the first line of the same file (split by "tab"). Note that <span class="quote">Editors</span> could upload files to a hidden or readonly folder through channels.</p>
 
       <h3 id="helpOnFileTypes">File Types</h3>
 
