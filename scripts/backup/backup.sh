@@ -6,7 +6,7 @@ $DMAC_CLEANER
 # dump database
 /usr/bin/pg_dump $PG_URL > $DMAC_ROOT/backup/db.dump
 
-# backup users
+# backup users https://www.cyberciti.biz/faq/howto-move-migrate-user-accounts-old-to-new-server/
 awk -v LIMIT=$UGIDLIMIT -F: '($3>LIMIT) && ($3!=65534)' /etc/passwd > $DMAC_ROOT/backup/users/passwd.mig
 awk -v LIMIT=$UGIDLIMIT -F: '($3>LIMIT) && ($3!=65534)' /etc/group > $DMAC_ROOT/backup/users/group.mig
 awk -v LIMIT=$UGIDLIMIT -F: '($3>LIMIT) && ($3!=65534) {print $1}' /etc/passwd | tee - |egrep -f - /etc/shadow > $DMAC_ROOT/backup/users/shadow.mig
