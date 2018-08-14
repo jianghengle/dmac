@@ -157,10 +157,6 @@ export default {
           return false
         if(this.metaData[i].value == '__other__' && !this.metaData[i].otherValue)
           return false
-        if(this.metaData[i].acceptFiles != null){
-          if(!this.metaData[i].upload)
-            return false
-        }
       }
       return true
     },
