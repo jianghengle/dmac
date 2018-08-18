@@ -90,19 +90,27 @@
                   <label class="label">{{meta.name}}</label>
                 </div>
                 <div class="field-body">
-                  <div class="field">
+                  <div v-if="meta.type == 'string'" class="field">
                     <div class="control">
-                      <div v-if="meta.options">
-                        <div class="select">
-                          <select v-model="meta.value">
-                            <option v-for="option in meta.options" v-bind:value="option.value">{{option.text}}</option>
-                          </select>
-                        </div>
-                        <input v-if="meta.value == '__other__'" class="input other-input" type="text" placeholder="Please specify..." v-model="meta.otherValue">
+                      <input class="input" type="text" v-model="meta.value">
+                    </div>
+                  </div>
+                  <div v-if="meta.type == 'select'" class="field">
+                    <div class="control">
+                      <div class="select">
+                        <select v-model="meta.value">
+                          <option v-for="option in meta.options" v-bind:value="option.value">{{option.text}}</option>
+                        </select>
                       </div>
-                      <div v-else>
-                        <input class="input" type="text" v-model="meta.value">
-                      </div>
+                      <input v-if="meta.value == '__other__'" class="input other-input" type="text" placeholder="Please specify..." v-model="meta.otherValue">
+                    </div>
+                  </div>
+                  <div v-if="meta.type == 'checkboxes'" class="field">
+                    <div class="control checkbox-control">
+                      <label v-for="item in meta.items" class="checkbox checkbox-label">
+                        <input type="checkbox" :value="item" v-model="meta.value">
+                        {{item}}
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -190,7 +198,11 @@ export default {
       var vm = this
       vm.waiting = true
       var metaDataValues = vm.metaData.map(function(m){
-        return m.value == '__other__' ? m.otherValue : m.value
+        if(m.type == 'select' && m.value == '__other__')
+          return m.otherValue
+        if(m.type == 'checkboxes')
+          return m.value.join(', ')
+        return m.value
       })
       var message = {name: vm.newName, description: vm.newDescription, templateId: vm.templateId, copyUsers: vm.copyUsers, metaData: metaDataValues.join('\t')}
       vm.$http.post(xHTTPx + '/create_project', message).then(response => {
@@ -219,32 +231,64 @@ export default {
         this.metaData = []
         for(var i=0;i<headers.length;i++){
           var header = headers[i]
-          var optionsStart = header.indexOf('{')
-          var optionsEnd = header.indexOf('}')
-          var name = ''
-          var options = null
           var value = ''
-          if(optionsStart == -1 || optionsEnd == -1 || optionsStart >= optionsEnd){
-            name = header
-          }else{
-            name = header.slice(0, optionsStart).trim()
-            options = header.slice(optionsStart+1, optionsEnd).split('|').map(function(s){
-              s = s.trim()
-              return {text: s, value: s}
-            })
-            var otherValue = ''
-            if(options.length && options[options.length - 1].text == '*'){
-              options[options.length - 1] = {text: 'Other', value: '__other__'}
-            }
-          }
-          if(i < values.length){
-            value = values[i]
-          }
-          this.metaData.push({name: name, value: value, options: options, otherValue: otherValue})
+          if(i < values.length) value = values[i]
+          this.metaData.push(this.parseMeta(header, value))
         }
       }, response => {
         this.waiting= false
       })
+    },
+    parseMeta(header, value){
+      var codeStart = header.indexOf('{')
+      var codeEnd = header.indexOf('}')
+      if(codeStart == -1 || codeEnd == -1 || codeStart >= codeEnd){
+        return { name: header, type: 'string', value: value }
+      }
+      var name = header.slice(0, codeStart).trim()
+      var code = header.slice(codeStart+1, codeEnd)
+
+      if(code.includes('|')){
+        var options = []
+        code.split('|').forEach(function(s){
+          var opt = s.trim()
+          if(opt){
+            options.push({text: opt, value: opt})
+          }
+        })
+        if(options.length && options[options.length - 1].text == '*'){
+          options[options.length - 1] = {text: 'Other', value: '__other__'}
+        }
+        var hasValue = false
+        for(var i=0;i<options.length;i++){
+          if(value == options[i].value){
+            hasValue = true
+            break
+          }
+        }
+        if(hasValue){
+          return {name: name, type: 'select', value: value, options: options, otherValue: ''}
+        }
+        if(!options.length || options[options.length-1].value != '__other__'){
+          options.push({text: 'Other', value: '__other__'})
+        }
+        return {name: name, type: 'select', value: '__other__', options: options, otherValue: value}
+      }
+
+      if(code.includes(',')){
+        var items = []
+        code.split(',').forEach(function(s){
+          var item = s.trim()
+          if(item) items.push(item)
+        })
+        var values = []
+        value.split(',').forEach(function(s){
+          var v = s.trim()
+          if(v && items.includes(v)) values.push(v)
+        })
+        return {name: name, type: 'checkboxes', items: items, value: values}
+      }
+      return {name: header, type: 'string', value: header}
     },
     requestTemplates(){
       this.waiting= true
@@ -295,5 +339,13 @@ export default {
 
 .other-input {
   margin-top: 5px;
+}
+
+.checkbox-control {
+  margin-top: 6px
+}
+
+.checkbox-label {
+  margin-right: 10px;
 }
 </style>

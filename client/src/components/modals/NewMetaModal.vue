@@ -79,7 +79,7 @@ export default {
       newPermission: 'Normal',
       permissionTip: "Permission for Editors and Viewers: Normal - Editor (read/write), Viewer (read); Readonly - Editor/Viewer (readonly); Hidden - Editor/Viewer (hidden)",
       fields: [],
-      fieldTip: "Leave entry empty if not appliable. Options must be seperated by '|', e.g. \"opt1 | opt2 | *\". Use '|*' to add an \"Other\" option for be specified. If this is a channel meta data file, and you want to add a field for uploading a file, fill the \"Option\" with \"file\". You could also specify the file types to be accepted by filling the \"Option\" with e.g.\"file: .txt, .pdf, .xls\"."
+      fieldTip: "Leave entry empty if not appliable. Options must be seperated by '|', e.g. \"opt1 | opt2 | *\". Use '|*' to add an \"Other\" option for be specified. If you want to make multiple checkable options, use ',' to seperate the options, e.g. \"opt1, opt2\". If this is a channel meta data file, and you want to add a field for uploading a file, fill the \"Option\" with \"file\". You could also specify the file types to be accepted by filling the \"Option\" with e.g.\"file: .txt, .pdf, .xls\"."
     }
   },
   computed: {
