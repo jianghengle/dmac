@@ -157,15 +157,13 @@ module DMACServer
           email = verify_token(ctx)
           project_id = get_param!(ctx, "project_id")
           id = get_param!(ctx, "id")
-          file = ctx.params.files["file"]
-          new_name = get_body!(ctx, "newName")
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
           raise "Permission denied" if control.role.to_s == "Viewer"
           raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
 
-          rel_path = Channel.upload_file(project, id, file, new_name)
+          rel_path = Channel.upload_file(project, id, ctx)
           Git.commit(project, email + " uploaded " + rel_path + " by channel") if project.auto_history
 
           {"ok": true}.to_json

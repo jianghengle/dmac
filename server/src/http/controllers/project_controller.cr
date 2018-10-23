@@ -402,7 +402,6 @@ module DMACServer
           project_id = get_param!(ctx, "project_id")
           data_path = get_param!(ctx, "data_path")
           data_path = URI.unescape(data_path)
-          file = ctx.params.files["file"]
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
@@ -410,7 +409,7 @@ module DMACServer
           raise "Permission denied" if role == "Viewer"
           raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
-          rel_path = MyFile.upload_file(project, data_path, file, control)
+          rel_path = MyFile.upload_file(project, data_path, ctx, control)
           Git.commit(project, email + " uploaded " + rel_path) if project.auto_history
 
           {"ok": true}.to_json

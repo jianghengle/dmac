@@ -315,23 +315,27 @@ module DMACServer
         Channel.delete_all_by_directory(project, file.data_path)
       end
 
-      def self.upload_file(project, data_path, file, control)
+      def self.upload_file(project, data_path, env, control)
         full_path = @@root + "/" + project.path.to_s
         prefix_length = full_path.size + 1
         full_path = full_path + data_path
-
-        filename = file.filename
-        raise "No filename included in upload" if !filename.is_a?(String)
-
         dir = MyFile.new(project, data_path)
-        raise "No file permission" unless dir.can_add_file?(control, filename)
 
-        target_path = full_path + "/" + filename
-        File.open(target_path, "w", 0o660) do |f|
-          IO.copy(file.tmpfile, f)
+        HTTP::FormData.parse(env.request) do |upload|
+          filename = upload.filename
+          # Be sure to check if file.filename is not empty otherwise it'll raise a compile time error
+          if !filename.is_a?(String)
+            p "No filename included in upload"
+          else
+            raise "No file permission" unless dir.can_add_file?(control, filename)
+            target_path = full_path + "/" + filename
+            File.open(target_path, "w", 0o660) do |f|
+              IO.copy(upload.body, f)
+            end
+            return target_path[prefix_length..-1]
+          end
         end
-
-        return target_path[prefix_length..-1]
+        raise "Failed to find file in form data"
       end
 
       def self.get_download_path(project, download)

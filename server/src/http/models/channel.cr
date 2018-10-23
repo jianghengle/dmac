@@ -186,7 +186,7 @@ module DMACServer
         return fields
       end
 
-      def self.upload_file(project, id, file, new_name)
+      def self.upload_file(project, id, env)
         channel = Repo.get_by(Channel, id: id)
         raise "cannot find channel" if channel.nil?
         channel = channel.as(Channel)
@@ -194,17 +194,23 @@ module DMACServer
         root = ENV["DMAC_ROOT"]
         full_path = root + "/" + project.path.to_s + channel.path.to_s
 
-        filename = new_name
-        raise "No filename included in upload" if new_name.empty?
+        filename = ""
+        HTTP::FormData.parse(env.request) do |part|
+          if part.name == "newName"
+            filename = part.body.gets_to_end
+          else
+            raise "No filename included in upload" if filename.empty?
 
-        target_path = full_path + "/" + filename
-        raise "Filename " + filename + " exists" if File.exists?(target_path)
+            target_path = full_path + "/" + filename
+            raise "Filename " + filename + " exists" if File.exists?(target_path)
 
-        File.open(target_path, "w") do |f|
-          IO.copy(file.tmpfile, f)
+            File.open(target_path, "w") do |f|
+              IO.copy(part.body, f)
+            end
+            return channel.path.to_s + "/" + filename
+          end
         end
-
-        return channel.path.to_s + "/" + filename
+        raise "Failed to find file in form data"
       end
 
       def self.upload_meta(project, id, meta_data)

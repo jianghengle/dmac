@@ -1,7 +1,6 @@
 module DMACServer
   module HttpAPI
     module ControllerBase
-
       private def error(ctx, message : String, code : Int32 = 422)
         ctx.response.status_code = code
         {errors: message}.to_json
@@ -38,17 +37,7 @@ module DMACServer
         raise InsufficientParameters.new("header #{header_string} does not exist")
       end
 
-      private def get_body(ctx, body_string) : String?
-        return ctx.params.body[body_string].to_s if ctx.params.body.has_key?(body_string)
-      end
-
-      private def get_body!(ctx, body_string) : String
-        body = get_body(ctx, body_string)
-        return body unless body.nil?
-        raise InsufficientParameters.new("body #{body_string} does not exist")
-      end
-
-      private def verify_token(ctx) 
+      private def verify_token(ctx)
         token = get_header!(ctx, "Authorization")
         return User.get_user(token).email.to_s
       end
@@ -70,7 +59,6 @@ module DMACServer
         end
         result
       end
-
     end
   end
 end

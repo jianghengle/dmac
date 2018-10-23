@@ -266,8 +266,8 @@ export default {
         if(!m.upload) return
         var upload = m.upload
         var formData = new FormData()
-        formData.append('file', upload.file)
         formData.append('newName', m.value)
+        formData.append('file', upload.file)
         var url = xHTTPx + '/upload_file_by_channel/' + vm.project.id + '/' + vm.channel.id
         var promise = vm.$http.post(url, formData, {
           before: request => {
