@@ -42,7 +42,7 @@ module DMACServer
         return if downloads.nil?
         downloads = downloads.as(Array)
         now = Time.now
-        download_ids = [] of Int32 | Int64 | String | Nil
+        download_ids = [] of Int8 | Int16 | Int32 | Int64 | String | Nil
         downloads.each do |download|
           download = download.as(Download)
           span = now - download.created_at.as(Time)

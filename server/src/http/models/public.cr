@@ -16,8 +16,8 @@ module DMACServer
           str << "\"projectId\":" << @project_id << ","
           str << "\"dataPath\":" << @data_path.to_json << ","
           str << "\"key\":" << @key.to_json << ","
-          str << "\"createdTime\":" << @created_at.as(Time).epoch << ","
-          str << "\"updatedTime\":" << @updated_at.as(Time).epoch
+          str << "\"createdTime\":" << @created_at.as(Time).to_unix << ","
+          str << "\"updatedTime\":" << @updated_at.as(Time).to_unix
           str << "}"
         end
         result

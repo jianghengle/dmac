@@ -31,7 +31,6 @@
 </template>
 
 <script>
-import PDFObject from 'pdfobject'
 
 export default {
   name: 'pdf-file',

@@ -10,19 +10,16 @@ targets:
   cleaner:
     main: src/cleaner.cr
 
-crystal: 0.26.1
+crystal: 0.27.0
 
 license: MIT
 
 dependencies:
   crecto:
     github: fridgerator/crecto
-    version: 0.9.0
 
   pg:
     github: will/crystal-pg
-    version: 0.15.0
 
   kemal:
     github: kemalcr/kemal
-    version: 0.24.0

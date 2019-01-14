@@ -17,8 +17,8 @@ module DMACServer
           str << "\"email\":" << @email.to_json << ","
           str << "\"role\":" << @role.to_json << ","
           str << "\"group\":" << @group_name.to_json << ","
-          str << "\"createdTime\":" << @created_at.as(Time).epoch << ","
-          str << "\"updatedTime\":" << @updated_at.as(Time).epoch
+          str << "\"createdTime\":" << @created_at.as(Time).to_unix << ","
+          str << "\"updatedTime\":" << @updated_at.as(Time).to_unix
           str << "}"
         end
         result

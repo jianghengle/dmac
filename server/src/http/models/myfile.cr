@@ -116,7 +116,7 @@ module DMACServer
           else
             str << "\"text\":\"\","
           end
-          str << "\"modifiedTime\":" << @modified_at.as(Time).epoch
+          str << "\"modifiedTime\":" << @modified_at.as(Time).to_unix
           str << "}"
         end
         result

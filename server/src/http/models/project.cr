@@ -23,8 +23,8 @@ module DMACServer
           fields.each do |k, v|
             str << "\"" << k << "\":\"" << v << "\","
           end
-          str << "\"createdTime\":" << @created_at.as(Time).epoch << ","
-          str << "\"updatedTime\":" << @updated_at.as(Time).epoch
+          str << "\"createdTime\":" << @created_at.as(Time).to_unix << ","
+          str << "\"updatedTime\":" << @updated_at.as(Time).to_unix
           str << "}"
         end
         result
