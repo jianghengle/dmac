@@ -8,6 +8,8 @@ import FolderFilePage from '@/components/FolderFilePage'
 import HistoryPage from '@/components/HistoryPage'
 import CommitPage from '@/components/CommitPage'
 import SearchPage from '@/components/SearchPage'
+import HelpPage from '@/components/HelpPage'
+import DmacLogin from '@/components/DmacLogin'
 
 Vue.use(Router)
 
@@ -16,6 +18,16 @@ export default new Router({
     {
       path: '/',
       redirect: '/projects'
+    },
+    {
+      path: '/help',
+      name: 'Help',
+      component: HelpPage
+    },
+    {
+      path: '/login',
+      name: 'DmacLogin',
+      component: DmacLogin
     },
     {
       path: '/projects',
@@ -66,6 +78,6 @@ export default new Router({
       path: '/public/:publicKey/search/:dataPath',
       name: 'PublicSearch',
       component: SearchPage
-    }
+    },
   ]
 })

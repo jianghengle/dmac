@@ -7,7 +7,6 @@
         </router-link>
 
         <div class="navbar-burger burger app-burger" :class="{'is-active': menuActive}"
-          v-if="token"
           @click="menuActive = !menuActive">
           <span></span>
           <span></span>
@@ -17,16 +16,30 @@
 
       <div class="navbar-menu app-menu" :class="{'is-active': menuActive}">
         <div class="navbar-end">
+
+          
+
           <div v-if="token" class="navbar-item">
             <span class="app-item" @mouseover="showEmail=true" @mouseout="showEmail=false">Hi,&nbsp;
               <span>{{name}}</span>
             </span>
           </div>
-          <div class="navbar-item">
-            <a class="app-item" @click="toggleHelpPage">
-              <span class="nav-icon"><icon name="question"></icon></span>Help
+
+          <div class="navbar-item has-dropdown is-hoverable my-dropdown">
+            <a class="navbar-link">
+              <span class="nav-icon"><icon name="book"></icon></span>Docs
             </a>
+
+            <div class="navbar-dropdown is-right">
+              <a class="navbar-item">
+                Get Started
+              </a>
+              <router-link class="navbar-item" :to="'/help'">
+                Help
+              </router-link>
+            </div>
           </div>
+
           <div v-if="token" class="navbar-item">
             <a class="app-item" @click="logout">
               <span class="nav-icon"><icon name="sign-out"></icon></span>Logout
@@ -51,11 +64,7 @@ export default {
   },
   computed: {
     token () {
-      var token = this.$store.state.user.token
-      if(token){
-        Vue.http.headers.common['Authorization'] = token
-      }
-      return token
+      return this.$store.state.user.token
     },
     name () {
       var username = this.$store.state.user.username
@@ -73,11 +82,10 @@ export default {
       this.menuActive = false
       if(loginFrom == 'Globus'){
         window.location.href = 'https://auth.globus.org/v2/web/logout?redirect_uri=' + xHTTPx + '&redirect_name=DMAC' 
+      }else{
+        this.$router.push('/login')
       }
     },
-    toggleHelpPage () {
-      this.$emit('toggle-help-page')
-    }
   },
 }
 </script>
@@ -97,16 +105,53 @@ export default {
 
 .app-burger {
   color: white;
+  margin: unset;
 }
 
 .app-menu {
   background-color: #2e1052;
 }
 
+.my-dropdown {
+
+  .navbar-link {
+    color: #FFFFFF;
+  }
+
+  .navbar-link::after {
+    border-color: #FFFFFF;
+  }
+
+  .navbar-dropdown {
+
+    .navbar-item {
+      color: #FFFFFF;
+    }
+
+    .navbar-item:hover {
+      color: #CCCCCC;
+      background-color: #2e1052;
+    }
+  }
+}
+
+.my-dropdown:hover .navbar-link{
+  color: #CCCCCC;
+  background-color: #2e1052;
+}
+
+.my-dropdown:hover .navbar-link::after{
+  border-color: #CCCCCC;
+}
+
+.my-dropdown:hover .navbar-dropdown{
+  background-color: #2e1052;
+}
+
 .nav-icon {
   position: relative;
   top: 3px;
-  right: 3px;
+  right: 5px;
 }
 
 .app-item {
@@ -114,7 +159,7 @@ export default {
 }
 
 a:hover {
-  color: #EEEEEE;
+  color: #CCCCCC;
 }
 
 

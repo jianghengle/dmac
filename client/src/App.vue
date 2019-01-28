@@ -1,43 +1,33 @@
 <template>
   <div id="app">
-    <dmac-header @toggle-help-page="showHelp = !showHelp"></dmac-header>
-    <div v-if="showHelp">
-      <help-page @toggle-help-page="showHelp = !showHelp"></help-page>
-    </div>
-    <div v-else>
-      <div v-if="showLogin">
-        <dmac-login></dmac-login>
+    <dmac-header></dmac-header>
+
+    <div class="columns">
+      <div class="column is-one-quarter" v-show="showNav">
+        <dmac-nav></dmac-nav>
       </div>
-      <div v-if="!showLogin" class="columns">
-        <div class="column is-one-quarter" v-show="showNav">
-          <dmac-nav></dmac-nav>
-        </div>
-        <div class="column" :class="{'is-three-quarter': showNav}" :style="{'max-width': mainWindowMaxWidth}">
-          <router-view></router-view>
-        </div>
+      <div class="column" :class="{'is-three-quarter': showNav}" :style="{'max-width': mainWindowMaxWidth}">
+        <router-view></router-view>
       </div>
     </div>
+
   </div>
 </template>
 
 <script>
 import DmacHeader from './components/DmacHeader'
 import DmacNav from './components/DmacNav'
-import DmacLogin from './components/DmacLogin'
-import HelpPage from './components/HelpPage'
+import Vue from 'vue'
 
 export default {
   name: 'app',
   components: {
     DmacHeader,
-    DmacNav,
-    DmacLogin,
-    HelpPage
+    DmacNav
   },
   data () {
     return {
       windowWidth: 0,
-      showHelp: false
     }
   },
   computed: {
@@ -47,11 +37,12 @@ export default {
     publicKey () {
       return this.$route.params.publicKey
     },
-    showLogin () {
-      if(this.publicKey) return false
-      return !this.token
+    routePath () {
+      return this.$route.path
     },
     showNav () {
+      if(this.routePath == '/help' || this.routePath == '/login')
+        return false
       return this.$store.state.projects.showNav
     },
     mainWindowMaxWidth () {
@@ -69,6 +60,12 @@ export default {
   mounted () {
     this.windowWidth = window.innerWidth
     window.addEventListener('resize', this.handleResize)
+
+    if(this.token) {
+      Vue.http.headers.common['Authorization'] = this.token
+    }else{
+      this.$router.push('/login')
+    }
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.handleResize)

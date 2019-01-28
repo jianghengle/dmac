@@ -136,6 +136,9 @@ export default {
     }
   },
   computed: {
+    token () {
+      return this.$store.state.user.token
+    },
     nodeMap () {
       return this.$store.state.projects.nodeMap
     },
@@ -221,10 +224,14 @@ export default {
     }
   },
   mounted () {
-    this.projectFilter = this.$store.state.options.projectFilter
-    this.$nextTick(function(){
-      this.requestProjects()
-    })
+    if(this.token){
+      this.projectFilter = this.$store.state.options.projectFilter
+      this.$nextTick(function(){
+        this.requestProjects()
+      })
+    }else{
+      this.$router.push('/login')
+    }
   },
 }
 </script>

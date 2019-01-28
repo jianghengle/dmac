@@ -1,7 +1,11 @@
 <template>
 
   <div class="help-page">
-    <div class="main-link close-btn" @click="toggleHelpPage"><icon name="times" scale="1.5"></icon></div>
+    <div class="back-btn">
+      <a class="button default-btn" @click="$router.go(-1)">
+        <icon name="arrow-left"></icon>&nbsp;Back
+      </a>
+    </div>
 
     <div class="help-nav">
       <a class="main-link" @click="scrollToElement('helpOnProject')">
@@ -116,10 +120,8 @@ export default {
   padding: 10px;
 }
 
-.close-btn {
-  margin-right: 15px;
-  margin-top: 10px;
-  float: right;
+.back-btn {
+  margin-left: 10px;
 }
 
 .help-nav {
