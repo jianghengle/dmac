@@ -41,7 +41,7 @@ export default {
       return this.$route.path
     },
     showNav () {
-      if(this.routePath == '/help' || this.routePath == '/login')
+      if(this.routePath == '/help' || this.routePath == '/login' || this.routePath == '/get_started')
         return false
       return this.$store.state.projects.showNav
     },

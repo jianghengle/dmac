@@ -9,6 +9,7 @@ import HistoryPage from '@/components/HistoryPage'
 import CommitPage from '@/components/CommitPage'
 import SearchPage from '@/components/SearchPage'
 import HelpPage from '@/components/HelpPage'
+import GetStartedPage from '@/components/GetStartedPage'
 import DmacLogin from '@/components/DmacLogin'
 
 Vue.use(Router)
@@ -23,6 +24,11 @@ export default new Router({
       path: '/help',
       name: 'Help',
       component: HelpPage
+    },
+    {
+      path: '/get_started',
+      name: 'GetStartedPage',
+      component: GetStartedPage
     },
     {
       path: '/login',

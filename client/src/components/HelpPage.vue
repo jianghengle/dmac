@@ -106,9 +106,6 @@ export default {
     scrollToElement(id){
       var el = document.getElementById(id)
       window.scroll(0, el.offsetTop)
-    },
-    toggleHelpPage(){
-      this.$emit('toggle-help-page')
     }
   }
 }
@@ -140,6 +137,7 @@ export default {
 
 h3 {
   color: #2e1052;
+  font-weight: bold;
 }
 
 .quote {

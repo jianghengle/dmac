@@ -17,8 +17,6 @@
       <div class="navbar-menu app-menu" :class="{'is-active': menuActive}">
         <div class="navbar-end">
 
-          
-
           <div v-if="token" class="navbar-item">
             <span class="app-item" @mouseover="showEmail=true" @mouseout="showEmail=false">Hi,&nbsp;
               <span>{{name}}</span>
@@ -26,14 +24,14 @@
           </div>
 
           <div class="navbar-item has-dropdown is-hoverable my-dropdown">
-            <a class="navbar-link">
+            <router-link class="navbar-link" :to="'/get_started'">
               <span class="nav-icon"><icon name="book"></icon></span>Docs
-            </a>
+            </router-link>
 
             <div class="navbar-dropdown is-right">
-              <a class="navbar-item">
+              <router-link class="navbar-item" :to="'/get_started'">
                 Get Started
-              </a>
+              </router-link>
               <router-link class="navbar-item" :to="'/help'">
                 Help
               </router-link>
