@@ -1,6 +1,6 @@
 <template>
 
-  <div class="help-page">
+  <div class="container help-page">
     <div class="back-btn">
       <a class="button default-btn" @click="$router.go(-1)">
         <icon name="arrow-left"></icon>&nbsp;Back
