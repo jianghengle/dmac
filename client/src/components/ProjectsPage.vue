@@ -60,6 +60,9 @@
           <div class="header">
             <span class="info">
               <span class="tags has-addons">
+                <span class="tag is-white">
+                  {{project.projectSize}}
+                </span>
                 <span class="tag" :class="{
                   'is-primary': project.projectRole=='Owner',
                   'is-info': project.projectRole=='Admin',

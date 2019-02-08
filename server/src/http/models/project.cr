@@ -17,6 +17,7 @@ module DMACServer
           str << "\"name\":" << @name.to_json << ","
           str << "\"description\":" << @description.to_json << ","
           str << "\"status\":\"" << @status << "\","
+          str << "\"projectSize\":\"" << project_size << "\","
           str << "\"autoHistory\":" << @auto_history.to_json << ","
           str << "\"key\":\"" << @key << "\","
           str << "\"path\":\"" << @path << "\","
@@ -28,6 +29,12 @@ module DMACServer
           str << "}"
         end
         result
+      end
+
+      def project_size
+        root = ENV["DMAC_ROOT"]
+        project_root = File.join(root, @path.to_s)
+        Local.get_folder_size(project_root)
       end
 
       def access_as_template(control)
@@ -43,6 +50,13 @@ module DMACServer
         role = control.role.to_s
         return "member" if role == "Owner" || role == "Admin"
         return ""
+      end
+
+      def self.get_all_projects
+        projects = Repo.all(Project)
+        result = [] of Project
+        return result if projects.nil?
+        projects.as(Array)
       end
 
       def self.get_projects_by_ids(ids)

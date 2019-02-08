@@ -263,6 +263,11 @@ module DMACServer
         Local.run("setfacl -R -m u:dmac:rx \"" + full_path + "\"")
         Local.run("setfacl -R -dm u:dmac:rx \"" + full_path + "\"")
       end
+
+      def self.get_folder_size(full_path)
+        result = Local.run("du -sh \"" + full_path + "\"")
+        result.split("\t").first
+      end
     end
   end
 end

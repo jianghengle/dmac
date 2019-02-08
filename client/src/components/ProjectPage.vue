@@ -41,6 +41,10 @@
               </td>
             </tr>
             <tr>
+              <th class="info-name info-cell">Space Usage</th>
+              <td class="info-cell">{{project.projectSize}}</td>
+            </tr>
+            <tr>
               <th class="info-name info-cell">History</th>
               <td class="info-cell">{{project.autoHistory ? 'Automatically save history' : 'Manually save history'}}</td>
             </tr>

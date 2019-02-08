@@ -10,6 +10,11 @@ module DMACServer
         begin
           email = verify_token(ctx)
           user = User.get_user_by_email!(email)
+          if user.role.to_s == "Admin"
+            projects = Project.get_all_projects
+
+            return "[\"Admin\", " + (projects.join(", ") { |i| i.to_json }) + "]"
+          end
 
           controls = Control.get_controls_by_user(email)
           arr = [] of String
