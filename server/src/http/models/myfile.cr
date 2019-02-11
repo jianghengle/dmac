@@ -101,6 +101,7 @@ module DMACServer
       end
 
       def to_json(read_text = false, public_url = "")
+        owner = Local.get_folder_file_owner(@full_path)
         result = String.build do |str|
           str << "{"
           str << "\"projectId\":\"" << @project.id << "\","
@@ -111,6 +112,7 @@ module DMACServer
           str << "\"publicUrl\":\"" << public_url << "\","
           str << "\"size\":\"" << @size << "\","
           str << "\"access\":" << @access << ","
+          str << "\"owner\":" << owner.to_json << ","
           if read_text
             str << "\"text\":" << get_text.to_json << ","
           else

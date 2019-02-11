@@ -95,6 +95,12 @@
                 <icon name="sort-desc" v-if="!sortOption.asc"></icon>
               </span>
             </th>
+            <th class="text-cell is-clickable" @click="sortNodeChildren('owner', 'string')">Owner
+              <span v-if="sortOption.field=='owner'">
+                <icon class="asc-icon" name="sort-asc" v-if="sortOption.asc"></icon>
+                <icon name="sort-desc" v-if="!sortOption.asc"></icon>
+              </span>
+            </th>
             <th class="text-cell is-clickable" @click="sortNodeChildren('modifiedTime', 'number')">Modified At
               <span v-if="sortOption.field=='modifiedTime'">
                 <icon class="asc-icon" name="sort-asc" v-if="sortOption.asc"></icon>
@@ -129,6 +135,7 @@
                 <span class="tooltiptext">{{f.size}}</span>
               </span>
             </td>
+            <td class="text-cell">{{f.owner}}</td>
             <td class="text-cell">{{f.modifiedAt}}</td>
             <td class="text-cell">
               <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && f.type=='file' && f.access==0) : true )"

@@ -268,6 +268,10 @@ module DMACServer
         result = Local.run("du -sh \"" + full_path + "\"")
         result.split("\t").first
       end
+
+      def self.get_folder_file_owner(full_path)
+        Local.run("ls -ld \"" + full_path + "\" | awk '{print $3}'").strip
+      end
     end
   end
 end
