@@ -274,9 +274,10 @@ module DMACServer
       end
 
       def self.set_folder_file_owner(full_path, role, username)
-        return unless (@@enabled || role == "Owner")
-
-        Local.run("chown -R " + username + " \"" + full_path + "\"")
+        return unless @@enabled
+        if role != "Owner"
+          Local.run("chown -R " + username + " \"" + full_path + "\"")
+        end
       end
     end
   end
