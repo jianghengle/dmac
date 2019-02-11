@@ -245,6 +245,8 @@ module DMACServer
             MyFile.copy_directory_files(project, copy_from_data_path, data_path, meta_data)
             Channel.copy_directory_channels(project, copy_from_data_path, data_path)
           end
+          user = User.get_user_by_email!(email)
+          Local.set_folder_file_owner(full_path, role, user.username.to_s)
           Git.commit(project, email + " created folder " + data_path) if project.auto_history
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -273,6 +275,8 @@ module DMACServer
 
           full_path = MyFile.create_file(project, data_path, control, content, copy_from_data_path)
           Local.set_file_permission(project, full_path, permission) if permission != "Normal"
+          user = User.get_user_by_email!(email)
+          Local.set_folder_file_owner(full_path, role, user.username.to_s)
           Git.commit(project, email + " created file " + data_path) if project.auto_history
           {"ok": true}.to_json
         rescue ex : InsufficientParameters
@@ -415,6 +419,11 @@ module DMACServer
           raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
 
           rel_path = MyFile.upload_file(project, data_path, ctx, control)
+          root = ENV["DMAC_ROOT"]
+          full_path = File.join(root, project.path.to_s, rel_path)
+          user = User.get_user_by_email!(email)
+          Local.set_folder_file_owner(full_path, role, user.username.to_s)
+
           Git.commit(project, email + " uploaded " + rel_path) if project.auto_history
 
           {"ok": true}.to_json

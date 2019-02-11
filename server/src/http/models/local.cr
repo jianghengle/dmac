@@ -272,6 +272,12 @@ module DMACServer
       def self.get_folder_file_owner(full_path)
         Local.run("ls -ld \"" + full_path + "\" | awk '{print $3}'").strip
       end
+
+      def self.set_folder_file_owner(full_path, role, username)
+        return unless (@@enabled || role == "Owner")
+
+        Local.run("chown -R " + username + " \"" + full_path + "\"")
+      end
     end
   end
 end
