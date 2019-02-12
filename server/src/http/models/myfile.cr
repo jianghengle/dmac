@@ -358,49 +358,61 @@ module DMACServer
       end
 
       def self.copy_files(source_files, target_path, target_control)
+        new_paths = [] of String
         new_folders = {} of String => Bool
         source_files.each do |f|
           if f.type == "file"
-            MyFile.copy_file(f.full_path, target_path, target_control)
+            path = MyFile.copy_file(f.full_path, target_path, target_control)
+            new_paths << path unless path.empty?
           else
-            MyFile.copy_folder(f.full_path, target_path, target_control, new_folders)
+            paths = MyFile.copy_folder(f.full_path, target_path, target_control, new_folders)
+            new_paths.concat(paths)
           end
         end
+        new_paths
       end
 
       def self.copy_file(source_full_path, target_path, target_control)
-        return unless MyFile.check_copy(source_full_path, target_path, target_control)
+        return "" unless MyFile.check_copy(source_full_path, target_path, target_control)
         filename = File.basename(source_full_path)
         new_full_path = target_path.full_path + "/" + filename
+        existing = File.exists? new_full_path
         File.open(new_full_path, "w", 0o660) do |tf|
           File.open(source_full_path) do |sf|
             IO.copy(sf, tf)
           end
         end
+        existing ? "" : new_full_path
       end
 
       def self.copy_folder(source_full_path, target_path, target_control, new_folders)
-        return unless MyFile.check_copy(source_full_path, target_path, target_control)
+        new_paths = [] of String
+        return new_paths unless MyFile.check_copy(source_full_path, target_path, target_control)
         folder_name = File.basename(source_full_path)
         new_target_full_path = target_path.full_path + "/" + folder_name
-        Dir.mkdir(new_target_full_path) unless File.exists? new_target_full_path
+        existing = File.exists? new_target_full_path
+        Dir.mkdir(new_target_full_path) unless existing
         new_target_data_path = target_path.data_path + "/" + folder_name
         new_target_path = MyFile.new(target_path.project, new_target_data_path)
         new_folders[new_target_path.full_path] = true
-
+        new_paths << new_target_full_path unless existing
         Dir.each source_full_path do |filename|
           next if @@ignore.has_key? filename.to_s
           new_source_full_path = source_full_path + "/" + filename
           if File.file? new_source_full_path
-            MyFile.copy_file(new_source_full_path, new_target_path, target_control)
+            path = MyFile.copy_file(new_source_full_path, new_target_path, target_control)
+            new_paths << path if existing && path != ""
           elsif (File.directory? new_source_full_path) && (!new_folders.has_key?(new_source_full_path))
-            MyFile.copy_folder(new_source_full_path, new_target_path, target_control, new_folders)
+            paths = MyFile.copy_folder(new_source_full_path, new_target_path, target_control, new_folders)
+            new_paths.concat(paths) if existing
           end
         end
+        new_paths
       end
 
       def self.check_copy(source_full_path, target_path, target_control)
-        return false unless target_control.role.to_s != "Editor" || File.file? source_full_path
+        return true if target_control.role.to_s != "Editor"
+        return false unless File.file? source_full_path
 
         filename = File.basename(source_full_path)
         new_full_path = target_path.full_path + "/" + filename

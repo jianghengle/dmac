@@ -491,7 +491,11 @@ module DMACServer
           target_path = MyFile.new(target_project, target_data_path)
           raise "Target is not a folder" unless target_path.type == "folder"
 
-          MyFile.copy_files(source_files, target_path, target_control)
+          paths = MyFile.copy_files(source_files, target_path, target_control)
+          user = User.get_user_by_email!(email)
+          paths.each do |p|
+            Local.set_folder_file_owner(p, target_role, user.username.to_s)
+          end
 
           rel_path = target_data_path
           Git.commit(target_project, email + " copy something into " + rel_path) if target_project.auto_history
