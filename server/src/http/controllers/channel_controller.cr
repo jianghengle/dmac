@@ -160,10 +160,20 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" if control.role.to_s == "Viewer"
-          raise "Permission denied" if (control.role.to_s == "Editor" && project.status != "Active")
+          role = control.role.to_s
+          raise "Permission denied" if role == "Viewer"
+          raise "Permission denied" if (role == "Editor" && project.status != "Active")
 
           rel_path = Channel.upload_file(project, id, ctx)
+          root = ENV["DMAC_ROOT"]
+          full_path = File.join(root, project.path.to_s, rel_path)
+          user = User.get_user_by_email!(email)
+          Local.set_folder_file_owner(full_path, role, user.username.to_s)
+          if role == "Editor"
+            group = "dmac-" + project.key.to_s + "-editor"
+            Local.set_owner_permission(group, full_path)
+          end
+
           Git.commit(project, email + " uploaded " + rel_path + " by channel") if project.auto_history
 
           {"ok": true}.to_json

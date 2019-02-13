@@ -279,6 +279,11 @@ module DMACServer
           Local.run("chown -R " + username + " \"" + full_path + "\"")
         end
       end
+
+      def self.set_owner_permission(group, full_path)
+        permission = Local.get_group_acl(group, full_path)
+        Local.run("chmod -u=" + permission + " \"" + full_path + "\"")
+      end
     end
   end
 end
