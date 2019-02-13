@@ -516,9 +516,14 @@ module DMACServer
 
           project = Project.get_project!(project_id)
           control = Control.get_control!(email, project)
-          raise "Permission denied" unless control.role.to_s == "Owner" || control.role.to_s == "Admin"
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin"
 
-          MyFile.unzip_file(project, data_path)
+          paths = MyFile.unzip_file(project, data_path)
+          user = User.get_user_by_email!(email)
+          paths.each do |p|
+            Local.set_folder_file_owner(p, role, user.username.to_s)
+          end
 
           rel_path = data_path
           Git.commit(project, email + " extract " + rel_path) if project.auto_history

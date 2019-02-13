@@ -432,15 +432,19 @@ module DMACServer
           target_path = target_path + "/" + s if s != file.name
         end
 
+        new_paths = [] of String
         Dir.each temp_path do |filename|
           next if filename.to_s == "." || filename.to_s == ".."
           source = temp_path + "/" + filename
           if File.file? source
-            MyFile.copy_file_from_outside(source, target_path)
+            path = MyFile.copy_file_from_outside(source, target_path)
+            new_paths << path unless path.empty?
           else
-            MyFile.copy_folder_from_outside(source, target_path)
+            paths = MyFile.copy_folder_from_outside(source, target_path)
+            new_paths.concat(paths)
           end
         end
+        new_paths
       end
 
       def self.unzip_to_temp(source)
@@ -455,28 +459,36 @@ module DMACServer
       def self.copy_file_from_outside(source, target)
         name = File.basename(source)
         target_path = target + "/" + name
-        return if ((File.exists? target_path) && (File.directory? target_path))
+        existing = File.exists? target_path
+        return "" if File.directory? target_path
         File.open(target_path, "w", 0o660) do |tf|
           File.open(source) do |sf|
             IO.copy(sf, tf)
           end
         end
+        existing ? "" : target_path
       end
 
       def self.copy_folder_from_outside(source, target)
+        new_paths = [] of String
         name = File.basename(source)
         new_target = target + "/" + name
-        return if ((File.exists? new_target) && (File.file? new_target))
-        Dir.mkdir(new_target) unless File.exists? new_target
+        existing = File.exists? new_target
+        return new_paths if File.file? new_target
+        Dir.mkdir(new_target) unless existing
+        new_paths << new_target unless existing
         Dir.each source do |filename|
           next if @@ignore.has_key? filename.to_s
           new_source = source + "/" + filename
           if File.file? new_source
-            MyFile.copy_file_from_outside(new_source, new_target)
+            path = MyFile.copy_file_from_outside(new_source, new_target)
+            new_paths << path if existing && path != ""
           else
-            MyFile.copy_folder_from_outside(new_source, new_target)
+            paths = MyFile.copy_folder_from_outside(new_source, new_target)
+            new_paths.concat(paths) if existing
           end
         end
+        new_paths
       end
 
       def self.prepare_download(download, project, data_path, control)
