@@ -154,15 +154,19 @@ module DMACServer
         user = user.as(User)
         username = user.username.to_s
         role = control.role.to_s
+        project_root = @@dmac_root + "/" + project.path.to_s
         if role == "Viewer"
           group = "dmac-" + project.key.to_s + "-viewer"
           Local.set_project_group(project, username, group)
+          Local.set_owner_permission(project_root, group, username)
         elsif role == "Editor"
           group = "dmac-" + project.key.to_s + "-editor"
           Local.set_project_group(project, username, group)
+          Local.set_owner_permission(project_root, group, username)
         else
           group = "dmac-" + project.key.to_s + "-admin"
           Local.set_project_group(project, username, group)
+          Local.set_owner_permission(project_root, group, username)
         end
       end
 
@@ -292,6 +296,25 @@ module DMACServer
         group = "dmac-" + project.key.to_s + "-" + role.downcase
         permission = Local.get_group_acl(group, full_path)
         Local.run("chmod u=" + permission + " \"" + full_path + "\"")
+      end
+
+      def self.set_owner_permission(full_path, group, username)
+        owner = Local.get_folder_file_owner(full_path)
+        if owner == username
+          permission = Local.get_group_acl(group, full_path)
+          permission = permission.delete('-')
+          permission = "-" if permission.empty?
+          Local.run("chmod u=" + permission + " \"" + full_path + "\"")
+        end
+
+        if File.directory? full_path
+          Dir.each full_path do |filename|
+            name = filename.to_s
+            next if (name == "." || name == ".." || name == ".git" || name == ".gitignore")
+            path = File.join(full_path, name)
+            Local.set_owner_permission(path, group, username)
+          end
+        end
       end
     end
   end
