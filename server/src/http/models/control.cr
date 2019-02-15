@@ -89,17 +89,10 @@ module DMACServer
         raise "Cannot find control" if control.nil?
         control = control.as(Control)
         control.email = email
-        role_down = false
-        if control.role.to_s == "Editor"
-          role_down = true if role == "Viewer"
-        elsif control.role.to_s == "Admin"
-          role_down = true if role != "Admin"
-        end
         control.role = role
         control.group_name = group
         changeset = Repo.update(control)
         raise changeset.errors.to_s unless changeset.valid?
-        Local.reown_project_files(project) if role_down
         return control
       end
 
@@ -109,7 +102,6 @@ module DMACServer
         control = control.as(Control)
         changeset = Repo.delete(control)
         raise changeset.errors.to_s unless changeset.valid?
-        Local.reown_project_files(project) if control.role.to_s != "Viewer"
         return control
       end
 

@@ -221,13 +221,6 @@ module DMACServer
         return "---"
       end
 
-      def self.reown_project_files(project)
-        return unless @@enabled
-
-        project_root = @@dmac_root + "/" + project.path.to_s
-        Local.run("chown -R root:root \"" + project_root + "\"")
-      end
-
       def self.set_file_permission(project, full_path, permission)
         return unless @@enabled
 
