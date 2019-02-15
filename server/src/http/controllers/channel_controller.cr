@@ -169,9 +169,8 @@ module DMACServer
           full_path = File.join(root, project.path.to_s, rel_path)
           user = User.get_user_by_email!(email)
           Local.set_folder_file_owner(full_path, role, user.username.to_s)
-          if role == "Editor"
-            group = "dmac-" + project.key.to_s + "-editor"
-            Local.set_owner_permission(group, full_path)
+          if role != "Owner"
+            Local.set_file_owner_permission(full_path, project, role)
           end
 
           Git.commit(project, email + " uploaded " + rel_path + " by channel") if project.auto_history

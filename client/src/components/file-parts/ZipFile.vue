@@ -5,6 +5,7 @@
         <icon name="arrow-left"></icon>
       </span>&nbsp;
       {{file && file.name}}
+      <span class="tag is-success file-tag" v-if="file && file.access==0">Normal</span>
       <span class="tag is-warning file-tag" v-if="file && file.access==1">Readonly</span>
       <span class="tag is-danger file-tag" v-if="file && file.access==2">Hidden</span>
       <a v-if="projectRole && projectRole!='Viewer' && ( projectRole=='Editor' ? (project.status=='Active' && file.access==0) : true )"

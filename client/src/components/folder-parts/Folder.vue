@@ -8,8 +8,9 @@
       <a class="main-link" v-if="folder.publicUrl" :href="folder.publicUrl" target="_blank">
         <icon class="action-icon" name="share-alt"></icon>
       </a>
+      <span class="tag is-success folder-tag" v-if="folder && (folder.dataPath=='/' || folder.access==0)">Normal</span>
       <span class="tag is-warning folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==1">Readonly</span>
-      <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' && folder.access==2">Hidden</span>
+      <span class="tag is-danger folder-tag" v-if="folder && folder.dataPath!='/' &&  folder.access==2">Hidden</span>
       <a v-if="folder.dataPath != '/' && canEditFolder"
         @click="emitOpenEditFolderModal"
         class="main-link">
@@ -124,7 +125,8 @@
             <td>
               {{f.name}}
               <span v-if="f.publicUrl">*</span>
-              <span v-if="folder.dataPath=='/' || folder.access < f.access">
+              <span v-if="folder.dataPath=='/' ? f.access != 0 : folder.access != f.access">
+                <span class="tag is-success" v-if="f.access==0">Normal</span>
                 <span class="tag is-warning" v-if="f.access==1">Readonly</span>
                 <span class="tag is-danger" v-if="f.access==2">Hidden</span>
               </span>

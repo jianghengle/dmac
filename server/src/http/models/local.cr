@@ -234,13 +234,19 @@ module DMACServer
 
         if permission == "Normal"
           Local.run("setfacl -R -m \"g:" + editor_group + ":rwx\" \"" + full_path + "\"")
+          Local.run("setfacl -R -dm \"g:" + editor_group + ":rwx\" \"" + full_path + "\"")
           Local.run("setfacl -R -m \"g:" + viewer_group + ":rx\" \"" + full_path + "\"")
+          Local.run("setfacl -R -dm \"g:" + viewer_group + ":rx\" \"" + full_path + "\"")
         elsif permission == "Readonly"
           Local.run("setfacl -R -m \"g:" + editor_group + ":rx\" \"" + full_path + "\"")
+          Local.run("setfacl -R -dm \"g:" + editor_group + ":rx\" \"" + full_path + "\"")
           Local.run("setfacl -R -m \"g:" + viewer_group + ":rx\" \"" + full_path + "\"")
+          Local.run("setfacl -R -dm \"g:" + viewer_group + ":rx\" \"" + full_path + "\"")
         elsif permission == "Hidden"
           Local.run("setfacl -R -m \"g:" + editor_group + ":-\" \"" + full_path + "\"")
+          Local.run("setfacl -R -dm \"g:" + editor_group + ":-\" \"" + full_path + "\"")
           Local.run("setfacl -R -m \"g:" + viewer_group + ":-\" \"" + full_path + "\"")
+          Local.run("setfacl -R -dm \"g:" + viewer_group + ":-\" \"" + full_path + "\"")
         end
       end
 
@@ -280,9 +286,12 @@ module DMACServer
         end
       end
 
-      def self.set_owner_permission(group, full_path)
+      def self.set_file_owner_permission(full_path, project, role)
+        return unless @@enabled
+
+        group = "dmac-" + project.key.to_s + "-" + role.downcase
         permission = Local.get_group_acl(group, full_path)
-        Local.run("chmod -u=" + permission + " \"" + full_path + "\"")
+        Local.run("chmod u=" + permission + " \"" + full_path + "\"")
       end
     end
   end
