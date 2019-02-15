@@ -63,6 +63,20 @@ module DMACServer
         control.as(Control)
       end
 
+      def self.get_username_role_map(project)
+        controls = Control.get_controls_by_project_id(project.id)
+        emails = controls.map { |c| c.email.to_s }
+        email_user_map = User.get_email_user_map(emails)
+        result = {} of String => String
+        controls.each do |c|
+          if email_user_map.has_key? c.email.to_s
+            user = email_user_map[c.email.to_s]
+            result[user.username.to_s] = c.role.to_s
+          end
+        end
+        result
+      end
+
       def self.create_control(email, project, role, group)
         control = Control.new
         control.project_id = project.id

@@ -224,8 +224,6 @@ module DMACServer
       def self.set_file_permission(project, full_path, permission)
         return unless @@enabled
 
-        Local.run("chown root:root \"" + full_path + "\"")
-
         editor_group = "dmac-" + project.key.to_s + "-editor"
         viewer_group = "dmac-" + project.key.to_s + "-viewer"
 
@@ -245,6 +243,10 @@ module DMACServer
           Local.run("setfacl -R -m \"g:" + viewer_group + ":-\" \"" + full_path + "\"")
           Local.run("setfacl -R -dm \"g:" + viewer_group + ":-\" \"" + full_path + "\"")
         end
+
+        project_root = @@dmac_root + "/" + project.path.to_s
+        role_map = Control.get_username_role_map(project)
+        Local.sync_owner_permission(project_root, project, role_map)
       end
 
       def self.keep_file_permission(source_file, target_file)
@@ -306,6 +308,27 @@ module DMACServer
             next if (name == "." || name == ".." || name == ".git" || name == ".gitignore")
             path = File.join(full_path, name)
             Local.set_owner_permission(path, group, username)
+          end
+        end
+      end
+
+      def self.sync_owner_permission(full_path, project, role_map)
+        owner = Local.get_folder_file_owner(full_path)
+        if owner != "root" && role_map.has_key?(owner) && role_map[owner] != "Owner"
+          role = role_map[owner]
+          group = "dmac-" + project.key.to_s + "-" + role.downcase
+          permission = Local.get_group_acl(group, full_path)
+          permission = permission.delete('-')
+          permission = "-" if permission.empty?
+          Local.run("chmod u=" + permission + " \"" + full_path + "\"")
+        end
+
+        if File.directory? full_path
+          Dir.each full_path do |filename|
+            name = filename.to_s
+            next if (name == "." || name == ".." || name == ".git" || name == ".gitignore")
+            path = File.join(full_path, name)
+            Local.sync_owner_permission(path, project, role_map)
           end
         end
       end

@@ -82,6 +82,17 @@ module DMACServer
         end
         return user
       end
+
+      def self.get_email_user_map(emails)
+        query = Query.where(:email, emails)
+        users = Repo.all(User, query)
+        result = {} of String => User
+        return result if users.nil?
+        users.as(Array).each do |u|
+          result[u.email.to_s] = u
+        end
+        result
+      end
     end
   end
 end
