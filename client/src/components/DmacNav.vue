@@ -36,7 +36,7 @@ export default {
 .nav-bar {
   padding: 10px;
   font-size: 14px;
-  overflow: scroll;
+  overflow: auto;
 }
 
 </style>
