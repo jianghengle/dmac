@@ -65,7 +65,7 @@ export default {
       Vue.http.headers.common['Authorization'] = this.token
     }else{
       if(this.routePath != '/help' && routePath != '/get_started'){
-        this.$router.push('/login')
+        this.$router.replace('/login')
       }
     }
   },

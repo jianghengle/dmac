@@ -233,7 +233,7 @@ export default {
         this.requestProjects()
       })
     }else{
-      this.$router.push('/login')
+      this.$router.replace('/login')
     }
   },
 }
