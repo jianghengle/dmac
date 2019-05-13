@@ -19,7 +19,14 @@ module DMACServer
           channels = Channel.get_channels_by_project(project)
           arr = [] of String
           channels.each do |c|
-            arr << c.to_json unless (role == "Editor" && c.status.to_s == "Closed")
+            if role == "Owner" || role == "Admin"
+              arr << c.to_json
+            elsif c.status.to_s == "Open"
+              arr << c.to_json
+            elsif c.status.to_s.starts_with? "Open to:"
+              channel_group = c.status.to_s[8..-1].strip
+              arr << c.to_json if channel_group == control.group_name
+            end
           end
           json_array(arr)
         rescue ex : InsufficientParameters

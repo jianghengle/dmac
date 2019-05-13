@@ -108,7 +108,7 @@
 
         <div class="columns is-multiline">
           <div class="column is-half" v-for="channel in channels":key="channel.id"
-            v-show="channelFilter=='All' || channelFilter==channel.status">
+            v-show="channelFilter=='All' || channel.status.startsWith(channelFilter)">
             <div class="box channel-box"
               @click="openUploadChannelModal(channel)">
               <div class="header">
@@ -116,10 +116,10 @@
                   <a class="button delete" @click.stop="deleteChannel(channel)" v-if="projectRole=='Owner'|| projectRole=='Admin'"></a>
                 </span>
                 <span class="name">
-                  <span class="tag" :class="{
+                  <span class="tag" v-if="projectRole=='Owner'|| projectRole=='Admin'" :class="{
                     'is-success': channel.status!='Closed',
                     'is-danger': channel.status=='Closed'
-                  }">{{channel.status=='Closed' ? 'Closed' : 'Open'}}</span>
+                  }">{{channel.status}}</span>
                   {{channel.name}}
                 </span>&nbsp;
                 <span class="edit-icon main-link"
@@ -257,7 +257,11 @@ export default {
         counts[f] = 0
       })
       this.channels.forEach(function(c){
-        counts[c.status]++
+        if(c.status.startsWith('Open')){
+          counts['Open']++
+        }else{
+          counts['Closed']++
+        }
         counts['All']++
       })
       return counts

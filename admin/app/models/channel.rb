@@ -11,11 +11,7 @@ class Channel < ApplicationRecord
       field :files
       field :file_filter
       field :rename
-      field :status, :enum do
-        enum do
-          ['Open', 'Closed']
-        end
-      end
+      field :status
     end
   end
 end

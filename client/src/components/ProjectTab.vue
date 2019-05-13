@@ -13,9 +13,9 @@
         <li :class="{'is-active': currentTab=='Meta'}"><a @click="viewMeta">Meta</a></li>
         <li :class="{'is-active': currentTab=='Channels'}"><a @click="viewChannels">Channels</a></li>
         <li :class="{'is-active': currentTab=='Data'}"><a @click="viewData">Data</a></li>
-        <li :class="{'is-active': currentTab=='Users'}"><a @click="viewUsers">Users</a></li>
-        <li :class="{'is-active': currentTab=='Public URLs'}"><a @click="viewPublicUrls">Public URLs</a></li>
-        <li :class="{'is-active': currentTab=='History'}"><a @click="viewHistory">History</a></li>
+        <li :class="{'is-active': currentTab=='Users'}" v-if="projectRole=='Owner' || projectRole=='Admin'"><a @click="viewUsers">Users</a></li>
+        <li :class="{'is-active': currentTab=='Public URLs'}" v-if="projectRole=='Owner' || projectRole=='Admin'"><a @click="viewPublicUrls">Public URLs</a></li>
+        <li :class="{'is-active': currentTab=='History'}" v-if="projectRole=='Owner' || projectRole=='Admin'"><a @click="viewHistory">History</a></li>
       </ul>
     </div>
 
@@ -48,6 +48,9 @@ export default {
     },
     project () {
       return this.nodeMap['/projects/' + this.projectId]
+    },
+    projectRole () {
+      return this.project && this.project.projectRole
     },
     projectTab () {
       return this.$store.state.options.projectTab

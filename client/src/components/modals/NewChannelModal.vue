@@ -25,8 +25,7 @@
             <p class="control">
               <span class="select">
                 <select v-model="status">
-                  <option>Open</option>
-                  <option>Closed</option>
+                  <option v-for="opt in statusOptions">{{opt}}</option>
                 </select>
               </span>
             </p>
@@ -88,6 +87,7 @@ export default {
       metadataFile: '',
       instruction: '',
       status: 'Open',
+      statusOptions: ['Open', 'closed'],
       name: ''
     }
   },
@@ -114,6 +114,7 @@ export default {
         }else{
           this.requestFolders()
         }
+        this.requestGroups()
       }
     },
     targetFolder: function (val) {
@@ -155,6 +156,23 @@ export default {
       }, response => {
         this.error = 'Failed to get files!'
         this.waiting= false
+      })
+    },
+    requestGroups(){
+      this.$http.get(xHTTPx + '/get_project_controls/' + this.project.id).then(response => {
+        var groups = {}
+        response.body.forEach(function(u){
+          if((u.role == 'Editor' || u.role == 'Viewer') && u.group.trim()){
+            groups['Open to: ' + u.group.trim()] = true
+          }
+        })
+        groups = Object.keys(groups)
+        groups.sort(function(a, b){
+          return a.localeCompare(b)
+        })
+        this.statusOptions = groups
+        this.statusOptions.unshift('Open')
+        this.statusOptions.push('Closed')
       })
     },
     create(){
