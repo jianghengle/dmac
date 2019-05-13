@@ -28,13 +28,13 @@
               </span>
             </p>
           </div>
-          <div class="field" v-if="false">
+          <div class="field" v-show="newRole=='Editor' || newRole=='Viewer'">
             <label class="label">Group</label>
             <p class="control">
               <input class="input" type="text" v-model="newGroup">
             </p>
             <p class="help is-info">
-              Group Name must only contain charactors from 'a'~'z', 'A'~'Z' and '0'~'9'
+              Optional for editors and viewers.
             </p>
           </div>
         </section>
@@ -92,9 +92,6 @@ export default {
     },
     changeValid () {
       var re = /^[a-zA-Z0-9]*$/
-      if(!re.test(this.newGroup)) {
-        return false
-      }
 
       if(!emailRegex.test(this.newEmail)){
         return false
@@ -108,7 +105,7 @@ export default {
     },
     changed () {
       if(!this.user) return false
-      var changed = this.newEmail != this.user.email || this.newRole != this.user.role || this.newGroup != this.user.group
+      var changed = this.newEmail != this.user.email || this.newRole != this.user.role || this.newGroup.trim() != this.user.group
       return changed
     }
   },
@@ -131,6 +128,7 @@ export default {
       if(!this.changeValid) return
       var vm = this
       vm.newEmail = vm.newEmail.toLowerCase()
+      vm.newGroup = vm.newGroup.trim()
       vm.waiting = true
       var message = {projectId: vm.user.projectId, id: vm.user.id, email: vm.newEmail, role: vm.newRole, group: vm.newGroup}
       vm.$http.post(xHTTPx + '/update_project_control', message).then(response => {

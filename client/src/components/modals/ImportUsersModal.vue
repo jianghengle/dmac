@@ -66,7 +66,6 @@
 
 <script>
 const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-const groupRegex = /^[a-zA-Z0-9]*$/
 
 export default {
   name: 'import-users-modal',
@@ -137,7 +136,7 @@ export default {
           var group = ''
           if(ss.length > 2){
             var g = ss[2].trim()
-            if(groupRegex.test(g)){
+            if(role == 'Viewer' || role == 'Editor'){
               group = g
             }
           }

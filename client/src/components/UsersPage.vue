@@ -172,7 +172,7 @@ export default {
     exportUrl () {
       var csv = 'Email, Role, Group\r\n'
       this.users.forEach(function(u){
-        csv = csv + u.email + ', ' + u.role + ', ' + u.group + '\r\n'
+        csv = csv + u.email + ', ' + u.role + ', ' + (u.role=='Editor'||u.role=='Viewer' ? u.group : '') + '\r\n'
       })
       var blob = new Blob([csv], {type: 'file'})
       return URL.createObjectURL(blob)

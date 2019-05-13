@@ -28,13 +28,13 @@
               </span>
             </p>
           </div>
-          <div class="field" v-if="false">
+          <div class="field" v-show="newRole=='Editor' || newRole=='Viewer'">
             <label class="label">Group</label>
             <p class="control">
               <input class="input" type="text" v-model="newGroup">
             </p>
             <p class="help is-info">
-              Group Name must only contain charactors from 'a'~'z', 'A'~'Z' and '0'~'9'
+              Optional for editors and viewers.
             </p>
           </div>
         </section>
@@ -81,8 +81,7 @@ export default {
       return !this.userMap[this.newEmail]
     },
     newGroupValid () {
-      var re = /^[a-zA-Z0-9]*$/
-      return re.test(this.newGroup)
+      return true
     }
   },
   watch: {
@@ -101,7 +100,8 @@ export default {
     addUser(){
       if(!this.newEmailValid) return
       var vm = this
-      vm.newEmail = vm.newEmail.toLowerCase()
+      vm.newEmail = vm.newEmail.toLowerCase().trim()
+      vm.newGroup = vm.newGroup.trim()
       vm.waiting = true
       var message = {projectId: vm.projectId, email: vm.newEmail, role: vm.newRole, group: vm.newGroup}
       vm.$http.post(xHTTPx + '/add_project_control', message).then(response => {
