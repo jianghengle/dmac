@@ -496,6 +496,9 @@ module DMACServer
         raise "No permission" unless file.viewable?(control)
         return if file.type == "file"
 
+        folder_size = MyFile.get_folder_size(file.full_path)
+        raise "Folder too big (>2G) to download directly" if folder_size >= 2000
+
         key = download.key.to_s
         temp_path = @@tmp + "/" + key
         Dir.mkdir(temp_path)
@@ -504,6 +507,12 @@ module DMACServer
         command = "cd " + temp_path + " && zip -r " + key + " *"
         io = IO::Memory.new
         Process.run(command, shell: true, output: io)
+      end
+
+      def self.get_folder_size(path)
+        io = IO::Memory.new
+        Process.run("du -sm \"#{path}\"", shell: true, output: io)
+        io.to_s.to_i(strict: false)
       end
 
       def self.copy_folder_to_outside(file, control, path, new_folders)
