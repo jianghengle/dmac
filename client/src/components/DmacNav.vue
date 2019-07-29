@@ -35,6 +35,7 @@ export default {
 
 .nav-bar {
   padding: 10px;
+  padding-bottom: 20px;
   font-size: 14px;
   overflow: auto;
 }

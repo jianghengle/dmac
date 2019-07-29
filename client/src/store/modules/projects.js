@@ -314,6 +314,16 @@ function compareNodes(o1, o2, opt){
   var v1 = o1[opt.field]
   var v2 = o2[opt.field]
   if(v1 == v2){
+    if(opt.field == 'type'){
+      if(o1.name == 'meta.txt')
+        return -1
+      if(o2.name == 'meta.txt')
+        return 1
+      if(o1.name.includes('meta'))
+        return -1
+      if(o2.name.includes('meta'))
+        return 1
+    }
     return o1.name.localeCompare(o2.name)
   }
   if(opt.order == 'number'){

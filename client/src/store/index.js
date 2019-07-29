@@ -5,6 +5,7 @@ import projects from './modules/projects'
 import search from './modules/search'
 import options from './modules/options'
 import irods from './modules/irods'
+import modals from './modules/modals'
 
 Vue.use(Vuex)
 
@@ -14,6 +15,7 @@ export default new Vuex.Store({
     projects: projects,
     search: search,
     options: options,
-    irods: irods
+    irods: irods,
+    modals: modals
   }
 })

@@ -166,13 +166,6 @@
       :channel="editChannelModal.channel"
       @close-edit-channel-modal="closeEditChannelModal">
     </edit-channel-modal>
-
-    <upload-channel-modal
-      :opened="uploadChannelModal.opened"
-      :channel="uploadChannelModal.channel"
-      :project="project"
-      @close-upload-channel-modal="closeUploadChannelModal">
-    </upload-channel-modal>
     
   </div>
 </template>
@@ -184,7 +177,6 @@ import EditProjectModal from './modals/EditProjectModal'
 import ConfirmModal from './modals/ConfirmModal'
 import NewChannelModal from './modals/NewChannelModal'
 import EditChannelModal from './modals/EditChannelModal'
-import UploadChannelModal from './modals/uploadChannelModal'
 
 export default {
   name: 'project-page',
@@ -195,7 +187,6 @@ export default {
     ConfirmModal,
     NewChannelModal,
     EditChannelModal,
-    UploadChannelModal
   },
   data () {
     return {
@@ -215,10 +206,6 @@ export default {
         opened: false
       },
       editChannelModal: {
-        opened: false,
-        channel: null
-      },
-      uploadChannelModal: {
         opened: false,
         channel: null
       },
@@ -402,12 +389,7 @@ export default {
       }
     },
     openUploadChannelModal(channel){
-      this.uploadChannelModal.channel = channel
-      this.uploadChannelModal.opened = true
-    },
-    closeUploadChannelModal(result){
-      this.uploadChannelModal.opened = false
-      this.uploadChannelModal.channel = null
+      this.$store.commit('modals/openUploadChannelModal', {channel: channel, project: this.project})
     },
     openConfirmModal(message, context){
       this.confirmModal.message = message

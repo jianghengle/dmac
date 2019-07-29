@@ -11,19 +11,23 @@
       </div>
     </div>
 
+    <upload-channel-modal></upload-channel-modal>
+
   </div>
 </template>
 
 <script>
 import DmacHeader from './components/DmacHeader'
 import DmacNav from './components/DmacNav'
+import UploadChannelModal from './components/modals/UploadChannelModal'
 import Vue from 'vue'
 
 export default {
   name: 'app',
   components: {
     DmacHeader,
-    DmacNav
+    DmacNav,
+    UploadChannelModal
   },
   data () {
     return {
