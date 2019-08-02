@@ -32,11 +32,17 @@
         @open-edit-file-modal="openEditFileModal">
       </pdf-file>
       <text-file
-        v-if="folderFile.fileType == 'text' || folderFile.fileType == 'code'"
+        v-if="(folderFile.fileType == 'text' && !folderFile.name.includes('meta')) || folderFile.fileType == 'code'"
         :file="folderFile"
         @content-changed="contentChanged"
         @open-edit-file-modal="openEditFileModal">
       </text-file>
+      <meta-file
+        v-if="folderFile.fileType == 'text' && folderFile.name.includes('meta')"
+        :file="folderFile"
+        @content-changed="contentChanged"
+        @open-edit-file-modal="openEditFileModal">
+      </meta-file>
       <csv-file
         v-if="folderFile.fileType == 'csv'"
         :file="folderFile"
@@ -78,6 +84,7 @@ import NormalFile from './file-parts/NormalFile'
 import ImageFile from './file-parts/ImageFile'
 import PdfFile from './file-parts/PdfFile'
 import TextFile from './file-parts/TextFile'
+import MetaFile from './file-parts/MetaFile'
 import CsvFile from './file-parts/CsvFile'
 import ZipFile from './file-parts/ZipFile'
 import EditFileModal from './modals/EditFileModal'
@@ -93,6 +100,7 @@ export default {
     ImageFile,
     PdfFile,
     TextFile,
+    MetaFile,
     CsvFile,
     ZipFile,
     EditFileModal,
