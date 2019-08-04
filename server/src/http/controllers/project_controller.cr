@@ -618,6 +618,36 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
+
+      def search_files_in_meta(ctx)
+        begin
+          email = verify_token(ctx)
+          project_id = get_param!(ctx, "projectId")
+          data_path = get_param!(ctx, "dataPath")
+          pattern = get_param!(ctx, "pattern").downcase
+
+          project = Project.get_project!(project_id)
+          control = Control.get_control!(email, project)
+          role = control.role.to_s
+          raise "Permission denied" unless role == "Owner" || role == "Admin" || project.status == "Active"
+
+          files = [] of MyFile
+          dir = MyFile.new(project, data_path)
+          raise "Permission denied" unless dir.viewable?(control)
+          raise "Not a folder" if dir.type.to_s == "file"
+          MyFile.search_files_in_meta(control, project, dir, pattern, files)
+
+          arr = [] of String
+          files.each do |f|
+            arr << f.to_json
+          end
+          json_array(arr)
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
     end
   end
 end

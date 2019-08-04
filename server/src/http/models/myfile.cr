@@ -224,6 +224,46 @@ module DMACServer
         return lines
       end
 
+      def self.search_files_in_meta(control, project, dir, pattern, files)
+        meta_files = [] of MyFile
+        data_files = {} of String => MyFile
+        subfolders = [] of MyFile
+        Dir.each dir.full_path do |filename|
+          next if @@ignore.has_key? filename.to_s
+          dp = "/" + filename
+          dp = dir.data_path + dp unless dir.data_path == "/"
+          file = MyFile.new(project, dp)
+          next unless file.viewable?(control)
+
+          if file.type == "folder"
+            subfolders << file
+          else
+            meta_files << file if file.name.includes?("meta")
+            data_files[file.name] = file
+          end
+        end
+        meta_files.each do |meta_file|
+          MyFile.search_in_meta(meta_file, data_files, pattern, files)
+        end
+        subfolders.each do |subfolder|
+          MyFile.search_files_in_meta(control, project, subfolder, pattern, files)
+        end
+      end
+
+      def self.search_in_meta(meta_file, data_files, pattern, files)
+        lines = File.read_lines(meta_file.full_path)
+        lines.shift?
+        lines.each do |line|
+          next unless line.downcase.includes? pattern
+          line.split("\t") do |cell|
+            cell.split(",") do |s|
+              key = s.strip
+              files << data_files[key] if data_files.has_key? key
+            end
+          end
+        end
+      end
+
       def self.get_parent_data_path(data_path)
         index = data_path.rindex("/")
         parent_data_path = "/"

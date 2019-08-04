@@ -236,6 +236,10 @@ module DMACServer
         HttpAPI::ProjectController.search_in_file(env)
       end
 
+      post "/search_files_in_meta" do |env|
+        HttpAPI::ProjectController.search_files_in_meta(env)
+      end
+
       post "/search_public_files" do |env|
         HttpAPI::PublicController.search_files(env)
       end

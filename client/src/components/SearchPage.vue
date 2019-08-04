@@ -4,24 +4,36 @@
     <project-tab></project-tab>
 
     <div>
-      <div>
-        <a class="button back-btn" @click="$router.go(-1)">
-          <icon name="arrow-left"></icon>&nbsp;
-          Back
-        </a>
-      </div>
-
-      <div class="field has-addons">
-        <div class="control is-expanded has-icons-left">
-          <input class="input" type="text" :placeholder="tip" v-model="searchInput" @keyup.enter="search" v-focus>
-          <span class="icon is-small is-left search-btn">
-            <icon name="search"></icon>
-          </span>
-        </div>
+      <div class="field is-grouped">
         <div class="control">
-          <a class="button is-primary" @click="search" :disabled="!canSearch">
-            Search
+          <a class="button" @click="$router.go(-1)">
+            <icon name="arrow-left"></icon>&nbsp;
+            Back
           </a>
+        </div>
+        <div class="control is-expanded">
+          <div class="field has-addons">
+            <div class="control has-icons-left">
+              <span class="select">
+                <select>
+                  <option>Filename</option>
+                  <option>Metadata</option>
+                  <option>Content</option>
+                </select>
+              </span>
+              <span class="icon">
+                <icon name="search"></icon>
+              </span>
+            </div>
+            <div class="control is-expanded">
+              <input class="input" type="text" :placeholder="tip" v-model="searchInput" @keyup.enter="search" v-focus>
+            </div>
+            <div class="control">
+              <a class="button is-primary" @click="search" :disabled="!canSearch">
+                Search
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -291,20 +303,12 @@ export default {
   padding: 10px;
 }
 
-.back-btn {
-  margin-bottom: 10px;
-}
-
-.search-btn {
-  cursor: pointer;
-}
-
 .search-result {
   margin-top: 5px;
 }
 
 .search-info {
-  margin-top: 30px;
+  margin-top: 15px;
   margin-bottom: 10px;
   color: #2e1052;
 }
