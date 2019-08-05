@@ -236,8 +236,8 @@ module DMACServer
         HttpAPI::ProjectController.search_in_file(env)
       end
 
-      post "/search_files_in_meta" do |env|
-        HttpAPI::ProjectController.search_files_in_meta(env)
+      post "/search_project_files_by_meta" do |env|
+        HttpAPI::ProjectController.search_files_by_meta(env)
       end
 
       post "/search_public_files" do |env|
@@ -246,6 +246,10 @@ module DMACServer
 
       post "/search_in_public_file" do |env|
         HttpAPI::PublicController.search_in_file(env)
+      end
+
+      post "/search_public_files_by_meta" do |env|
+        HttpAPI::PublicController.search_files_by_meta(env)
       end
 
       post "/list_irods_path" do |env|

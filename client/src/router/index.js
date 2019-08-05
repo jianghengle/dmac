@@ -85,5 +85,10 @@ export default new Router({
       name: 'PublicSearch',
       component: SearchPage
     },
+    {
+      path: '/search_in_projects',
+      name: 'SearchInProjects',
+      component: SearchPage
+    },
   ]
 })

@@ -619,7 +619,7 @@ module DMACServer
         end
       end
 
-      def search_files_in_meta(ctx)
+      def search_files_by_meta(ctx)
         begin
           email = verify_token(ctx)
           project_id = get_param!(ctx, "projectId")

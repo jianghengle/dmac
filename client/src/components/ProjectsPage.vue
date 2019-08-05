@@ -6,6 +6,10 @@
         <div class="column">
           <icon name="database"></icon>
           Projects
+          &nbsp;
+          <router-link class="main-link search-button" :to="'/search_in_projects'">
+            <icon name="search"></icon>
+          </router-link>
         </div>
         <div class="column">
           <div class="field is-grouped is-grouped-right">

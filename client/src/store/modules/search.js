@@ -2,80 +2,26 @@ import DateForm from 'dateformat'
 
 // initial state
 export const state = {
-  sourceId: null,
-  sourceType: null,
-  input: '',
-  pattern: '',
-  dataPath: null,
+  source: null,
+  type: null,
+  pattern: null,
   result: null,
-  resultType: 'files'
+  sortOption: null
 }
 
 // mutations
 export const mutations = {
-  setSourceId (state, id) {
-    state.sourceId = id
-    state.pattern = ''
-    state.dataPath = null
+  startSearch (state, obj) {
+    state.source = obj.source
+    state.type = obj.type
+    state.pattern = obj.pattern
     state.result = null
   },
+  pushResult (state, result) {
+    if(state.result == null)
+      state.result = []
 
-  setSourceType (state, type) {
-    state.sourceType = type
-  },
-
-  setInput (state, input) {
-    state.input = input
-  },
-
-  setPattern (state, pattern) {
-    state.pattern = pattern
-  },
-
-  setDataPath (state, dataPath) {
-    state.dataPath = dataPath
-  },
-
-  setResult (state, result) {
-    if(!result){
-      state.result = result
-      return
-    }
-
-    if(state.resultType == 'files'){
-      state.result = result.map(function(f){
-        f.path = '/projects/' + f.projectId + '/data/' + encodeURIComponent(f.dataPath)
-        if(state.sourceType == 'public'){
-          f.path = '/public/' + state.sourceId + '/data/' + encodeURIComponent(f.dataPath)
-        }
-        f.name = f.dataPath.slice(state.dataPath.length)
-        if(f.name.startsWith('/')){
-          f.name = f.name.slice(1)
-        }
-        f.modifiedAt = DateForm(f.modifiedTime*1000, 'mmm dd yyyy HH:MM')
-        if(f.type == 'file'){
-          var iconMap = {
-            unknown: 'file-o',
-            image: 'file-image-o',
-            pdf: 'file-pdf-o',
-            text: 'file-text-o',
-            code: 'file-code-o',
-            csv: 'file-o',
-            zip: 'file-zip-o'
-          }
-          f.icon = iconMap[f.fileType]
-          f.sizeLabel = f.size
-          if(f.size > 1000000000){
-            f.sizeLabel = Math.floor(f.size / 1000000000) + 'G'
-          }else if(f.size > 1000000){
-            f.sizeLabel = Math.floor(f.size / 1000000) + 'M'
-          }else if(f.size > 1000){
-            f.sizeLabel = Math.floor(f.size / 1000) + 'K'
-          }
-        }
-        return f
-      })
-    }else{
+    if(state.type == 'Content'){
       state.result = result.map(function(l){
         var splitIndex = l.indexOf(':')
         var num = ''
@@ -86,14 +32,32 @@ export const mutations = {
         }
         return [num, line]
       })
+    }else{
+      result.forEach(function(f){
+        if(state.source.publicKey){
+          f.path = '/public/' + state.source.publicKey + '/data/' + encodeURIComponent(f.dataPath)
+        }else{
+          f.path = '/projects/' + f.projectId + '/data/' + encodeURIComponent(f.dataPath)
+        }
+        f.modifiedAt = DateForm(f.modifiedTime*1000, 'mmm dd yy')
+        f.sizeLabel = f.size
+        if(f.size > 1000000000){
+          f.sizeLabel = Math.floor(f.size / 1000000000) + 'G'
+        }else if(f.size > 1000000){
+          f.sizeLabel = Math.floor(f.size / 1000000) + 'M'
+        }else if(f.size > 1000){
+          f.sizeLabel = Math.floor(f.size / 1000) + 'K'
+        }
+        if(state.source.projectMap){
+          f.project = state.source.projectMap[f.projectId].name
+        }
+        state.result.push(f)
+      })
     }
   },
 
-  setResultType (state, type) {
-    state.resultType = type
-  },
-
-  sortResult(state, sortOption) {    
+  sortResult(state, sortOption) {
+    state.sortOption = sortOption
     if(!state.result)
       return
     state.result.sort(function(a, b){

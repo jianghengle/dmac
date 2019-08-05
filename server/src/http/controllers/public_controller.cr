@@ -152,6 +152,39 @@ module DMACServer
           error(ctx, e.message.to_s)
         end
       end
+
+      def search_files_by_meta(ctx)
+        begin
+          public_key = get_param!(ctx, "publicKey")
+          data_path = get_param!(ctx, "dataPath")
+          pattern = get_param!(ctx, "pattern")
+
+          public = Public.get_public!(public_key)
+          raise "Wrong header" unless data_path.starts_with? public.data_path.to_s
+
+          project_id = public.project_id
+          project = Project.get_project!(project_id)
+          control = Control.new
+          control.role = "Admin"
+          control.group_name = ""
+
+          files = [] of MyFile
+          dir = MyFile.new(project, data_path)
+          raise "Permission denied" unless dir.viewable?(control)
+          raise "Not a folder" if dir.type.to_s == "file"
+          MyFile.search_files_in_meta(control, project, dir, pattern, files)
+
+          arr = [] of String
+          files.each do |f|
+            arr << f.to_json
+          end
+          json_array(arr)
+        rescue ex : InsufficientParameters
+          error(ctx, "Not all required parameters were present")
+        rescue e : Exception
+          error(ctx, e.message.to_s)
+        end
+      end
     end
   end
 end
