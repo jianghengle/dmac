@@ -288,7 +288,7 @@ export default {
         this.sortOption = this.$store.state.search.sortOption
       if(this.folderFile && this.folderFile.type == 'file'){
         this.searchSelect = 'Content'
-      }else if(this.seachType && this.searchType != 'Content') {
+      }else if(this.searchType && this.searchType != 'Content') {
         this.searchSelect = this.searchType
       }else{
         this.searchSelect = 'Metadata'
