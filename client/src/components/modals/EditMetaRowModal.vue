@@ -37,7 +37,8 @@
         </section>
         <footer class="modal-card-foot">
           <a class="button main-btn" :class="{'is-loading': waiting}" :disabled="!changed" @click="updateFile">Update</a>
-          <a class="button button-right" @click="close">Cancel</a> 
+          <a class="button is-danger" :class="{'is-loading': waiting}" :disabled="changed" @click="deleteRow">Delete Row</a>
+          <a class="button button-right" @click="close">Cancel</a>
         </footer>
       </div>
     </div>
@@ -96,6 +97,19 @@ export default {
         this.waiting = false
       })
     },
+    deleteRow(){
+      if(this.changed) return
+      this.waiting = true
+      var text = this.makeHeaderLine(this.metaHeader) + '\n' + this.makeLines(this.metaRows, this.rowIndex)
+      var message = {projectId: this.file.projectId, dataPath: this.file.dataPath, text: text}
+      this.$http.post(xHTTPx + '/save_text_file', message).then(response => {
+        this.waiting = false
+        this.$emit('close-edit-meta-row-modal', true)
+      }, response => {
+        this.error = 'Failed to save file!'
+        this.waiting = false
+      })
+    },
     deleleColumn (i) {
       var col = this.newRow[i]
       if(col.new){
@@ -125,6 +139,8 @@ export default {
       for(var i=0;i<metaRows.length;i++){
         var cells = []
         if(i == index){
+          if(!newRow)
+            continue
           for(var j=0;j<newRow.length;j++){
             var cell = newRow[j]
             if(!cell.deleted){
