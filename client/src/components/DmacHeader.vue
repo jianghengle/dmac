@@ -23,6 +23,12 @@
             </span>
           </div>
 
+          <div v-if="token" class="navbar-item">
+            <a class="app-item" href="https://sway.office.com/YzEjQGZyPF9FHATh" target="_blank">
+              <span class="nav-icon"><icon name="tasks"></icon></span>Status
+            </a>
+          </div>
+
           <div class="navbar-item has-dropdown is-hoverable my-dropdown">
             <router-link class="navbar-link" :to="'/get_started'">
               <span class="nav-icon"><icon name="book"></icon></span>Docs
