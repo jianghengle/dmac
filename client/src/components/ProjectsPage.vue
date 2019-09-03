@@ -50,47 +50,50 @@
       </ul>
     </div>
 
-    <div class="columns is-multiline">
-      <div class="column is-half" v-for="project in projects":key="project.id"
-        v-show="projectFilter=='All'
-          || (projectFilter=='Active' && project.status=='Active')
-          || (projectFilter=='Archive' && project.status=='Archived')
-          || (projectFilter=='Templates' && (project.status=='Template' || project.status=='Public Template'))
-          || (projectFilter=='My projects' && project.projectRole=='Owner')
-          || (projectFilter=='Shared with me' && project.projectRole!='Owner')
-          ">
-        <div class="box project-box" @click="viewProject(project)">
-          <div class="header">
-            <span class="info">
-              <span class="tags has-addons">
-                <span class="tag is-white">
-                  {{project.projectSize}}
-                </span>
-                <span class="tag" :class="{
-                  'is-primary': project.projectRole=='Owner',
-                  'is-info': project.projectRole=='Admin',
-                  'is-success': project.projectRole=='Editor',
-                  'is-warning': project.projectRole=='Viewer'}">
-                  {{project.projectRole}}
-                </span>
-                <span class="tag" :class="{
-                  'is-success': project.status=='Active',
-                  'is-white': project.status=='Archived',
-                  'is-light': project.status=='Template' || project.status=='Public Template'}">
-                  {{project.status}}
+    <div v-if="ownerProjects" v-for="(ops, owner) in ownerProjects">
+      <div class="project-owner-title">{{owner}}</div>
+      <div class="columns is-multiline">
+        <div class="column is-half" v-for="project in ops":key="project.id"
+          v-show="projectFilter=='All'
+            || (projectFilter=='Active' && project.status=='Active')
+            || (projectFilter=='Archive' && project.status=='Archived')
+            || (projectFilter=='Templates' && (project.status=='Template' || project.status=='Public Template'))
+            || (projectFilter=='My projects' && project.projectRole=='Owner')
+            || (projectFilter=='Shared with me' && project.projectRole!='Owner')
+            ">
+          <div class="box project-box" @click="viewProject(project)">
+            <div class="header">
+              <span class="info">
+                <span class="tags has-addons">
+                  <span class="tag is-white">
+                    {{project.projectSize}}
+                  </span>
+                  <span class="tag" :class="{
+                    'is-primary': project.projectRole=='Owner',
+                    'is-info': project.projectRole=='Admin',
+                    'is-success': project.projectRole=='Editor',
+                    'is-warning': project.projectRole=='Viewer'}">
+                    {{project.projectRole}}
+                  </span>
+                  <span class="tag" :class="{
+                    'is-success': project.status=='Active',
+                    'is-white': project.status=='Archived',
+                    'is-light': project.status=='Template' || project.status=='Public Template'}">
+                    {{project.status}}
+                  </span>
                 </span>
               </span>
-            </span>
-            <span class="name">
-              {{project.name}}
-            </span>&nbsp;
-            <span class="edit-icon main-link"
-              v-if="project.projectRole=='Owner' || project.projectRole=='Admin'"
-              @click.stop="openEditProjectModal(project)">
-              <icon name="edit"></icon>
-            </span>
+              <span class="name">
+                {{project.name}}
+              </span>&nbsp;
+              <span class="edit-icon main-link"
+                v-if="project.projectRole=='Owner' || project.projectRole=='Admin'"
+                @click.stop="openEditProjectModal(project)">
+                <icon name="edit"></icon>
+              </span>
+            </div>
+            <div class="description">{{project.description}}</div>
           </div>
-          <div class="description">{{project.description}}</div>
         </div>
       </div>
     </div>
@@ -155,6 +158,27 @@ export default {
       return node.children.map(function(c){
         return vm.nodeMap[c]
       })
+    },
+    ownerProjects () {
+      if(this.projects){
+        var result = {}
+        var vm = this
+        this.projects.forEach(function(p){
+          if(vm.projectFilter == 'All'
+            || (vm.projectFilter == 'Active' && p.status=='Active')
+            || (vm.projectFilter == 'Archive' && p.status=='Archive')
+            || (vm.projectFilter == 'Templates' && (p.status=='Templates' || p.status=='Public Template'))
+            || (vm.projectFilter == 'My projects' && p.projectRole=='Owner')
+            || (vm.projectFilter == 'Shared with me' && p.projectRole!='Owner')){
+            if(result[p.ownerName]){
+              result[p.ownerName].push(p)
+            }else{
+              result[p.ownerName] = [p]
+            }
+          }
+        })
+        return result
+      }
     },
     templates () {
       var templates = this.projects.filter(function(p){
@@ -304,7 +328,13 @@ export default {
   background-color: #f2f2f2; 
 }
 
-
+.project-owner-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2e1052;
+  margin-top: 25px;
+  margin-bottom: 10px;
+}
 
 
 </style>

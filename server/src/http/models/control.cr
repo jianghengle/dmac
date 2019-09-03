@@ -128,6 +128,22 @@ module DMACServer
           Control.create_control(c.email.to_s, target, role, c.group_name.to_s)
         end
       end
+
+      def self.get_owner_map(projects)
+        project_ids = projects.keys
+        query = Query.where(project_id: project_ids).where(role: "Owner")
+        controls = Repo.all(Control, query)
+        emails = controls.map { |c| c.email.to_s }
+        email_user_map = User.get_email_user_map(emails)
+        result = {} of String => String
+        controls.each do |c|
+          if email_user_map.has_key? c.email.to_s
+            user = email_user_map[c.email.to_s]
+            result[c.project_id.to_s] = user.username.to_s
+          end
+        end
+        result
+      end
     end
   end
 end

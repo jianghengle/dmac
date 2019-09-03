@@ -12,8 +12,15 @@ module DMACServer
           user = User.get_user_by_email!(email)
           if user.role.to_s == "Admin"
             projects = Project.get_all_projects
-
-            return "[\"Admin\", " + (projects.join(", ") { |i| i.to_json }) + "]"
+            project_map = {} of String => Project
+            projects.each { |p| project_map[p.id.to_s] = p }
+            owner_map = Control.get_owner_map(project_map)
+            projects_json = projects.join(", ") do |p|
+              fields = {} of String => String
+              fields["ownerName"] = owner_map[p.id.to_s]
+              p.to_json(fields)
+            end
+            return "[\"Admin\", " + projects_json + "]"
           end
 
           controls = Control.get_controls_by_user(email)
@@ -26,6 +33,8 @@ module DMACServer
             end
             projects = Project.get_projects_by_ids(project_ids)
 
+            owner_map = Control.get_owner_map(projects)
+
             projects.each do |k, v|
               fields = {} of String => String
               control = controls[k] if controls.has_key? k
@@ -33,6 +42,7 @@ module DMACServer
               role = control.role.to_s
               next unless role == "Owner" || role == "Admin" || v.status == "Active"
               fields["projectRole"] = control.role.to_s
+              fields["ownerName"] = owner_map[k]
               obj = v.to_json(fields)
               arr.push(obj)
             end
