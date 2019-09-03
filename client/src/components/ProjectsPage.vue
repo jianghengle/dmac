@@ -167,7 +167,7 @@ export default {
           if(vm.projectFilter == 'All'
             || (vm.projectFilter == 'Active' && p.status=='Active')
             || (vm.projectFilter == 'Archive' && p.status=='Archive')
-            || (vm.projectFilter == 'Templates' && (p.status=='Templates' || p.status=='Public Template'))
+            || (vm.projectFilter == 'Templates' && (p.status=='Template' || p.status=='Public Template'))
             || (vm.projectFilter == 'My projects' && p.projectRole=='Owner')
             || (vm.projectFilter == 'Shared with me' && p.projectRole!='Owner')){
             if(result[p.ownerName]){
