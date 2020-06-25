@@ -106,7 +106,7 @@ GEM
       method_source (~> 0.8.1)
       slop (~> 3.4)
     puma (3.9.1)
-    rack (2.0.3)
+    rack (2.2.3)
     rack-cors (0.4.1)
     rack-pjax (1.0.0)
       nokogiri (~> 1.5)
